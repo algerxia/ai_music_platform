@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v6 妻子视角",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Female Chinese folk ballad, 74BPM, D minor pentatonic, 4/4. Style mix: narrative smoothness of 三国恋 plus restrained tragedy of 赤伶. Third-person wife watching her husband at night under a lamp, tender pity, silent heartache, one continuous scene, no genre jumps. Female vocal only, warm, close, low in verses like she is looking at him and dare not speak; chorus is female 戏腔悲叹, tearful light sigh, NOT high belt, NOT explosion, NOT shouting. NO spoken word, NO talking, NO rap, NO male voice. The inner-monologue lines must still be SUNG as breathy pitched 气声, never spoken. Arrangement rebuilt: Verse = soft guzheng arpeggio, very weak xiao long tones, sparse wooden fish, sub pad; mute pipa, big drum, suona, erhu. Then 8-bar guzheng interlude, all drums stop, only guzheng plus sparse xiao, extreme silence, she stares. Pre-chorus: xiao rises, light rim roll, weak bass. 4-bar pipa with soft melancholy, last bar total rest. Chorus: erhu enters wrapping the vocal, guzheng arpeggios, soft drums, no heavy kick, no suona. Bridge: slightly more tension, light downbeat drum only, tiny suona atmosphere, no war-drum blast. Outro: all tension instruments fade, return to guzheng xiao pad, bittersweet close. Emotions layer slowly: gaze, ache, empathy, staying. Real human female vocal, in tune, lingering, cinematic, tears in throat. No EDM, no trap, no idol brightness, no sudden rock climax.",
+  "lyrics": "[Intro]\n(古筝与弱箫，女声气声轻叹)\n嗯……\n\n[Verse 1]\n灯影摇落旧章\n岁岁陪他孤坐至天光\n寒途只身前往\n一腔热忱 从未肯退让\n无数朝夕俯仰\n满心期许 皆付与渺茫\n旁人不识怅惘\n唯她看清 他眼底跌宕\n\n[Interlude]\n(古筝八小节，全鼓静音，箫零星呼应，极致留白)\n\n[Pre-Chorus]\n几番奔赴闯荡\n几番云雾遮断远方\n明明倾尽热肠\n偏偏命运 不肯相谅\n未敢轻言离场\n只是心力 早已沧桑\n一腔少年坦荡\n困于尘俗 无人相赏\n\n[Interlude]\n(琵琶轻轮指柔怅上行，末小节全休止)\n\n[Chorus]\n雾色漫过层台\n半生求索 困于尘埃\n一腔孤勇深埋\n世俗从来 只论成败\n霜色铺满长阶\n只身起落 无人关怀\n纵是万般落败\n心底星火 未曾沉埋\n\n[Bridge]\n世人皆看结果\n唯有我见过他一路跌撞的模样\n笔墨空负年少华章\n锋芒沉于人海寻常\n众生皆逐名利过往\n谁惜凡人 寸寸热肠\n纵然难登云外高堂\n初心未向世事投降\n纵被人间风雨磨伤\n一身澄澈 未曾消亡\n\n[Outro]\n夜色归于静凉\n旧年意气 心底珍藏\n纵无高远风光\n不负当初 年少热望\n她看尽他跌宕\n万般平凡 亦是坦荡\n初心从未虚妄\n温柔相守 岁岁如常\n[End]",
+  "context": {
+    "genre": ["国风", "女声", "赤伶式悲腔", "叙事"],
+    "mood": "凝望、沉默、心疼，层层递进，无突兀爆发",
+    "bpm": 74,
+    "key": "Dm",
+    "structure": "Verse旁观-古筝留白-PreChorus-琵琶留白-戏腔Chorus-气声Bridge-Outro相守",
+    "duration_seconds": 240,
+    "negative_prompt": "男声, 说话, 念白对白, 战鼓炸裂, 唢呐长鸣, 嘶吼, 突兀高潮, rap, EDM, 歌词出现长安"
+  }
+}

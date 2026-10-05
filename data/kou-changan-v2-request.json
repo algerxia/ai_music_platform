@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v2",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Cinematic Chinese folk-pop like 笑纳 but MORE dramatic. 84BPM, 4/4, D minor pentatonic (D羽). Male vocal, real human voice, in tune, emotional, NOT spoken word, NOT recitative, NOT monotone. Huge dynamic contrast is mandatory: Verse is intimate and low, almost whisper-sung over sparse guzheng and xiao; Pre-chorus climbs every bar; Chorus is the only place the full band hits, with a soaring, unforgettable pentatonic hook that a listener can hum after one listen. The hook phrase is the long cry 「长安云深啊」: start on a held high note, slight kunqu slide, then a falling-then-rising contour, repeat immediately so it sticks. After the sung chorus, add a wordless 啊～ counter-melody on erhu that people linger on. Second chorus must be bigger than the first: extra octave leap, stacked harmony, full drums, suona accent on downbeats. Bridge is the true climax, not rap: powerful belting, war drums, then a one-bar silence, then the biggest chorus. Arrangement: intro states the chorus melody on dizi first (no vocal), so the hook exists before lyrics. Do not keep the same energy the whole song. Do not make verse and chorus similar. Catchy, haunting, lingering, cinematic, studio-quality mix. No EDM, no trap, no idol sweetness, no mumbling.",
+  "lyrics": "[Intro]\n(笛子先吹出副歌主旋律，古筝轻拂，不要人声)\n啊～ 长安～\n\n[Verse 1]\n灯残半卷 墨凉了数年\n我熬尽青灯 换一纸无缘\n云隔远山 故人看不见\n诗书沉入泥 长安不肯见\n\n[Pre-Chorus]\n关河铺满天 才名困尘间\n世人只认榜上仙\n不认这布衣少年\n胸中山河 还未曾收敛\n\n[Chorus]\n长安云深啊——\n困住多少少年肝肠\n长安云深啊——\n锋芒在胸不肯降\n念一点旧情不敢忘\n功名若不赏\n那我便自赴万重山岗\n长安云深啊——\n\n[Interlude]\n(二胡把副歌钩子再拉一遍，空一拍再进桥段)\n\n[Bridge]\n金榜不收我鸿章\n庙堂不认我温良\n长安不让我登堂\n那就——考不上长安 就打上长安\n布衣亦可叩天疆\n书生自有铁肝肠\n此身不负山河浩荡\n不入朝堂 也做朝堂之上\n\n[Chorus]\n长安云深啊——\n困住多少少年肝肠\n长安云深啊——\n锋芒在胸不肯降\n（最高潮，和声拉宽，长音拖腔）\n那我便自赴万重山岗\n长安云深啊——\n\n[Outro]\n剑起风霜 初心仍烫\n山河在肩 温柔在旁\n啊～ 长安～\n[End]",
+  "context": {
+    "genre": ["国风", "影视感", "叙事流行"],
+    "mood": "先抑后扬，副歌必须成为记忆点",
+    "bpm": 84,
+    "key": "Dm",
+    "structure": "Intro钩子-Verse-PreChorus-Chorus-Interlude-Bridge高潮-Chorus更大-Outro",
+    "duration_seconds": 200,
+    "negative_prompt": "全程平铺, 念白, 说唱到底, 没有副歌钩子, 主歌副歌力度一样, 单调, EDM, trap, 过慢挽歌"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v7 京昆戏腔",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Female Chinese opera-pop, 74BPM, D minor pentatonic. The singing MUST sound like real 京剧旦角 plus 昆曲水磨腔, not generic pop with a little slide. Verse: restrained 昆曲, slow 水磨腔, each character polished, breath pauses 气口, gentle 小腔 ornaments, like 青衣 narrating while watching him at night. Chorus: 京剧西皮/二黄 flavored 悲腔, long 拖腔 on 雾色漫过层台 and 霜色铺满长阶, nasal head resonance, curved melisma, kunqu-style slides ~ between notes, tearful but pitched, never shout. Bridge: 昆曲转 京剧, still fully sung, no 念白, no 京白, no talking. Interlude: jinghu 京胡 and kunqu 笛子 lead, plus 月琴, 板鼓, small gong, then guzheng space; pipa fill ends with one silent bar. Female opera vocal only, in tune, 赤伶-level 戏腔 but softer like a wife sighing. No spoken word, no male voice, no rap, no EDM, no sudden rock. Arrangement stays tender: no war drums, no long suona melody, erhu/jinghu answers the vocal in chorus.",
+  "lyrics": "[Intro]\n(昆笛起，京胡轻应，女声水磨腔起腔)\n啊——衣啊——\n\n[Verse 1]\n灯影摇落旧章\n岁岁陪他孤坐至天光\n寒途只身前往\n一腔热忱 从未肯退让\n无数朝夕俯仰\n满心期许 皆付与渺茫\n旁人不识怅惘\n唯她看清 他眼底跌宕\n\n[Interlude]\n(京胡与昆笛过门，板鼓轻敲，古筝留白)\n\n[Pre-Chorus]\n几番奔赴闯荡\n几番云雾遮断远方\n明明倾尽热肠\n偏偏命运 不肯相谅\n未敢轻言离场\n只是心力 早已沧桑\n一腔少年坦荡\n困于尘俗 无人相赏\n\n[Interlude]\n(月琴琵琶轻轮，末小节全休止)\n\n[Chorus]\n雾色漫过层台啊——\n半生求索 困于尘埃\n一腔孤勇深埋\n世俗从来 只论成败\n霜色铺满长阶啊——\n只身起落 无人关怀\n纵是万般落败\n心底星火 未曾沉埋\n\n[Bridge]\n世人皆看结果\n唯有我见过他一路跌撞的模样\n笔墨空负年少华章\n锋芒沉于人海寻常\n众生皆逐名利过往\n谁惜凡人 寸寸热肠\n纵然难登云外高堂啊——\n初心未向世事投降\n纵被人间风雨磨伤\n一身澄澈 未曾消亡\n\n[Outro]\n夜色归于静凉\n旧年意气 心底珍藏\n纵无高远风光\n不负当初 年少热望\n她看尽他跌宕\n万般平凡 亦是坦荡\n初心从未虚妄\n温柔相守 岁岁如常\n啊——衣啊——\n[End]",
+  "context": {
+    "genre": ["京剧", "昆曲", "女声戏腔", "国风"],
+    "mood": "青衣水磨腔叙事，西皮悲腔轻叹，不炸裂",
+    "bpm": 74,
+    "key": "Dm",
+    "structure": "昆腔起-Verse-京胡过门-Pre-Chorus戏腔-Bridge-Outro",
+    "duration_seconds": 240,
+    "negative_prompt": "流行口语唱法, 说话, 念白, 京白, 男声, 喊麦, 战鼓, EDM, 没有拖腔, 没有戏腔"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "180a400b-b9d5-4a3e-9a0a-8addc1ae9e2a",
+    "project_id": "122623fe-aa03-443d-b7df-295d927e0811",
+    "status": "succeeded",
+    "job_type": "initial_generate",
+    "prompt": "Emotional Chinese folk ballad, 78BPM, D minor. Sing like a man crying quietly to one person, not reciting a poem, not rapping a slogan. Intimate close-mic male vocal, breathy verse, cracked voice on high notes, 哭腔 on the word 长安, slight sob before chorus downbeat. Melody must hurt: long vowels, rubato, space between lines, the chorus hook is a plea not a speech. Arrangement serves emotion: verse only xiao + one guzheng string + almost no drums; pre-chorus strings swell; chorus opens the chest with erhu singing the same phrase as the vocal; second chorus bigger but still sad, not heroic rock. The most important feeling is 不甘心又舍不得. Catchy but aching. Real human vocal, in tune, with tears in the throat. No monotone, no opera shout, no trap, no EDM, no cheerful idol tone.",
+    "error_message": "",
+    "credit_hold": 10,
+    "provider": "runninghub",
+    "model": "minimax-music-2.5",
+    "result_asset_id": "5d023988-8e50-40e4-8442-23b4ae43f90a",
+    "created_at": "2026-10-04T09:19:31.548303+00:00",
+    "started_at": "2026-10-04T09:19:31.556471+00:00",
+    "finished_at": "2026-10-04T09:29:06.812974+00:00"
+  }
+}

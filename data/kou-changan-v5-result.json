@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "bbfa88fc-4228-47fb-ac3f-b05f8430b5a1",
+    "project_id": "122623fe-aa03-443d-b7df-295d927e0811",
+    "status": "succeeded",
+    "job_type": "initial_generate",
+    "prompt": "Chinese opera-pop fusion, 74BPM, D minor pentatonic. ALL vocals must be sung 戏腔/悲腔, NEVER spoken word, NEVER rap, NEVER 念白, NEVER whispering narration, NEVER a talking voice. If a line looks like dialogue, still sing it with melody. Opening 8 seconds: male 戏腔 vocalize 啊—— with jinghu answering, no talking. Verse also sung in restrained 戏腔, not pop speech-singing. Chorus is full 悲腔 with slides and held notes, tearful but pitched. Bridge is still sung 戏腔, higher, no recitation. Middle instrumental interlude MUST be a Chinese opera ensemble: jinghu lead, yueqin, small gong, clappers 板鼓, muted luo hits, short suona calls, not a modern pop guzheng loop. Second interlude: pipa plus jinghu, then one bar of complete silence, then chorus. Instruments enter and exit gradually. Real human opera-tinged male vocal, in tune, emotional, no spoken adlibs, no background talking, no radio voice. No EDM, no trap, no English, no dialogue.",
+    "error_message": "",
+    "credit_hold": 10,
+    "provider": "runninghub",
+    "model": "minimax-music-2.5",
+    "result_asset_id": "3ff26118-c736-4e6c-a075-9f8bd7ca342f",
+    "created_at": "2026-10-04T09:53:00.221693+00:00",
+    "started_at": "2026-10-04T09:53:00.228644+00:00",
+    "finished_at": "2026-10-04T09:55:06.265302+00:00"
+  }
+}

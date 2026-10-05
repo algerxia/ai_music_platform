@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v3",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Emotional Chinese folk ballad, 78BPM, D minor. Sing like a man crying quietly to one person, not reciting a poem, not rapping a slogan. Intimate close-mic male vocal, breathy verse, cracked voice on high notes, 哭腔 on the word 长安, slight sob before chorus downbeat. Melody must hurt: long vowels, rubato, space between lines, the chorus hook is a plea not a speech. Arrangement serves emotion: verse only xiao + one guzheng string + almost no drums; pre-chorus strings swell; chorus opens the chest with erhu singing the same phrase as the vocal; second chorus bigger but still sad, not heroic rock. The most important feeling is 不甘心又舍不得. Catchy but aching. Real human vocal, in tune, with tears in the throat. No monotone, no opera shout, no trap, no EDM, no cheerful idol tone.",
+  "lyrics": "[Intro]\n(箫，像有人在门外站了很久)\n长安……我还在……\n\n[Verse 1]\n窗纸薄 灯也倦\n墨还没干 人已散\n我把名字写了又写\n写到指尖都发寒\n云隔着山 信寄不回\n你在不在 我看不见\n\n[Pre-Chorus]\n我问过青山 问过夜\n谁把少年 留在门外\n功名不认我 就算了吧\n可我想问 你还等我吗\n\n[Chorus]\n长安啊 你为何不见我\n我想你 想得心发热\n我不跪 我也不肯走\n旧情这一点 我还舍不得\n长安云深啊——\n你听见了吗\n\n[Verse 2]\n剑在鞘 心还烫\n一身狂 不敢忘\n他们说布衣不该望\n我偏把山河抗在肩上\n可抗到最后 我才知道\n我真正想见的 是你的目光\n\n[Pre-Chorus]\n金榜没有我的名\n庙堂没有我的座\n这些我都可以不要\n只要你还记得我\n\n[Chorus]\n长安啊 你为何不见我\n我想你 想得心发热\n考不上 我就打上长安\n不是为赢 是怕你看我走散\n长安云深啊——\n你开门啊\n\n[Bridge]\n(鼓忽然进来，声音却是哭着喊)\n不收我鸿章 就不收\n不认我温良 就不认\n我可以不要朝堂\n我不能 不要你问一声\n\n[Chorus]\n长安啊 你为何不见我\n山河在肩 温柔在旁\n这一拜 不是为功名\n是为那盏灯 还没凉\n长安云深啊——\n我还在门外\n\n[Outro]\n(只剩人声和箫)\n长安……\n我还在……\n[End]",
+  "context": {
+    "genre": ["国风", "抒情", "叙事"],
+    "mood": "压抑的思念，副歌是哭着问，不是喊口号",
+    "bpm": 78,
+    "key": "Dm",
+    "structure": "Intro-Verse-Pre-Chorus-Chorus-Verse2-Chorus-Bridge-Chorus-Outro",
+    "duration_seconds": 210,
+    "negative_prompt": "朗诵, 文言堆砌, 口号, 说唱, 无感情, 全程同一力度, 甜美, EDM"
+  }
+}

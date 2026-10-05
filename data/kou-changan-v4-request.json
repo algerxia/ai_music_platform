@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v4",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Chinese folk narrative ballad, title feeling of knocking on a distant capital but NEVER sing that place-name. 74BPM, 4/4, D minor pentatonic (D羽), chords Dm F G Am Em. Melody only stepwise and small leaps, no big jumps, smooth singable lines. One scene only: a man under a dying lamp at night, memory then reality then a contained outburst then reconciliation. Male vocal: Verse and outro are close, low, spoken-sung storytelling, no bright belt. Pre-chorus volume rises linearly. Chorus is kunqu-tinged 悲腔, a tearful sigh, long slides on 雾漫过层层高台 and 霜铺满蜿蜒长阶, NOT shouting, NOT heroic rock. Bridge: first 4 bars almost spoken 气声 昆白, instruments thin; then 戏腔 lifts, war drum on downbeats only, suona short stabs, no long suona melody. Arrangement: Verse = guzheng arpeggio + sparse wooden fish + weak bass + pad + occasional xiao, pipa/drums/suona mute. Then 8-bar guzheng interlude, all percussion mute, xiao answers and leaves space. Pipa fill 4 bars, bar 4 is complete silence (critical emotional pause) then chorus. Chorus: erhu answers the vocal, guzheng arpeggios, soft drums, NO heavy kick, suona/war drum mute. Outro reuses verse motif, drums and suona mute, erhu exits, end on guzheng decay. All instruments fade in and out, never sudden. Haunting, lingering, cinematic, real human vocal with tears, in tune. No EDM, no trap, no rap, no idol sweetness, no monotone recitation of classical couplets.",
+  "lyrics": "[Intro]\n(古筝分解，稀疏木鱼，弱箫长音，无人声)\n\n[Verse 1]\n灯叠半卷旧稿\n长夜独自 待到天稍晓\n脚步踏遍寒峭\n眼底曾向 远路远眺\n\n[Interlude]\n(古筝主旋律八小节，打击乐全静，箫呼应，乐句留白)\n\n[Pre-Chorus]\n肩上驮着 几分期盼\n云雾隔断 望不尽远山\n尚且不愿 就此离散\n只是心力 早已耗完\n\n[Interlude]\n(琵琶轮指蓄力三小节，第四小节整小节休止)\n\n[Chorus]\n雾漫过层层高台\n半生奔走 困在了尘埃\n微光难入 世俗眼台\n任凭风雨 反复掩埋\n霜铺满蜿蜒长阶\n孤身一程 无人来相偕\n万千期许 尽数撕裂\n心底余火 不肯熄灭\n\n[Bridge]\n不是不曾拼命\n只是那道高墙\n终究难以逾越\n笔墨难换一纸交代\n锋芒沉落在人海之内\n世间只论 成败的黑白\n谁去数 跌过多少来回\n攀不上 那一重楼台\n便守心火 于尘世之内\n纵然埋进 茫茫尘霭\n未将本心 就此销毁\n\n[Outro]\n喧嚣归于夜色寂寥\n旧梦仍在 心底轻摇\n我到不了 云间远峤\n未曾丢掉 当年的年少\n[End]",
+  "context": {
+    "genre": ["国风", "戏腔", "叙事"],
+    "mood": "含泪的叹，先抑后扬再和解，不要嘶吼",
+    "bpm": 74,
+    "key": "Dm",
+    "structure": "Verse-古筝间奏-PreChorus-琵琶过门留白-Chorus戏腔-Bridge昆白后扬-Outro主歌动机",
+    "duration_seconds": 230,
+    "negative_prompt": "歌词出现长安, 大跳旋律, 嘶吼, 说唱, 重踢鼓贯穿全曲, 唢呐长旋律, 音色突然进出, 电子舞曲, 甜美偶像"
+  }
+}

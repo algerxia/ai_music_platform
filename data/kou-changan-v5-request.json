@@ -1,0 +1,16 @@
+{
+  "title": "叩长安 v5",
+  "format": "mp3",
+  "instrumental": false,
+  "prompt": "Chinese opera-pop fusion, 74BPM, D minor pentatonic. ALL vocals must be sung 戏腔/悲腔, NEVER spoken word, NEVER rap, NEVER 念白, NEVER whispering narration, NEVER a talking voice. If a line looks like dialogue, still sing it with melody. Opening 8 seconds: male 戏腔 vocalize 啊—— with jinghu answering, no talking. Verse also sung in restrained 戏腔, not pop speech-singing. Chorus is full 悲腔 with slides and held notes, tearful but pitched. Bridge is still sung 戏腔, higher, no recitation. Middle instrumental interlude MUST be a Chinese opera ensemble: jinghu lead, yueqin, small gong, clappers 板鼓, muted luo hits, short suona calls, not a modern pop guzheng loop. Second interlude: pipa plus jinghu, then one bar of complete silence, then chorus. Instruments enter and exit gradually. Real human opera-tinged male vocal, in tune, emotional, no spoken adlibs, no background talking, no radio voice. No EDM, no trap, no English, no dialogue.",
+  "lyrics": "[Intro]\n啊——\n雾漫过层层高台\n\n[Verse 1]\n灯叠半卷旧稿\n长夜独自 待到天稍晓\n脚步踏遍寒峭\n眼底曾向 远路远眺\n\n[Interlude]\n(戏曲过门：京胡领奏，月琴弹拨，板鼓轻敲，小锣点缀，唢呐短音，无人声)\n\n[Pre-Chorus]\n肩上驮着 几分期盼\n云雾隔断 望不尽远山\n尚且不愿 就此离散\n只是心力 早已耗完\n\n[Interlude]\n(京胡与琵琶对答三小节，第四小节全休止)\n\n[Chorus]\n雾漫过层层高台\n半生奔走 困在了尘埃\n微光难入 世俗眼台\n任凭风雨 反复掩埋\n霜铺满蜿蜒长阶\n孤身一程 无人来相偕\n万千期许 尽数撕裂\n心底余火 不肯熄灭\n\n[Bridge]\n笔墨难换一纸交代\n锋芒沉落在人海之内\n世间只论 成败的黑白\n谁去数 跌过多少来回\n攀不上 那一重楼台\n便守心火 于尘世之内\n纵然埋进 茫茫尘霭\n未将本心 就此销毁\n\n[Chorus]\n雾漫过层层高台\n半生奔走 困在了尘埃\n霜铺满蜿蜒长阶\n心底余火 不肯熄灭\n\n[Outro]\n喧嚣归于夜色寂寥\n旧梦仍在 心底轻摇\n我到不了 云间远峤\n未曾丢掉 当年的年少\n啊——\n[End]",
+  "context": {
+    "genre": ["戏曲", "国风", "戏腔"],
+    "mood": "悲腔，全曲演唱，间奏是戏班过门",
+    "bpm": 74,
+    "key": "Dm",
+    "structure": "戏腔起腔-Verse-戏曲间奏-PreChorus-过门留白-Chorus-唱段Bridge-Chorus-Outro",
+    "duration_seconds": 230,
+    "negative_prompt": "说话, 念白, 白话旁白, rap, spoken word, 有人在讲话, 广播腔, 昆白, 对话, EDM"
+  }
+}

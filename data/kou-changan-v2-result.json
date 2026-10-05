@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "18c47811-c6ae-410e-b380-a8417673a937",
+    "project_id": "122623fe-aa03-443d-b7df-295d927e0811",
+    "status": "succeeded",
+    "job_type": "initial_generate",
+    "prompt": "Cinematic Chinese folk-pop like 笑纳 but MORE dramatic. 84BPM, 4/4, D minor pentatonic (D羽). Male vocal, real human voice, in tune, emotional, NOT spoken word, NOT recitative, NOT monotone. Huge dynamic contrast is mandatory: Verse is intimate and low, almost whisper-sung over sparse guzheng and xiao; Pre-chorus climbs every bar; Chorus is the only place the full band hits, with a soaring, unforgettable pentatonic hook that a listener can hum after one listen. The hook phrase is the long cry 「长安云深啊」: start on a held high note, slight kunqu slide, then a falling-then-rising contour, repeat immediately so it sticks. After the sung chorus, add a wordless 啊～ counter-melody on erhu that people linger on. Second chorus must be bigger than the first: extra octave leap, stacked harmony, full drums, suona accent on downbeats. Bridge is the true climax, not rap: powerful belting, war drums, then a one-bar silence, then the biggest chorus. Arrangement: intro states the chorus melody on dizi first (no vocal), so the hook exists before lyrics. Do not keep the same energy the whole song. Do not make verse and chorus similar. Catchy, haunting, lingering, cinematic, studio-quality mix. No EDM, no trap, no idol sweetness, no mumbling.",
+    "error_message": "",
+    "credit_hold": 10,
+    "provider": "runninghub",
+    "model": "minimax-music-2.5",
+    "result_asset_id": "83c613da-72b7-47b3-9b76-58e4bec919be",
+    "created_at": "2026-10-04T09:09:47.845932+00:00",
+    "started_at": "2026-10-04T09:09:47.864817+00:00",
+    "finished_at": "2026-10-04T09:13:04.050857+00:00"
+  }
+}

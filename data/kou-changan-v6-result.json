@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "e88d7f70-e142-40e0-b775-134b74f33feb",
+    "project_id": "122623fe-aa03-443d-b7df-295d927e0811",
+    "status": "succeeded",
+    "job_type": "initial_generate",
+    "prompt": "Female Chinese folk ballad, 74BPM, D minor pentatonic, 4/4. Style mix: narrative smoothness of 三国恋 plus restrained tragedy of 赤伶. Third-person wife watching her husband at night under a lamp, tender pity, silent heartache, one continuous scene, no genre jumps. Female vocal only, warm, close, low in verses like she is looking at him and dare not speak; chorus is female 戏腔悲叹, tearful light sigh, NOT high belt, NOT explosion, NOT shouting. NO spoken word, NO talking, NO rap, NO male voice. The inner-monologue lines must still be SUNG as breathy pitched 气声, never spoken. Arrangement rebuilt: Verse = soft guzheng arpeggio, very weak xiao long tones, sparse wooden fish, sub pad; mute pipa, big drum, suona, erhu. Then 8-bar guzheng interlude, all drums stop, only guzheng plus sparse xiao, extreme silence, she stares. Pre-chorus: xiao rises, light rim roll, weak bass. 4-bar pipa with soft melancholy, last bar total rest. Chorus: erhu enters wrapping the vocal, guzheng arpeggios, soft drums, no heavy kick, no suona. Bridge: slightly more tension, light downbeat drum only, tiny suona atmosphere, no war-drum blast. Outro: all tension instruments fade, return to guzheng xiao pad, bittersweet close. Emotions layer slowly: gaze, ache, empathy, staying. Real human female vocal, in tune, lingering, cinematic, tears in throat. No EDM, no trap, no idol brightness, no sudden rock climax.",
+    "error_message": "",
+    "credit_hold": 10,
+    "provider": "runninghub",
+    "model": "minimax-music-2.5",
+    "result_asset_id": "9c559932-45a8-47e8-90b6-9c8f876587ca",
+    "created_at": "2026-10-04T09:59:54.490519+00:00",
+    "started_at": "2026-10-04T09:59:54.497438+00:00",
+    "finished_at": "2026-10-04T10:03:20.461762+00:00"
+  }
+}

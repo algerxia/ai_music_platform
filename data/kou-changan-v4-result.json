@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "bb56782c-6fc1-458e-85a6-25ab37ac21e0",
+    "project_id": "122623fe-aa03-443d-b7df-295d927e0811",
+    "status": "succeeded",
+    "job_type": "initial_generate",
+    "prompt": "Chinese folk narrative ballad, title feeling of knocking on a distant capital but NEVER sing that place-name. 74BPM, 4/4, D minor pentatonic (D羽), chords Dm F G Am Em. Melody only stepwise and small leaps, no big jumps, smooth singable lines. One scene only: a man under a dying lamp at night, memory then reality then a contained outburst then reconciliation. Male vocal: Verse and outro are close, low, spoken-sung storytelling, no bright belt. Pre-chorus volume rises linearly. Chorus is kunqu-tinged 悲腔, a tearful sigh, long slides on 雾漫过层层高台 and 霜铺满蜿蜒长阶, NOT shouting, NOT heroic rock. Bridge: first 4 bars almost spoken 气声 昆白, instruments thin; then 戏腔 lifts, war drum on downbeats only, suona short stabs, no long suona melody. Arrangement: Verse = guzheng arpeggio + sparse wooden fish + weak bass + pad + occasional xiao, pipa/drums/suona mute. Then 8-bar guzheng interlude, all percussion mute, xiao answers and leaves space. Pipa fill 4 bars, bar 4 is complete silence (critical emotional pause) then chorus. Chorus: erhu answers the vocal, guzheng arpeggios, soft drums, NO heavy kick, suona/war drum mute. Outro reuses verse motif, drums and suona mute, erhu exits, end on guzheng decay. All instruments fade in and out, never sudden. Haunting, lingering, cinematic, real human vocal with tears, in tune. No EDM, no trap, no rap, no idol sweetness, no monotone recitation of classical couplets.",
+    "error_message": "",
+    "credit_hold": 10,
+    "provider": "runninghub",
+    "model": "minimax-music-2.5",
+    "result_asset_id": "ab6c219c-4f9f-4626-af04-b886c55208fb",
+    "created_at": "2026-10-04T09:45:15.920570+00:00",
+    "started_at": "2026-10-04T09:45:15.927251+00:00",
+    "finished_at": "2026-10-04T09:47:15.664566+00:00"
+  }
+}
