@@ -41,7 +41,19 @@ echo "==> reload nginx (ignore if web not ready)"
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web nginx -s reload 2>/dev/null || true
 
 echo "==> health"
-curl -fsS http://127.0.0.1/api/health || curl -fsS http://127.0.0.1:8080/api/health
-echo
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if curl -fsS http://127.0.0.1/api/health >/tmp/studio_health.json 2>/dev/null \
+    || curl -fsS http://127.0.0.1:8080/api/health >/tmp/studio_health.json 2>/dev/null; then
+    cat /tmp/studio_health.json
+    echo
+    break
+  fi
+  sleep 2
+  if [[ "$i" -eq 10 ]]; then
+    echo "ERROR: health check failed" >&2
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail=40 api web || true
+    exit 1
+  fi
+done
 docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 echo "==> done $(git rev-parse --short HEAD)"
