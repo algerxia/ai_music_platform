@@ -25,6 +25,7 @@ if [[ -n "${GIT_BUNDLE:-}" ]]; then
   git fetch "$GIT_BUNDLE" "$BRANCH"
   git checkout "$BRANCH"
   git reset --hard FETCH_HEAD
+  git update-ref "refs/remotes/origin/$BRANCH" FETCH_HEAD
 elif [[ "${SKIP_GIT_PULL:-0}" == "1" ]]; then
   echo "==> SKIP_GIT_PULL=1，使用当前工作树 $(git rev-parse --short HEAD)"
 else
