@@ -1,7 +1,8 @@
 # 阿里云 ECS 部署与连接说明（给 Agent / 运维）
 
-正规流程：**本机改代码 → commit → push GitHub `main` → 服务器 `git pull` + Compose 重建**。  
-不要再用 `scp` 零散覆盖生产文件（紧急热修除外，事后必须补 commit/push）。
+正规流程：**本机改代码 → commit → push GitHub `main` → `./deploy/deploy.sh`**。  
+`deploy.sh` 会把 `main` 打成 **git bundle** 传到 ECS 再 `fetch` + Compose 重建（ECS 直连 GitHub 常超时，故不用服务器上 `git pull`）。  
+不要再用零散 `scp` 覆盖单文件当发布（紧急热修除外，事后必须补 commit/push）。
 
 ## 现网信息
 
@@ -27,21 +28,21 @@ curl -sS http://59.110.35.36:8080/api/health
 ## 标准发布流程
 
 ```bash
-# 1) 本机
+# 1) 本机入库
 cd /path/to/ai_music_platform
+git checkout main
 git status
 git add …
 git commit -m "…"
-git push origin main
+# origin 建议 SSH：git@github.com:algerxia/ai_music_platform.git
 
-# 2) 一键部署到 ECS（本机执行）
+# 2) 一键发布到 ECS
 ./deploy/deploy.sh
-
-# 等价：SSH 后手动
-ssh -i ~/.ssh/id_ed25519 root@59.110.35.36 'bash /opt/ai_music_platform/deploy/remote_update.sh'
+# 已 push 过可： SKIP_PUSH=1 ./deploy/deploy.sh
 ```
 
-`remote_update.sh` 会：`git pull --ff-only` →  
+`deploy.sh`：`git push` → `git bundle` → `scp` → ECS 上 `GIT_BUNDLE=… remote_update.sh`。  
+`remote_update.sh`：更新到目标 commit →  
 `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build` → 探活。
 
 生产专用覆盖在 `docker-compose.prod.yml`（国内镜像、CORS、80 端口）。`.env` **永不进 Git**，只留在服务器。
@@ -94,23 +95,23 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml exec web nginx -
 
 ## 首次把现网改成 Git 部署（已做过可跳过）
 
-在服务器上（保留 `.env` 与 Docker volumes）：
+ECS 直连 GitHub 不稳定时，用本机 bundle 初始化（保留 `.env` 与 Docker volumes）：
 
 ```bash
-# 备份密钥
+# 本机
+git bundle create /tmp/ai_music_platform.bundle main
+scp -i ~/.ssh/id_ed25519 /tmp/ai_music_platform.bundle root@59.110.35.36:/tmp/
+
+# 服务器
 cp /opt/ai_music_platform/.env /root/ai_music_platform.env.bak
-
-# 停栈（volumes 保留）
 cd /opt/ai_music_platform && docker compose down || true
-
-# 挪走旧目录（非 git），再 clone
 mv /opt/ai_music_platform /opt/ai_music_platform.legacy_scp
-git clone https://github.com/algerxia/ai_music_platform.git /opt/ai_music_platform
-cp /root/ai_music_platform.env.bak /opt/ai_music_platform/.env
-chmod +x /opt/ai_music_platform/deploy/*.sh
-
+git clone /tmp/ai_music_platform.bundle /opt/ai_music_platform
 cd /opt/ai_music_platform
-bash deploy/remote_update.sh
+git remote add origin https://github.com/algerxia/ai_music_platform.git   # 仅作溯源；日常更新走 bundle
+cp /root/ai_music_platform.env.bak .env
+chmod +x deploy/*.sh
+SKIP_GIT_PULL=1 bash deploy/remote_update.sh
 ```
 
 确认健康后，可择期删除 `/opt/ai_music_platform.legacy_scp`。
@@ -129,7 +130,7 @@ bash deploy/remote_update.sh
 
 ## Agent 操作约束
 
-1. **发布路径**：commit → `git push origin main` → `./deploy/deploy.sh`。禁止把未入库改动只 scp 到生产后了事。
+1. **发布路径**：commit → `git push origin main` → `./deploy/deploy.sh`（bundle 同步）。禁止把未入库改动只 scp 到生产后了事。
 2. 改生产前：`curl /api/health` + 服务器 `git log -1`。
 3. 绝不打印 / 提交 AccessKey、`.env`、供应商 Key。
 4. 公网 IP 以 **`59.110.35.36`** 为准。
