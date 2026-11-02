@@ -1,0 +1,17 @@
+# ECS 生产覆盖：国内镜像、公网 CORS、开放 80/8080。
+# 用法：docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+services:
+  postgres:
+    image: docker.m.daocloud.io/library/postgres:15-alpine
+
+  redis:
+    image: docker.m.daocloud.io/library/redis:7-alpine
+
+  api:
+    environment:
+      CORS_ORIGINS: http://127.0.0.1:8080,http://localhost:8080,http://59.110.35.36:8080,http://59.110.35.36
+
+  web:
+    image: docker.m.daocloud.io/library/nginx:latest
+    ports:
+      - "80:80"

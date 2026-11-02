@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.audit import record
 from app.capabilities import CAPABILITY_SCHEMA_VERSION, public_capabilities
@@ -69,6 +70,15 @@ def on_startup() -> None:
 
 def api_base(request: Request) -> str:
     return str(request.base_url).rstrip("/")
+
+
+def public_assets(db: Session, assets, base: str = "") -> list[dict]:
+    job_ids = [asset.job_id for asset in assets if asset.job_id]
+    jobs = {}
+    if job_ids:
+        for job in db.scalars(select(GenerationJob).where(GenerationJob.id.in_(job_ids))):
+            jobs[job.id] = job
+    return [asset_public(asset, base, job=jobs.get(asset.job_id)) for asset in assets]
 
 
 @app.get("/api/health")
@@ -282,14 +292,15 @@ def list_projects(
     base = api_base(request)
     payload = []
     for project in projects:
-        assets = [
-            asset_public(asset, base)
-            for asset in db.scalars(
+        assets = public_assets(
+            db,
+            db.scalars(
                 select(Asset)
                 .where(Asset.project_id == project.id, Asset.deleted_at.is_(None))
                 .order_by(Asset.created_at.desc())
-            )
-        ]
+            ).all(),
+            base,
+        )
         pending = db.scalar(
             select(GenerationJob).where(
                 GenerationJob.project_id == project.id,
@@ -325,12 +336,13 @@ def get_project(project_id: UUID, request: Request, user: User = Depends(get_cur
     if not project or project.owner_user_id != user.id or project.deleted_at:
         raise HTTPException(status_code=404, detail="项目不存在")
     base = api_base(request)
-    assets = [
-        asset_public(asset, base)
-        for asset in db.scalars(
+    assets = public_assets(
+        db,
+        db.scalars(
             select(Asset).where(Asset.project_id == project.id, Asset.deleted_at.is_(None)).order_by(Asset.created_at.desc())
-        )
-    ]
+        ).all(),
+        base,
+    )
     pending = db.scalar(
         select(GenerationJob).where(
             GenerationJob.project_id == project.id,
@@ -782,8 +794,7 @@ def list_assets(request: Request, user: User = Depends(get_current_user), db: Se
         select(Asset).where(Asset.user_id == user.id, Asset.deleted_at.is_(None)).order_by(Asset.created_at.desc())
     ).all()
     result = []
-    for asset in assets:
-        item = asset_public(asset, base)
+    for item, asset in zip(public_assets(db, assets, base), assets, strict=True):
         project = db.get(Project, asset.project_id)
         item["projectName"] = project.name if project else ""
         item["projectId"] = str(asset.project_id)
@@ -875,6 +886,11 @@ def write_project_lyrics(
         project.updated_at = datetime.now(timezone.utc)
         if asset:
             asset.lyrics = lyrics
+            meta = dict(asset.meta or {})
+            meta["lyrics_written"] = True
+            meta["lyrics_source"] = "qwen"
+            asset.meta = meta
+            flag_modified(asset, "meta")
         else:
             selected = db.scalar(
                 select(Asset).where(
@@ -885,6 +901,11 @@ def write_project_lyrics(
             )
             if selected:
                 selected.lyrics = lyrics
+                meta = dict(selected.meta or {})
+                meta["lyrics_written"] = True
+                meta["lyrics_source"] = "qwen"
+                selected.meta = meta
+                flag_modified(selected, "meta")
         record(
             db,
             actor_id=user.id,

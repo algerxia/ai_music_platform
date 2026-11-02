@@ -279,7 +279,7 @@ def poll_runninghub_task(api_key: str, task_id: str, timeout_seconds: int = 600)
             return last
         if status == "FAILED":
             raise RuntimeError(runninghub_failure_message(last.get("errorMessage") or last.get("failedReason") or "RunningHub 任务失败"))
-        time.sleep(3)
+        time.sleep(1.5)
     raise TimeoutError("RunningHub 音乐生成超时")
 
 

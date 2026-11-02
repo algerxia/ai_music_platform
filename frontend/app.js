@@ -31,6 +31,19 @@ let notices = [];
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+/** HTTP 公网不是安全上下文，不要调用 crypto.randomUUID。 */
+function newIdempotencyKey() {
+  const bytes = new Uint8Array(16);
+  if (globalThis.crypto?.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
@@ -182,10 +195,27 @@ function renderEditor() {
   $('#result-stage').innerHTML = assets.map((asset) => renderResultCard(project, asset)).join('');
 }
 
+function takeKindTags(asset) {
+  const origin = asset.origin || 'instrumental';
+  const originLabel = asset.originLabel || ({ vocal_cover: '人声翻唱', variation: '变体', instrumental: '纯音乐', vocal: '人声成曲' }[origin] || origin);
+  const tags = [`<span class="take-tag take-tag-${escapeHTML(origin)}">${escapeHTML(originLabel)}</span>`];
+  if (asset.lyricsWritten) {
+    tags.push('<span class="take-tag take-tag-lyrics">已填词</span>');
+  }
+  return `<div class="take-tags">${tags.join('')}</div>`;
+}
+
+function jobTypeLabel(type = '') {
+  return ({ vocal_cover: '人声翻唱', variation: '变体', initial_generate: '成曲生成' }[type] || type);
+}
+
 function renderPendingJob(project) {
   const job = project.pendingJob;
   const cancel = job.can_cancel ? `<button class="mini-action" data-cancel-job="${job.id}" type="button">取消排队</button>` : '';
-  return `<div class="pending-job"><div class="pending-orbit"></div><h3>正在生成…</h3><p>阶段：${escapeHTML(job.progress_stage || job.status || 'queued')} · 已预留 ${job.credit_hold || CREDIT_COST} 积分</p><small>任务 ${escapeHTML(job.id || '')} · ${escapeHTML(job.job_type || '')}</small>${cancel}</div>`;
+  const stage = job.progress_stage || job.status || 'queued';
+  const stageLabel = stage === 'submitting' ? '提交中' : stage;
+  const taskLabel = job.id && job.id !== 'pending-local' ? `任务 ${job.id}` : '正在提交到队列';
+  return `<div class="pending-job"><div class="pending-orbit"></div><h3>正在${jobTypeLabel(job.job_type) === '人声翻唱' ? '翻唱' : '生成'}…</h3><p>阶段：${escapeHTML(stageLabel)} · ${escapeHTML(jobTypeLabel(job.job_type))} · 已预留 ${job.credit_hold || CREDIT_COST} 积分</p><small>${escapeHTML(taskLabel)} · MiniMax 通常约 1 分钟</small>${cancel}</div>`;
 }
 
 function renderResultCard(project, asset) {
@@ -194,6 +224,7 @@ function renderResultCard(project, asset) {
   return `<article class="result-card ${asset.selected ? 'selected' : ''} ${monitorAssetId === asset.id ? 'playing' : ''}" data-asset-id="${asset.id}">
     <div class="result-wave">${makeWaveform(asset.id)}</div>
     <div class="result-body"><div class="result-top"><strong>${escapeHTML(asset.title)}</strong><button class="ghost-icon" data-favorite="${asset.id}" type="button">${asset.favorite ? '★' : '☆'}</button></div>
+    ${takeKindTags(asset)}
     <div class="result-meta"><span>${asset.duration || project.duration || '--'}s</span><span>${asset.bpm || project.bpm} BPM</span><span>${escapeHTML(asset.key || project.key || '')}</span><span>Take ${asset.version || 1}</span></div>
     <div class="result-actions">
       <button class="mini-action" data-select="${asset.id}" type="button">${asset.selected ? '当前' : '设为当前'}</button>
@@ -209,10 +240,11 @@ function renderMonitor(asset, project) {
   if (!asset) return '';
   const a = allAssets().find((item) => item.id === compareSlots.a);
   const b = allAssets().find((item) => item.id === compareSlots.b);
-  const lyrics = String(asset.lyrics || project.lyrics || '').trim();
+  const lyrics = String(asset.lyrics || '').trim();
+  const kinds = [asset.originLabel, asset.lyricsWritten ? '已填词' : ''].filter(Boolean).join(' · ');
   return `<div class="player-shell">
     <p class="player-title">${escapeHTML(asset.title)}</p>
-    <p class="player-sub">${asset.bpm || project.bpm} BPM · ${escapeHTML(asset.key || '')} · ${escapeHTML(asset.format || 'mp3').toUpperCase()} · 条款 ${escapeHTML(asset.termsVersion || '1.0')}</p>
+    <p class="player-sub">${kinds ? `${escapeHTML(kinds)} · ` : ''}${asset.bpm || project.bpm} BPM · ${escapeHTML(asset.key || '')} · ${escapeHTML(asset.format || 'mp3').toUpperCase()}</p>
     <audio id="main-audio" preload="metadata"></audio>
     <input class="player-bar" id="player-seek" type="range" min="0" max="1000" value="0" aria-label="进度" />
     <div class="player-times"><span id="player-elapsed">0:00</span><span id="player-remain">--</span></div>
@@ -231,7 +263,7 @@ function renderMonitor(asset, project) {
         ${lyrics ? `<button class="mini-action" data-copy-lyrics="1" type="button">复制</button>` : ''}
         ${lyrics ? `<button class="mini-action" data-vocal-regen="1" type="button">用人声再生成</button>` : ''}
       </div>
-      <pre class="lyrics-body">${lyrics ? escapeHTML(lyrics) : '还没有歌词。生成完成后可按这首曲子填词；填词不会改这段音频。'}</pre>
+      <pre class="lyrics-body">${lyrics ? escapeHTML(lyrics) : '这个版本还没有填词。填词只写进当前 Take，不会改这段 MP3。'}</pre>
       <p class="player-sub">「用人声再生成」会把当前 MP3 上传到 RunningHub，再调用 MiniMax Music Cover。歌词提交上限 1000 字；会出新 Take，不覆盖旧文件。</p>
     </div>
     <p class="player-sub">MIDI / 分轨 / 精确 WAV：当前模型不支持。导出包含 MP3 原文件与 generation.txt 元数据，便于丢进 DAW。</p>
@@ -290,7 +322,7 @@ function renderLibrary() {
   $('#library-list').innerHTML = assets.map((asset) => `
     <article class="library-item" data-library-asset="${asset.id}" role="button" tabindex="0">
       <div class="library-item-icon" aria-hidden="true">▶</div>
-      <div class="library-item-copy"><strong>${escapeHTML(asset.title)}</strong><small>${escapeHTML(asset.date || '')} · Take ${asset.version || 1}</small></div>
+      <div class="library-item-copy"><strong>${escapeHTML(asset.title)}</strong><small>${escapeHTML(asset.date || '')} · Take ${asset.version || 1} · ${escapeHTML(asset.originLabel || '成曲')}${asset.lyricsWritten ? ' · 已填词' : ''}</small></div>
       <div class="library-item-project">${escapeHTML(asset.projectName)}</div>
       <button data-play="${asset.id}" type="button">播放</button>
       <button data-download="${asset.id}" type="button">下载</button>
@@ -319,7 +351,7 @@ function renderRecentJobs() {
       ? `<button class="mini-action" data-retry-job="${job.id}" type="button">重试</button>`
       : '';
     const open = job.project_id ? `<button class="mini-action" data-open-project="${job.project_id}" type="button">打开</button>` : '';
-    return `<div class="job-row"><div><strong>${escapeHTML(job.project_name || '项目')}</strong><small>${escapeHTML(job.progress_stage || job.status)} · ${escapeHTML(job.job_type || '')}</small></div><div class="library-row-actions">${open}${retry}</div></div>`;
+    return `<div class="job-row"><div><strong>${escapeHTML(job.project_name || '项目')}</strong><small>${escapeHTML(job.progress_stage || job.status)} · ${escapeHTML(jobTypeLabel(job.job_type))}</small></div><div class="library-row-actions">${open}${retry}</div></div>`;
   }).join('');
 }
 
@@ -630,32 +662,41 @@ function stopAllPolls() {
   pollTimers.clear();
 }
 
+async function pollJobOnce(projectId, jobId) {
+  const payload = await api(`/api/jobs/${jobId}`);
+  const job = payload.data;
+  const project = projects.find((item) => item.id === projectId);
+  if (project) project.pendingJob = job;
+  if (job.status === 'succeeded' || job.status === 'failed' || job.status === 'canceled') {
+    const timer = pollTimers.get(jobId);
+    if (timer) clearInterval(timer);
+    pollTimers.delete(jobId);
+    await refreshSession();
+    if (currentProjectId === projectId) await openProject(projectId);
+    if (job.status === 'succeeded') {
+      showToast(job.job_type === 'vocal_cover' ? '人声翻唱完成，已保存为新 Take。' : (qwenConfigured ? '音乐生成完成。可以填词后再做「用人声再生成」。' : '音乐生成完成。'));
+    } else {
+      showToast(job.error_message || '生成失败，积分已退回。', 'error');
+    }
+    return true;
+  }
+  render();
+  return false;
+}
+
 function startJobPoll(projectId, jobId) {
   if (pollTimers.has(jobId)) return;
+  pollJobOnce(projectId, jobId).catch((error) => showToast(error.message, 'error'));
   const timer = setInterval(async () => {
     try {
-      const payload = await api(`/api/jobs/${jobId}`);
-      const job = payload.data;
-      const project = projects.find((item) => item.id === projectId);
-      if (project) project.pendingJob = job;
-      if (job.status === 'succeeded' || job.status === 'failed' || job.status === 'canceled') {
-        clearInterval(timer);
-        pollTimers.delete(jobId);
-        await refreshSession();
-        if (currentProjectId === projectId) await openProject(projectId);
-        if (job.status === 'succeeded') {
-          showToast(job.job_type === 'vocal_cover' ? '人声翻唱完成，已保存为新 Take。' : (qwenConfigured ? '音乐生成完成。可以填词后再做「用人声再生成」。' : '音乐生成完成。'));
-        }
-        else showToast(job.error_message || '生成失败，积分已退回。', 'error');
-      } else {
-        render();
-      }
+      const done = await pollJobOnce(projectId, jobId);
+      if (done) return;
     } catch (error) {
       clearInterval(timer);
       pollTimers.delete(jobId);
       showToast(error.message, 'error');
     }
-  }, 3000);
+  }, 1500);
   pollTimers.set(jobId, timer);
 }
 
@@ -683,7 +724,6 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     showToast('这个项目已有一项生成任务正在进行。', 'error');
     return;
   }
-  await saveEditorFields();
   const format = 'mp3';
   const lyrics = $('#lyrics-input')?.value.trim() || '';
   const instrumental = vocalCover ? false : $('#vocal-select').value === 'instrumental';
@@ -709,46 +749,56 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     showToast(`歌词 ${lyrics.length} 字，Music Cover 提交时会压缩到 ${coverMax} 字。`);
   }
   const cost = CREDIT_COST;
-  const confirmed = window.confirm(
-    vocalCover
-      ? `将把当前成品上传到 RunningHub，再调用 MiniMax Music Cover 加人声。\n预留 ${cost} 积分；生成新 Take，不覆盖旧文件。\n歌词提交上限 1000 字。不保证 1:1 保留编曲。继续吗？`
-      : `将创建异步任务并预留 ${cost} 积分。旧 Take 不会被覆盖。\n当前模型只交付 MP3，不提供 MIDI/分轨。失败自动退回积分。继续吗？`,
-  );
-  if (!confirmed) return;
   const button = $('#generate-button');
   button.disabled = true;
+  // 立刻给反馈，避免先等保存/确认才像卡住
+  project.pendingJob = {
+    id: 'pending-local',
+    status: 'queued',
+    progress_stage: 'submitting',
+    job_type: vocalCover ? 'vocal_cover' : (sourceAssetId ? 'variation' : 'initial_generate'),
+    credit_hold: cost,
+  };
+  creditBalance = Math.max(0, creditBalance - cost);
+  render();
+  showToast(vocalCover ? `人声翻唱提交中，预留 ${cost} 积分…` : `正在提交生成，预留 ${cost} 积分（约 1 分钟）…`);
   try {
-    const payload = await api(`/api/projects/${project.id}/jobs`, {
-      method: 'POST',
-      headers: { 'Idempotency-Key': crypto.randomUUID() },
-      body: JSON.stringify({
-        prompt,
-        format,
-        instrumental,
-        lyrics,
-        parent_asset_id: sourceAssetId,
-        job_type: vocalCover ? 'vocal_cover' : (sourceAssetId ? 'variation' : 'initial_generate'),
-        capability_schema_version: capabilities?.schema_version,
-        context: {
-          genre: project.genre || [],
-          bpm: project.bpm,
-          key: project.key,
-          duration_seconds: project.duration,
-          mood: project.mood,
-          structure: project.structure,
-          negative_prompt: project.negativePrompt,
-          time_signature: project.timeSignature || '4/4',
-          vocal_cover: vocalCover,
-        },
+    const [, payload] = await Promise.all([
+      saveEditorFields().catch(() => null),
+      api(`/api/projects/${project.id}/jobs`, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': newIdempotencyKey() },
+        body: JSON.stringify({
+          prompt,
+          format,
+          instrumental,
+          lyrics,
+          parent_asset_id: sourceAssetId,
+          job_type: vocalCover ? 'vocal_cover' : (sourceAssetId ? 'variation' : 'initial_generate'),
+          capability_schema_version: capabilities?.schema_version,
+          context: {
+            genre: project.genre || [],
+            bpm: project.bpm,
+            key: project.key,
+            duration_seconds: project.duration,
+            mood: project.mood,
+            structure: project.structure,
+            negative_prompt: project.negativePrompt,
+            time_signature: project.timeSignature || '4/4',
+            vocal_cover: vocalCover,
+          },
+        }),
       }),
-    });
+    ]);
     project.pendingJob = payload.data;
-    creditBalance = Math.max(0, creditBalance - CREDIT_COST);
     render();
     startJobPoll(project.id, payload.data.id);
-    showToast(vocalCover ? '人声翻唱已进入队列（先上传成品，再 Cover）。' : '任务已进入队列。');
-    await refreshSession();
+    showToast(vocalCover ? '人声翻唱已进入队列。' : '任务已进入队列，MiniMax 生成中…');
+    refreshSession().catch(() => null);
   } catch (error) {
+    project.pendingJob = null;
+    creditBalance += cost;
+    render();
     showToast(error.message, 'error');
   } finally {
     button.disabled = false;
@@ -988,7 +1038,11 @@ async function requestWriteLyrics(assetId) {
     const lyrics = result.data?.lyrics || '';
     applyLyricsToEditor(lyrics);
     const asset = (project.assets || []).find((item) => item.id === targetId);
-    if (asset) asset.lyrics = lyrics;
+    if (asset) {
+      asset.lyrics = lyrics;
+      asset.lyricsWritten = true;
+      asset.hasLyrics = true;
+    }
     render();
     showToast('歌词已写入当前版本。可用「用人声再生成」把成品送到 Music Cover。');
   } catch (error) {
@@ -1295,7 +1349,7 @@ document.addEventListener('click', (event) => {
   if (copyLyricsTarget) {
     const project = projects.find((entry) => entry.id === currentProjectId);
     const asset = (project?.assets || []).find((entry) => entry.id === monitorAssetId) || project;
-    const lyrics = String(asset?.lyrics || project?.lyrics || '').trim();
+    const lyrics = String(asset?.lyrics || '').trim();
     if (!lyrics) return;
     navigator.clipboard.writeText(lyrics).then(() => showToast('歌词已复制。')).catch(() => showToast('复制失败。', 'error'));
     return;

@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM docker.m.daocloud.io/library/python:3.12-slim
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DEFAULT_TIMEOUT=120
 
 COPY backend/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --no-cache-dir -r /tmp/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
 COPY backend /app
 

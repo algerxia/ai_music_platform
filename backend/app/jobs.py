@@ -130,6 +130,14 @@ def process_job(job_id: str) -> None:
                 old.selected = False
 
             parent_id = job.parent_asset_id
+            if is_cover:
+                origin = "vocal_cover"
+            elif parent_id:
+                origin = "variation"
+            elif not instrumental:
+                origin = "vocal"
+            else:
+                origin = "instrumental"
             asset = Asset(
                 project_id=project.id,
                 user_id=user.id,
@@ -153,7 +161,14 @@ def process_job(job_id: str) -> None:
                 terms_version="1.0",
                 file_size_bytes=file_size,
                 parent_asset_id=parent_id,
-                meta={"source_url": result["audio_url"], "duration_estimated": True, "cover_source": result.get("source_audio_url")},
+                meta={
+                    "source_url": result["audio_url"],
+                    "duration_estimated": True,
+                    "cover_source": result.get("source_audio_url"),
+                    "origin": origin,
+                    "job_type": job.job_type,
+                    "lyrics_written": bool((result.get("lyrics") or lyrics or "").strip()),
+                },
             )
             db.add(asset)
             db.flush()

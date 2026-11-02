@@ -166,11 +166,44 @@ def project_public(project, assets=None, pending_job=None) -> dict:
     }
 
 
-def asset_public(asset, api_base: str = "") -> dict:
+ORIGIN_LABELS = {
+    "vocal_cover": "人声翻唱",
+    "variation": "变体",
+    "instrumental": "纯音乐",
+    "vocal": "人声成曲",
+}
+
+
+def infer_asset_origin(asset, job=None) -> str:
+    meta = getattr(asset, "meta", None) or {}
+    stored = str(meta.get("origin") or "")
+    if stored in ORIGIN_LABELS:
+        return stored
+    job_type = ""
+    params = {}
+    if job is not None:
+        job_type = job.job_type or ""
+        params = job.params or {}
+    else:
+        job_type = str(meta.get("job_type") or "")
+    if job_type == "vocal_cover" or params.get("vocal_cover") or meta.get("cover_source"):
+        return "vocal_cover"
+    if job_type == "variation" or getattr(asset, "parent_asset_id", None):
+        return "variation"
+    if job_type == "initial_generate" and params.get("instrumental") is False:
+        return "vocal"
+    return "instrumental"
+
+
+def asset_public(asset, api_base: str = "", job=None) -> dict:
     # Always relative so the browser stays on the nginx origin (e.g. :8080),
     # not request.base_url which often drops the published port.
     _ = api_base
     audio_url = f"/api/assets/{asset.id}/content"
+    origin = infer_asset_origin(asset, job)
+    meta = getattr(asset, "meta", None) or {}
+    lyrics = getattr(asset, "lyrics", "") or ""
+    lyrics_written = bool(meta.get("lyrics_written"))
     return {
         "id": str(asset.id),
         "title": asset.title,
@@ -196,6 +229,11 @@ def asset_public(asset, api_base: str = "") -> dict:
         "parentAssetId": str(asset.parent_asset_id) if getattr(asset, "parent_asset_id", None) else None,
         "termsVersion": getattr(asset, "terms_version", "1.0") or "1.0",
         "createdAt": asset.created_at.isoformat() if asset.created_at else None,
+        "origin": origin,
+        "originLabel": ORIGIN_LABELS.get(origin, origin),
+        "jobType": (job.job_type if job is not None else meta.get("job_type")) or "",
+        "hasLyrics": bool(lyrics.strip()),
+        "lyricsWritten": lyrics_written,
     }
 
 

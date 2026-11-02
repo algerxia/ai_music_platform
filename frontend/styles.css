@@ -78,7 +78,7 @@ body.is-app .public-shell{display:none}
 .capability-flags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .flag{font-size:11px;border:1px solid var(--line2);border-radius:999px;padding:3px 8px;color:var(--muted)}
 .flag.off{opacity:.55;text-decoration:line-through}
-.result-card.selected{outline:1px solid var(--accent)}
+.take-tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}.take-tag{font-size:10px;letter-spacing:.02em;border:1px solid var(--line2);border-radius:999px;padding:2px 8px;color:var(--muted);background:var(--panel3)}.take-tag-instrumental{color:#b9c0a8}.take-tag-vocal_cover{border-color:#5d4a2a;background:#2a2318;color:#e6c37a}.take-tag-variation{border-color:#3d4a5c;background:#1c232c;color:#9eb6d4}.take-tag-vocal{border-color:#4a3d5c;background:#231c2c;color:#c9b0e0}.take-tag-lyrics{border-color:#3d5534;background:#1b2416;color:var(--accent)}
 #lyrics-input{width:100%;min-height:90px;background:var(--panel3);border:1px solid var(--line2);color:var(--text);border-radius:10px;padding:8px}
 .plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
 .plan-tile{border:1px solid var(--line2);border-radius:14px;padding:14px;background:var(--panel2)}
