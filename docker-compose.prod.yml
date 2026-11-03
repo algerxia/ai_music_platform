@@ -16,6 +16,10 @@ services:
     environment:
       AUDIO_WORKER_URL: http://audio-worker:8090
 
+  # 生产默认拉起工具链 worker（base compose 里挂在 profile tools）
+  audio-worker:
+    profiles: []
+
   web:
     image: docker.m.daocloud.io/library/nginx:latest
     ports:
