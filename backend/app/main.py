@@ -19,11 +19,13 @@ from app.capabilities import CAPABILITY_SCHEMA_VERSION, public_capabilities
 from app.config import settings
 from app.credits import hold_credits, release_hold
 from app.db import get_db, init_db
+from app.extra_routes import router as extra_router
 from app.models import Asset, Consent, CreditLedger, DeletionRequest, GenerationJob, Project, Report, User
 from app.plans import PLANS, get_plan
 from app.policy import review_generation_text
 from app.providers import parse_prompt_controls, qwen_chat, write_lyrics
 from app.queue import enqueue_job
+from app.rh_engines import audio_worker_health
 from app.schemas import (
     AssetPatch,
     DeletionCreate,
@@ -49,7 +51,7 @@ from app.security import create_access_token, get_current_user, hash_password, v
 from app.storage import download_bytes, ensure_bucket
 
 
-app = FastAPI(title="Studio AI API", version="2.0.0")
+app = FastAPI(title="Studio AI API", version="2.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -57,6 +59,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(extra_router)
 
 
 @app.on_event("startup")
@@ -102,10 +105,15 @@ def health():
             "credits": True,
             "object_storage": True,
             "variation": True,
-            "midi": False,
-            "stems": False,
+            "agent": True,
+            "parametric": True,
+            "midi": True,
+            "stems": True,
+            "tools": True,
+            "mv": True,
             "billing": False,
         },
+        "audio_worker": audio_worker_health(),
     }
 
 
@@ -236,6 +244,7 @@ def capabilities():
         "data": public_capabilities(
             bool(settings.runninghub_api_key),
             bool(settings.dashscope_api_key),
+            audio_worker_ok=audio_worker_health(),
         )
     }
 
@@ -489,21 +498,50 @@ def create_job(
         job_type = "vocal_cover"
         instrumental_flag = False
     else:
-        if not body.instrumental and not lyrics_text:
+        engine_preview = str(ctx.get("engine") or "minimax").lower()
+        mode_preview = str(ctx.get("mode") or "parametric").lower()
+        # Suno 文生可不填歌词；Mureka/Suno 自定义需歌词或由 worker 补写
+        if engine_preview == "minimax" and not body.instrumental and not lyrics_text:
             raise HTTPException(status_code=400, detail="人声模式需要填写歌词，或先使用副驾生成歌词")
+        if engine_preview == "suno" and mode_preview == "custom" and not lyrics_text:
+            raise HTTPException(status_code=400, detail="Suno 自定义模式需要歌词")
         prompt = body.prompt
-        job_type = "variation" if body.parent_asset_id else (body.job_type or "initial_generate")
+        requested_type = body.job_type or "initial_generate"
+        if requested_type == "extend":
+            job_type = "extend"
+        elif body.parent_asset_id:
+            job_type = "variation"
+        else:
+            job_type = requested_type
         if body.parent_asset_id:
             parent = db.get(Asset, body.parent_asset_id)
             if not parent or parent.user_id != user.id:
                 raise HTTPException(status_code=404, detail="源版本不存在")
-            prompt = (
-                f"{body.prompt}\n\n[Variation of Take {parent.version}] Keep the song identity, "
-                "change arrangement and vocal ornament, do not copy the previous mix exactly."
-            )[:6000]
+            if job_type == "variation":
+                prompt = (
+                    f"{body.prompt}\n\n[Variation of Take {parent.version}] Keep the song identity, "
+                    "change arrangement and vocal ornament, do not copy the previous mix exactly."
+                )[:6000]
         instrumental_flag = body.instrumental
+        if engine_preview == "suno" and mode_preview == "text":
+            instrumental_flag = body.instrumental
 
-    cost = settings.music_cost_credits
+    engine = str(ctx.get("engine") or "minimax").lower()
+    mode = str(ctx.get("mode") or "parametric").lower()
+    if job_type == "extend":
+        engine = "mureka"
+        mode = "extend"
+        cost = settings.extend_credit_cost
+        if not body.parent_asset_id:
+            raise HTTPException(status_code=400, detail="延长需要选择源 Take")
+    elif is_cover:
+        cost = settings.music_cost_credits + 5
+    elif engine == "suno":
+        cost = settings.suno_credit_cost
+    elif engine == "mureka":
+        cost = settings.mureka_credit_cost
+    else:
+        cost = settings.music_cost_credits
     job = GenerationJob(
         project_id=project.id,
         user_id=user.id,
@@ -517,10 +555,16 @@ def create_job(
             "lyrics": body.lyrics or project.lyrics,
             "context": body.context,
             "vocal_cover": is_cover,
+            "engine": engine,
+            "mode": mode,
+            "tags": ctx.get("tags") or "",
+            "title": ctx.get("title") or project.name,
+            "n": ctx.get("n") or 2,
+            "extend_at_ms": ctx.get("extend_at_ms") or 0,
         },
         idempotency_key=key or None,
         provider="runninghub",
-        model="minimax-music-cover" if is_cover else settings.music_model,
+        model="minimax-music-cover" if is_cover else (engine if engine != "minimax" else settings.music_model),
         capability_schema_version=body.capability_schema_version or CAPABILITY_SCHEMA_VERSION,
         credit_hold=cost,
         parent_asset_id=body.parent_asset_id,
@@ -711,6 +755,8 @@ def patch_asset(asset_id: UUID, body: AssetPatch, user: User = Depends(get_curre
         raise HTTPException(status_code=404, detail="素材不存在")
     if body.favorite is not None:
         asset.favorite = body.favorite
+    if body.is_public is not None:
+        asset.is_public = body.is_public
     if body.note is not None:
         asset.note = body.note[:2000]
     if body.lyrics is not None:
@@ -802,16 +848,53 @@ def list_assets(request: Request, user: User = Depends(get_current_user), db: Se
     return {"data": result}
 
 
+def _asset_media_type(asset) -> str:
+    fmt = (asset.format or "").lower().lstrip(".")
+    kind = (getattr(asset, "asset_type", "") or "").lower()
+    mapping = {
+        "mp3": "audio/mpeg",
+        "wav": "audio/wav",
+        "flac": "audio/flac",
+        "ogg": "audio/ogg",
+        "m4a": "audio/mp4",
+        "aac": "audio/aac",
+        "mp4": "video/mp4",
+        "webm": "video/webm",
+        "mov": "video/quicktime",
+        "mid": "audio/midi",
+        "midi": "audio/midi",
+        "musicxml": "application/vnd.recordare.musicxml+xml",
+        "xml": "application/xml",
+        "txt": "text/plain; charset=utf-8",
+        "lrc": "text/plain; charset=utf-8",
+        "json": "application/json",
+    }
+    if fmt in mapping:
+        return mapping[fmt]
+    if kind == "mv":
+        return "video/mp4"
+    if kind in {"lyrics", "analysis"}:
+        return "text/plain; charset=utf-8"
+    if kind == "midi":
+        return "audio/midi"
+    return "application/octet-stream"
+
+
 @app.get("/api/assets/{asset_id}/content")
 def asset_content(asset_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     asset = db.get(Asset, asset_id)
     if not asset or asset.user_id != user.id or asset.deleted_at:
         raise HTTPException(status_code=404, detail="素材不存在")
+    media = _asset_media_type(asset)
+    if not asset.storage_key:
+        text = (asset.lyrics or asset.note or asset.prompt or "").encode("utf-8")
+        if not text:
+            raise HTTPException(status_code=404, detail="该素材没有可预览的文件内容")
+        return Response(content=text, media_type="text/plain; charset=utf-8", headers={"Cache-Control": "private, max-age=3600"})
     try:
         data = download_bytes(asset.storage_key)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="音频文件缺失，请重新生成") from exc
-    media = "audio/mpeg" if asset.format == "mp3" else "audio/wav"
+        raise HTTPException(status_code=404, detail="文件缺失，请重新生成") from exc
     return Response(content=data, media_type=media, headers={"Cache-Control": "private, max-age=3600"})
 
 

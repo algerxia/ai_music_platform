@@ -114,7 +114,34 @@
         <svg class="icon icon-small" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
       </button>
 
-      <div class="nav-label">工作空间</div>
+      <div class="nav-label">创作</div>
+      <nav class="primary-nav" aria-label="创作">
+        <a class="nav-item" href="/create/agent" data-view="agent">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v10H8l-4 4V6Z"/></svg><span>对话式生成</span>
+        </a>
+        <a class="nav-item" href="/create/parametric" data-view="parametric">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13"/></svg><span>参数式生成</span>
+        </a>
+      </nav>
+
+      <div class="nav-label nav-label-spaced">发现</div>
+      <nav class="primary-nav" aria-label="发现">
+        <a class="nav-item" href="/discover" data-view="discover">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><span>音乐广场</span>
+        </a>
+        <a class="nav-item" href="/mv" data-view="mv">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg><span>音乐 MV</span>
+        </a>
+      </nav>
+
+      <div class="nav-label nav-label-spaced">工具箱</div>
+      <nav class="primary-nav" aria-label="工具箱">
+        <a class="nav-item" href="/tools" data-view="tools">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5 19 9l-8.5 8.5H6v-4.5L14.5 4.5Z"/></svg><span>全部工具</span>
+        </a>
+      </nav>
+
+      <div class="nav-label nav-label-spaced">工作空间</div>
       <nav class="primary-nav" aria-label="主导航">
         <a class="nav-item active" href="/studio" data-view="studio">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>工作室</span>
@@ -125,10 +152,9 @@
         <a class="nav-item" href="/library" data-view="library">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v13H4z"/><path d="m10 9 5 3-5 3V9Z"/></svg><span>素材库</span>
         </a>
-      </nav>
-
-      <div class="nav-label nav-label-spaced">创作工具</div>
-      <nav class="primary-nav" aria-label="创作工具">
+        <a class="nav-item" href="/mine" data-view="mine">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.8-3.2 4-4.8 7-4.8S17.2 15.8 19 19"/></svg><span>我的</span>
+        </a>
         <a class="nav-item" href="/usage" data-view="usage">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M17.5 7H9.7a3.2 3.2 0 0 0 0 6.4h4.6a3.2 3.2 0 0 1 0 6.4H6.5"/></svg><span>用量与方案</span>
         </a>
@@ -163,13 +189,13 @@
       <section class="view" id="view-studio" aria-labelledby="welcome-title">
         <div class="studio-page">
           <div class="welcome-row">
-            <div><div class="eyebrow"><span class="eyebrow-line"></span><span id="studio-date">MONDAY, JUNE 16, 2025</span></div><h1 id="welcome-title">早上好。<span class="wave-emoji">✳</span></h1><p class="welcome-subtitle" id="welcome-subtitle">从项目开始，把每次生成都留成可比较的 Take。</p></div>
+            <div><div class="eyebrow"><span class="eyebrow-line"></span><span id="studio-date">MONDAY, JUNE 16, 2025</span></div><h1 id="welcome-title">早上好。<span class="wave-emoji">✳</span></h1><p class="welcome-subtitle" id="welcome-subtitle">对话式或参数式开写；每次生成都留成可比较的 Take。</p></div>
             <button class="button button-primary new-project-button" type="button" data-action="new-project"><span class="plus">＋</span>新建项目</button>
           </div>
 
           <div class="hero-card">
             <div class="hero-grain"></div><div class="hero-orb orb-one"></div><div class="hero-orb orb-two"></div>
-            <div class="hero-content"><div class="hero-kicker"><span class="hero-kicker-dot"></span>STUDIO AI · CREATIVE WORKSPACE</div><h2>把脑海里的声音，<br />变成<span>下一首作品。</span></h2><p>从一个想法开始。探索新的声音方向，快速迭代，<br class="desktop-only" />然后带着你的灵感回到熟悉的制作流程。</p><button class="button button-light" type="button" data-action="new-project">开始创作 <span>→</span></button></div>
+            <div class="hero-content"><div class="hero-kicker"><span class="hero-kicker-dot"></span>STUDIO AI · DUAL CREATE</div><h2>对话式灵感，<br />或<span>参数式精控。</span></h2><p>左侧可选对话生成（确认后再扣费）或参数式工作台（MiniMax / 苏诺 / Mureka）。<br class="desktop-only" />工具箱与 MV 覆盖后期能力。</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="button button-light" href="/create/agent" data-view="agent">对话式生成 <span>→</span></a><a class="button button-light" href="/create/parametric" data-view="parametric">参数式生成 <span>→</span></a></div></div>
             <div class="hero-visual" aria-hidden="true"><div class="hero-ring ring-a"></div><div class="hero-ring ring-b"></div><div class="hero-ring ring-c"></div><div class="hero-disc"><div class="disc-label"><span class="disc-wave">〰</span><span>IDEA<br />NO. 001</span></div></div><div class="hero-note note-one">D#m</div><div class="hero-note note-two">♬</div><div class="hero-note note-three">82 BPM</div></div>
             <div class="hero-index"><span>01</span><i></i><span>03</span></div>
           </div>
@@ -190,12 +216,168 @@
 
       <section class="view" id="view-projects" aria-labelledby="projects-title"><div class="inner-page"><div class="page-title-row"><div><div class="section-kicker">YOUR CATALOG</div><h1 id="projects-title">所有项目</h1><p class="page-description">你的每一个创作想法，都从这里继续生长。</p></div><button class="button button-primary" type="button" data-action="new-project"><span class="plus">＋</span>新建项目</button></div><div class="list-toolbar"><label class="search-box"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="project-search" type="search" placeholder="搜索项目..." /></label><select class="filter-button" id="project-status-filter"><option value="active">进行中</option><option value="archived">已归档</option><option value="all">全部</option></select></div><div class="all-project-grid" id="all-projects"></div></div></section>
 
-      <section class="view" id="view-editor" aria-labelledby="editor-title"><div class="editor-page"><div class="editor-topline"><button class="back-button" data-action="back" type="button">← <span>所有项目</span></button><span class="demo-pill small-demo"><span class="status-dot"></span>MiniMax Music 工作台</span></div><div class="editor-heading"><div><div class="editor-project-meta"><span class="project-kind-dot"></span><span id="editor-purpose">灵感草稿</span><span class="meta-separator">·</span><span id="editor-updated">刚刚更新</span></div><h1 id="editor-title">未命名项目</h1></div><button class="icon-button" id="rename-project" type="button" aria-label="重命名项目"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z"/></svg></button></div>
+      <section class="view" id="view-agent" aria-labelledby="agent-title">
+        <div class="inner-page agent-page">
+          <div class="page-title-row"><div><div class="section-kicker">CONVERSATIONAL</div><h1 id="agent-title">对话式生成</h1><p class="page-description" id="agent-desc">多轮澄清 → 方案确认卡 → 再扣积分生成。确认前不扣费。</p></div><button class="button button-primary" type="button" id="agent-new-session">新会话</button></div>
+          <div class="chip-row agent-kind-tabs" id="agent-kind-tabs" role="tablist" aria-label="Agent 类型">
+            <button class="choice-chip active" type="button" data-agent-kind="general">综合助手</button>
+            <button class="choice-chip" type="button" data-agent-kind="melody">旋律 Agent</button>
+            <button class="choice-chip" type="button" data-agent-kind="lyrics">作词 Agent</button>
+          </div>
+          <div class="agent-layout">
+            <div class="agent-chat" id="agent-chat"></div>
+            <aside class="agent-side">
+              <div class="section-kicker">方案确认</div>
+              <div id="agent-confirm-panel" class="agent-confirm empty-block">确认方案会出现在这里。</div>
+              <div class="section-kicker" style="margin-top:1.2rem">快捷入口</div>
+              <div class="chip-row" id="agent-quick">
+                <button class="choice-chip" type="button" data-agent-quick="我有一段灵感，想做成流行女声歌">我有灵感</button>
+                <button class="choice-chip" type="button" data-agent-quick="帮我写一首古风对唱的歌词并定风格">帮我写词</button>
+                <button class="choice-chip" type="button" data-agent-quick="只要纯音乐配乐，电影感，90 秒">纯音乐配乐</button>
+              </div>
+            </aside>
+          </div>
+          <div id="agent-attach-preview" class="agent-attach-preview" hidden></div>
+          <form class="agent-composer" id="agent-form">
+            <label class="agent-attach-btn" title="添加文件"><input type="file" id="agent-file" accept="audio/*,video/*,image/*,.mid,.midi,.txt,.lrc,.mp3,.wav,.mp4,.webm" hidden /><span>＋</span></label>
+            <input id="agent-input" maxlength="4000" placeholder="描述你想要的歌，也可附上参考音视频…" autocomplete="off" />
+            <button class="button button-primary" type="submit">发送</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" id="view-parametric" aria-labelledby="parametric-title">
+        <div class="inner-page parametric-studio">
+          <div class="page-title-row"><div><div class="section-kicker">PARAMETRIC</div><h1 id="parametric-title">参数式生成</h1><p class="page-description" id="parametric-hint">结构化参数直接出歌；与对话式生成并列。版本不覆盖。</p></div>
+            <span class="demo-pill" id="param-cost-pill"><span class="status-dot"></span><span id="param-cost-label">10 积分 / 次</span></span>
+          </div>
+          <div class="create-split">
+            <div class="create-form-panel">
+              <div class="engine-tabs" id="engine-tabs">
+                <button type="button" class="engine-tab active" data-engine="minimax">MiniMax<span>参数可控</span></button>
+                <button type="button" class="engine-tab" data-engine="suno">苏诺 V5.5<span>文生 / 自定义</span></button>
+                <button type="button" class="engine-tab" data-engine="mureka">Mureka V9<span>歌词成曲</span></button>
+              </div>
+              <div class="mode-tabs" id="mode-tabs">
+                <button type="button" class="choice-chip selected" data-mode="text">文生音乐</button>
+                <button type="button" class="choice-chip" data-mode="custom">自定义</button>
+                <button type="button" class="choice-chip" data-mode="parametric">精细参数</button>
+                <button type="button" class="choice-chip" data-mode="sfx">音效</button>
+              </div>
+              <label class="form-field"><span>歌名</span><input id="param-title" maxlength="80" placeholder="可选，留空则用描述生成" /></label>
+              <label class="form-field full-field" id="param-desc-wrap"><span id="param-desc-label">歌曲描述</span><textarea id="param-desc" maxlength="6000" rows="5" placeholder="例：女声近麦轻声倾诉，字字有气息；雨夜窗边对一个人说话；木吉他+ downstream弦，副歌才抬高情绪。忌电子合成腔。"></textarea></label>
+              <label class="form-field full-field" id="param-lyrics-wrap" hidden><span>歌词（可用 [Verse]/[Chorus]）</span><textarea id="param-lyrics" maxlength="5000" rows="8" placeholder="口语、可换气，意象具体。例：&#10;[Verse]&#10;茶凉了一半 你还没回来&#10;[Chorus]&#10;我把今夜唱得很轻…"></textarea></label>
+              <label class="form-field" id="param-tags-wrap" hidden><span>风格标签</span><input id="param-tags" maxlength="1000" placeholder="民谣, 女声, intimate vocal, emotional phrasing" /></label>
+              <div class="field-grid" id="param-fine-grid" hidden>
+                <label class="form-field"><span>BPM</span><input id="param-bpm" type="number" min="40" max="240" value="90" /></label>
+                <label class="form-field"><span>调性</span><select id="param-key"><option>D minor</option><option>C major</option><option>A minor</option><option>G major</option><option>自由调性</option></select></label>
+                <label class="form-field"><span>时长</span><select id="param-duration"><option value="30">30s</option><option value="60">60s</option><option value="90" selected>90s</option><option value="120">120s</option><option value="180">180s</option></select></label>
+                <label class="form-field"><span>声音</span><select id="param-vocal"><option value="instrumental">纯音乐</option><option value="vocal">人声</option></select></label>
+              </div>
+              <label class="form-field" id="param-inst-wrap"><span><input type="checkbox" id="param-instrumental" /> 纯音乐（无人声）</span></label>
+              <div class="chip-row" id="param-genre-chips">
+                <button class="choice-chip selected" type="button" data-genre="流行">流行</button>
+                <button class="choice-chip" type="button" data-genre="国风">国风</button>
+                <button class="choice-chip" type="button" data-genre="Cinematic">电影感</button>
+                <button class="choice-chip" type="button" data-genre="电子">电子</button>
+                <button class="choice-chip" type="button" data-genre="民谣">民谣</button>
+                <button class="choice-chip" type="button" data-genre="R&amp;B">R&amp;B</button>
+              </div>
+              <div class="generate-footer">
+                <div class="generation-cost"><span class="cost-icon">✳</span><span><strong id="param-cost-strong">10 积分</strong><small>失败退回 · 新 Take 不覆盖</small></span></div>
+                <button class="button button-generate" id="param-generate" type="button">立即生成 <span class="button-arrow">→</span></button>
+              </div>
+              <p class="field-hint" id="param-job-status"></p>
+            </div>
+            <aside class="create-side-panel">
+              <div class="section-kicker">MY CREATIONS</div>
+              <h2 class="section-heading">我的创作</h2>
+              <div id="param-creations" class="creation-list"><div class="empty-block">生成后会出现在这里。</div></div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-tools" aria-labelledby="tools-title">
+        <div class="inner-page">
+          <div class="page-title-row"><div><div class="section-kicker">TOOLBOX</div><h1 id="tools-title">工具箱</h1><p class="page-description">每个工具独立表单；结果写入工具箱项目，可进素材库。</p></div></div>
+          <div class="tools-grid" id="tools-grid"></div>
+          <div class="tool-workbench" id="tool-workbench" hidden>
+            <div class="page-title-row"><div><h2 id="tool-workbench-title">工具</h2><p id="tool-workbench-desc" class="page-description"></p></div><button type="button" class="outline-button" id="tool-back">返回</button></div>
+            <div class="field-grid" id="tool-fields">
+              <label class="form-field full-field"><span>选用已有作品</span><select id="tool-asset-select"><option value="">— 或不选，改用下方上传 —</option></select></label>
+              <label class="form-field full-field" id="tool-asset2-wrap" hidden><span>第二段作品（合并）</span><select id="tool-asset-select2"><option value="">— 可选 —</option></select></label>
+              <label class="form-field full-field"><span>或上传音频 / MIDI</span><input type="file" id="tool-file" accept="audio/*,.mid,.midi" /></label>
+              <label class="form-field full-field" id="tool-file2-wrap" hidden><span>或上传第二段音频（合并）</span><input type="file" id="tool-file2" accept="audio/*" /></label>
+              <label class="form-field" id="tool-sep-wrap" hidden><span>分离模式</span><select id="tool-sep-mode"><option value="demucs">全轨近似（本地）</option><option value="vocal">人声（云端）</option><option value="background">伴奏（云端）</option><option value="full">源分离（云端）</option></select></label>
+              <label class="form-field" id="tool-crop-wrap" hidden><span>起点(秒)</span><input id="tool-crop-start" type="number" min="0" value="0" /><span>终点(秒)</span><input id="tool-crop-end" type="number" min="1" value="15" /></label>
+              <label class="form-field full-field"><span id="tool-prompt-label">说明 / 歌词 / 主题</span><textarea id="tool-prompt" maxlength="6000" rows="4" placeholder="可选"></textarea></label>
+            </div>
+            <div class="generate-footer"><div class="generation-cost"><span class="cost-icon">✳</span><span id="tool-cost-label">积分按工具计费</span></div><button class="button button-generate" id="tool-run" type="button">开始处理 →</button></div>
+            <div id="tool-result" class="empty-block" style="margin-top:1rem">结果会出现在这里。</div>
+            <div id="tool-history" class="creation-list" style="margin-top:1rem"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-discover" aria-labelledby="discover-title">
+        <div class="inner-page">
+          <div class="page-title-row"><div><div class="section-kicker">DISCOVER</div><h1 id="discover-title">音乐广场</h1><p class="page-description">公开作品与专辑。可在「我的」把作品设为公开。</p></div></div>
+          <div class="segmented-control" id="discover-tabs">
+            <button class="active" type="button" data-discover-tab="tracks">新歌</button>
+            <button type="button" data-discover-tab="albums">专辑</button>
+            <button type="button" data-discover-tab="mine">我的创作</button>
+          </div>
+          <div id="discover-list" class="library-list"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-mv" aria-labelledby="mv-title">
+        <div class="inner-page">
+          <div class="page-title-row"><div><div class="section-kicker">MV</div><h1 id="mv-title">音乐 MV</h1><p class="page-description">选一首自己的歌，生成歌词封面成片。</p></div></div>
+          <label class="form-field"><span>选择作品</span><select id="mv-asset-select"><option value="">加载中…</option></select></label>
+          <label class="form-field"><span>或粘贴 Asset ID</span><input id="mv-asset-id" placeholder="可选" /></label>
+          <label class="form-field"><span>MV 标题</span><input id="mv-title-input" maxlength="120" placeholder="未命名 MV" /></label>
+          <label class="form-field full-field"><span>歌词（滚动展示）</span><textarea id="mv-lyrics" rows="4" placeholder="可空，默认用作品歌词"></textarea></label>
+          <button class="button button-primary" type="button" id="mv-create">开始制作 MV</button>
+          <div id="mv-list" class="job-list" style="margin-top:1.5rem"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-mine" aria-labelledby="mine-title">
+        <div class="inner-page">
+          <div class="page-title-row"><div><div class="section-kicker">MINE</div><h1 id="mine-title">我的</h1><p class="page-description">作品、专辑、分轨（7 天）、喜欢、团队、LRC、多音轨。</p></div></div>
+          <div class="segmented-control" id="mine-tabs">
+            <button class="active" type="button" data-mine-tab="works">作品</button>
+            <button type="button" data-mine-tab="albums">专辑</button>
+            <button type="button" data-mine-tab="stems">分轨</button>
+            <button type="button" data-mine-tab="likes">喜欢</button>
+            <button type="button" data-mine-tab="teams">团队</button>
+            <button type="button" data-mine-tab="lrc">LRC</button>
+            <button type="button" data-mine-tab="multitrack">多音轨</button>
+            <button type="button" data-mine-tab="piano">钢琴</button>
+            <button type="button" data-mine-tab="letter">音乐信</button>
+          </div>
+          <div id="mine-panel" class="mine-panel"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-editor" aria-labelledby="editor-title"><div class="editor-page"><div class="editor-topline"><button class="back-button" data-action="back" type="button">← <span>所有项目</span></button><span class="demo-pill small-demo"><span class="status-dot"></span>参数式生成工作台</span></div><div class="editor-heading"><div><div class="editor-project-meta"><span class="project-kind-dot"></span><span id="editor-purpose">灵感草稿</span><span class="meta-separator">·</span><span id="editor-updated">刚刚更新</span></div><h1 id="editor-title">未命名项目</h1></div><button class="icon-button" id="rename-project" type="button" aria-label="重命名项目"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z"/></svg></button></div>
         <div class="editor-layout">
           <div class="composer-panel">
-            <div class="panel-heading"><span class="panel-step">01</span><div><h2>描述与控制</h2><p>参数会写入项目；模型不支持的项会标明，不会静默丢弃。</p></div></div>
+            <div class="panel-heading"><span class="panel-step">01</span><div><h2>参数式 · 描述与控制</h2><p>选择引擎后提交；不支持的项会标明，不会静默丢弃。</p></div></div>
+            <div class="engine-tabs compact" id="editor-engine-tabs">
+              <button type="button" class="engine-tab active" data-engine="minimax">MiniMax</button>
+              <button type="button" class="engine-tab" data-engine="suno">苏诺</button>
+              <button type="button" class="engine-tab" data-engine="mureka">Mureka</button>
+            </div>
+            <div class="mode-tabs" id="editor-mode-tabs">
+              <button type="button" class="choice-chip selected" data-mode="parametric">参数台</button>
+              <button type="button" class="choice-chip" data-mode="text">文生</button>
+              <button type="button" class="choice-chip" data-mode="custom">自定义</button>
+            </div>
             <label class="field-label" for="prompt-input">创作描述</label>
-            <div class="prompt-input-wrap"><textarea id="prompt-input" maxlength="6000" placeholder="风格、情绪、配器、人声表演、段落结构。越具体，版本越可复用。"></textarea><div class="textarea-footer"><button class="prompt-assist" type="button" id="prompt-assist">✳ <span>Qwen 创作副驾</span></button><button class="prompt-assist" type="button" id="fill-controls">↳ <span>一键填写参数</span></button><span id="prompt-count">0 / 6000</span></div></div>
+            <div class="prompt-input-wrap"><textarea id="prompt-input" maxlength="6000" placeholder="写清：对谁唱、什么情绪、近麦/远麦、轻声还是爆发、咬字与气息、配器与留白。例：克制男声，句尾收气，像忍住哽咽；忌 AI 合成腔与匀速念词。"></textarea><div class="textarea-footer"><button class="prompt-assist" type="button" id="prompt-assist">✳ <span>Qwen 创作副驾</span></button><button class="prompt-assist" type="button" id="fill-controls">↳ <span>一键填写参数</span></button><span id="prompt-count">0 / 6000</span></div></div>
             <p class="field-hint" id="prompt-provider-hint">MiniMax 实际只接收 2000 字风格描述；超过的部分会在生成时自动压缩，完整文案仍保存在项目里。</p>
             <div class="qwen-result" id="qwen-result" hidden><div class="qwen-result-head"><span>✳ QWEN 建议</span><button type="button" id="qwen-dismiss" aria-label="关闭建议">×</button></div><div class="qwen-result-text" id="qwen-result-text"></div><div class="qwen-result-actions"><button type="button" class="mini-action" id="qwen-apply">采用创作描述</button><button type="button" class="mini-action" id="qwen-copy">复制建议</button></div></div>
             <div class="field-section"><div class="field-section-title"><span>声音方向</span></div><div class="chip-row" id="genre-chips"><button class="choice-chip selected" type="button">Ambient</button><button class="choice-chip" type="button">Cinematic</button><button class="choice-chip" type="button">国风</button><button class="choice-chip" type="button">Neo-soul</button><button class="choice-chip add-chip" type="button">＋</button></div></div>
@@ -276,7 +458,7 @@
   <div class="toast-region" id="toast-region" aria-live="polite"></div>
   <div class="modal-backdrop" id="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" type="button" aria-label="关闭">×</button><div class="modal-kicker">NEW CREATION</div><h2 id="modal-title">给灵感一个名字。</h2><p>先从一个项目开始。之后可以随时调整方向。</p><form id="new-project-form"><label class="field-label" for="new-project-name">项目名称</label><input class="modal-input" id="new-project-name" maxlength="80" placeholder="例如：午夜之后" required /><label class="field-label modal-second-label" for="new-project-purpose">创作类型</label><select class="modal-input" id="new-project-purpose"><option value="灵感草稿">灵感草稿</option><option value="电影 / 游戏配乐">电影 / 游戏配乐</option><option value="歌曲制作">歌曲制作</option><option value="Loop / 节奏">Loop / 节奏</option><option value="声音设计">声音设计</option></select><div class="modal-actions"><button class="button button-secondary modal-cancel" type="button">再想一想</button><button class="button button-primary" type="submit">创建项目 <span>→</span></button></div></form></div></div>
   <script src="/config.js?v=public-tunnel"></script>
-  <script type="module" src="/app.js?v=uuid-http-2"></script>
+  <script type="module" src="/app.js?v=melody-agents-1"></script>
 </body>
 </html>
 

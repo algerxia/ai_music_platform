@@ -16,7 +16,8 @@
 | 安全组 | `sg-2zeaqz72g0obkpq3x0z9` |
 | 项目目录 | `/opt/ai_music_platform`（**git clone**） |
 | 对外入口 | http://59.110.35.36 （80）与 http://59.110.35.36:8080 |
-| 栈 | Docker Compose：`web` / `api` / `worker` / `postgres` / `redis` |
+| 栈 | Docker Compose：`web` / `api` / `worker` / `audio-worker` / `postgres` / `redis` |
+| 功能覆盖表 | [`docs/SUNO_COVERAGE.md`](../docs/SUNO_COVERAGE.md) |
 
 健康检查：
 

@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     music_model: str = "minimax-music-2.5"
     runninghub_api_key: str = ""
     runninghub_base_url: str = "https://www.runninghub.cn"
+    # Suno 等模型已要求走国际 AI 节点；MiniMax/Mureka 仍可用 CN。
+    runninghub_ai_base_url: str = "https://www.runninghub.ai"
+    audio_worker_url: str = "http://audio-worker:8090"
+    suno_credit_cost: int = 20
+    mureka_credit_cost: int = 50
+    extend_credit_cost: int = 30
 
     @property
     def cors_origin_list(self):

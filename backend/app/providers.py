@@ -26,14 +26,76 @@ MUSIC_PROMPT_MAX = 2000
 MUSIC_LYRICS_MAX = 3500
 INSTRUMENTAL_LYRICS = "[Intro]\n[Inst]\n[Outro]"
 
+# Steer models away from flat “AI vocal” and toward human performance.
+HUMAN_VOCAL_CN = (
+    "真人流行歌手录音室干声：每个字都有语气与情绪起伏，咬字自然像说话；"
+    "句首轻吸气、句尾气息收束；力度有 croon/倾诉/爆发的层次；"
+    "微颤音与轻微瑕疵美，像真人麦克风距离感；禁止电子合成人声、机械抖音、念经式匀速吐字、过度修音。"
+)
+HUMAN_VOCAL_EN = (
+    "intimate human studio vocal, emotional word-by-word phrasing, natural diction like speaking to someone, "
+    "breath at phrase edges, dynamic storytelling dynamics, subtle human vibrato and mic proximity, "
+    "avoid robotic AI vocal, avoid flat monotone, avoid synthetic choir stacks, avoid over-autotune"
+)
+HUMAN_INSTRUMENTAL_CN = (
+    "真人乐队/录音室演奏感：有呼吸与动态，乐器相互让位；禁止死板量化、塑料感音色堆叠。"
+)
+ANTI_AI_NEGATIVE = (
+    "AI感人声, 机械颤音, 匀速念词, 过度电音修音, 塑料感编曲, 空洞副歌堆叠, robotic vocal, "
+    "synthetic speech-singing, flat dynamics"
+)
+
+
+def _already_humanized(text: str) -> bool:
+    markers = ("真人流行歌手", "intimate human studio vocal", "每个字都有语气", "word-by-word phrasing")
+    lower = text or ""
+    return any(m in lower for m in markers)
+
+
+def enrich_human_expression(prompt: str, context: dict | None = None, *, lang: str = "auto") -> str:
+    """Append human-performance guidance so generations feel less AI-flat."""
+    text = (prompt or "").strip()
+    ctx = context or {}
+    instrumental = bool(ctx.get("instrumental"))
+    if _already_humanized(text):
+        return text
+    # Prefer Chinese guide for MiniMax CN; English for Suno-style prompts.
+    use_en = lang == "en" or (lang == "auto" and re.search(r"[A-Za-z]{20,}", text) and not re.search(r"[\u4e00-\u9fff]{8,}", text))
+    if instrumental:
+        guide = "live acoustic ensemble feel, human dynamics, room ambience" if use_en else HUMAN_INSTRUMENTAL_CN
+    else:
+        guide = HUMAN_VOCAL_EN if use_en else HUMAN_VOCAL_CN
+    mood = str(ctx.get("mood") or "").strip()
+    mood_bit = ""
+    if mood and not _mostly_ascii(mood):
+        mood_bit = f"情绪主轴：{mood}。" if not use_en else f"emotional core: {mood}."
+    elif mood:
+        mood_bit = f"emotional core: {mood}."
+    block = f"{guide} {mood_bit}".strip()
+    negative = str(ctx.get("negative_prompt") or "").strip()
+    if "AI感" not in negative and "robotic" not in negative.lower():
+        negative = f"{negative}, {ANTI_AI_NEGATIVE}".strip(", ").strip() if negative else ANTI_AI_NEGATIVE
+    parts = [text, block]
+    if negative:
+        parts.append(f"避免：{negative}" if not use_en else f"avoid: {negative}")
+    return "\n".join(p for p in parts if p).strip()
+
+
+def _mostly_ascii(text: str) -> bool:
+    s = text or ""
+    letters = sum(1 for ch in s if ("A" <= ch <= "Z") or ("a" <= ch <= "z"))
+    cjk = sum(1 for ch in s if "\u4e00" <= ch <= "\u9fff")
+    return letters > cjk * 2
+
 
 def compact_music_prompt(prompt: str, context: dict | None = None) -> str:
-    text = re.sub(r"\*+", "", prompt or "")
+    ctx = dict(context or {})
+    text = enrich_human_expression(prompt, ctx)
+    text = re.sub(r"\*+", "", text or "")
     text = re.sub(r"^#+\s*", "", text, flags=re.M)
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
     extras = []
-    ctx = context or {}
     if ctx.get("instrumental"):
         extras.append("纯音乐, instrumental, no vocals")
     genres = ctx.get("genre") or []
@@ -45,8 +107,7 @@ def compact_music_prompt(prompt: str, context: dict | None = None) -> str:
         extras.append(str(ctx["key"]))
     if ctx.get("mood"):
         extras.append(str(ctx["mood"])[:40])
-    if ctx.get("negative_prompt"):
-        extras.append(f"避免: {str(ctx['negative_prompt'])[:80]}")
+    # negative already folded into enrich; keep short extra if user set one
     prefix = "，".join(part for part in extras if part).strip()
     if prefix:
         budget = MUSIC_PROMPT_MAX - len(prefix) - 1
@@ -92,8 +153,13 @@ MAX_COVER_AUDIO_BYTES = 50 * 1024 * 1024
 
 def compact_cover_lyrics(lyrics: str) -> str:
     text = compact_music_lyrics(lyrics or "", False).strip()
-    if len(text) > COVER_LYRICS_MAX:
-        text = text[:COVER_LYRICS_MAX]
+    # Drop stage directions / parenthetical asides that confuse Music Cover.
+    text = re.sub(r"[（(][^）)]{0,40}[）)]", "", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    # Prefer shorter singable lyrics for cover stability.
+    soft_max = min(COVER_LYRICS_MAX, 720)
+    if len(text) > soft_max:
+        text = text[:soft_max]
         if "\n" in text:
             text = text.rsplit("\n", 1)[0]
     if len(text) < COVER_LYRICS_MIN:
@@ -168,31 +234,65 @@ def upload_runninghub_audio(path: Path) -> str:
     return url
 
 
-def submit_runninghub_task(route: str, payload: dict) -> dict:
+def submit_runninghub_task(route: str, payload: dict, *, base_url: str | None = None) -> dict:
     api_key = settings.runninghub_api_key.strip()
     if not api_key:
         raise RuntimeError("RUNNINGHUB_API_KEY 未配置")
-    base = settings.runninghub_base_url.rstrip("/")
+    primary = (base_url or settings.runninghub_base_url).rstrip("/")
+    ai_base = (settings.runninghub_ai_base_url or "https://www.runninghub.ai").rstrip("/")
     headers = runninghub_auth_headers(api_key)
-    try:
-        submitted = post_json(base + route, payload, headers, timeout=60)
-    except HTTPError as error:
-        detail = error.read().decode("utf-8", errors="ignore")[:200]
-        raise RuntimeError(f"RunningHub HTTP {error.code}: {detail}") from error
-    except URLError as error:
-        raise RuntimeError(f"无法连接 RunningHub: {error}") from error
+    bases = [primary]
+    if ai_base and ai_base not in bases:
+        bases.append(ai_base)
 
-    task_id = str(submitted.get("taskId") or "").strip()
-    error_code = str(submitted.get("errorCode") or "").strip()
-    error_message = str(submitted.get("errorMessage") or "").strip()
-    if not task_id:
+    submitted = None
+    used_base = primary
+    last_error = ""
+    for base in bases:
+        used_base = base
+        try:
+            submitted = post_json(base + route, payload, headers, timeout=60)
+        except HTTPError as error:
+            detail = error.read().decode("utf-8", errors="ignore")[:200]
+            last_error = f"RunningHub HTTP {error.code}: {detail}"
+            continue
+        except URLError as error:
+            last_error = f"无法连接 RunningHub: {error}"
+            continue
+        error_code = str(submitted.get("errorCode") or "").strip()
+        error_message = str(submitted.get("errorMessage") or "").strip()
+        task_id = str(submitted.get("taskId") or "").strip()
+        # 40310: model removed from CN — retry on AI endpoint
+        need_ai = error_code == "40310" or "runninghub.ai" in error_message.lower() or "AI endpoint" in error_message
+        if task_id:
+            break
+        if need_ai and base != ai_base:
+            continue
         if error_code == "1014":
             raise RuntimeError("RunningHub 标准模型 API 需要企业级-共享 API Key")
+        if error_code == "40310":
+            raise RuntimeError(
+                "Suno 等模型需在 RunningHub 全球站开通（runninghub.ai）并使用对应 API Key；"
+                "当前 Key 仍被识别为 CN 节点，无法调用该模型。"
+            )
+        raise RuntimeError(f"RunningHub 拒绝请求（{error_code or 'unknown'}）{error_message[:160]}")
+    else:
+        raise RuntimeError(last_error or "RunningHub 请求失败")
+
+    task_id = str(submitted.get("taskId") or "").strip()
+    if not task_id:
+        error_code = str(submitted.get("errorCode") or "").strip()
+        error_message = str(submitted.get("errorMessage") or "").strip()
+        if error_code == "40310":
+            raise RuntimeError(
+                "Suno 等模型需在 RunningHub 全球站开通（runninghub.ai）并使用对应 API Key；"
+                "当前 Key 仍被识别为 CN 节点，无法调用该模型。"
+            )
         raise RuntimeError(f"RunningHub 拒绝请求（{error_code or 'unknown'}）{error_message[:160]}")
     if str(submitted.get("status", "")).upper() == "SUCCESS" and submitted.get("results"):
         result = submitted
     else:
-        result = poll_runninghub_task(api_key, task_id)
+        result = poll_runninghub_task(api_key, task_id, base_url=used_base)
     audio_url = ""
     for item in result.get("results") or []:
         if isinstance(item, dict) and item.get("url"):
@@ -200,14 +300,15 @@ def submit_runninghub_task(route: str, payload: dict) -> dict:
             break
     if not audio_url:
         raise RuntimeError("RunningHub 没有返回可下载的音频地址")
-    return {"task_id": task_id, "audio_url": audio_url}
+    return {"task_id": task_id, "audio_url": audio_url, "base_url": used_base}
 
 
 def cover_music_runninghub(*, prompt: str, lyrics: str, audio_path: Path, fmt: str = "mp3") -> dict:
     ctx = {"instrumental": False}
     style = compact_music_prompt(prompt, ctx)
     cover_prompt = compact_music_prompt(
-        f"{style}\n保留参考音频的旋律与编曲骨架，加入贴合歌词的人声演唱，不要改成纯伴奏。",
+        f"{style}\n保留参考音频的旋律与编曲骨架；人声要像真人歌手对着麦唱，"
+        f"每个字有语气，气息真实，情感贴合歌词，不要改成纯伴奏，不要合成腔。",
         ctx,
     )
     cover_lyrics = compact_cover_lyrics(lyrics)
@@ -267,9 +368,11 @@ def download_url(url: str, target: Path, timeout: int = 120) -> int:
     return written
 
 
-def poll_runninghub_task(api_key: str, task_id: str, timeout_seconds: int = 600) -> dict:
+def poll_runninghub_task(
+    api_key: str, task_id: str, timeout_seconds: int = 600, *, base_url: str | None = None
+) -> dict:
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    base = settings.runninghub_base_url.rstrip("/")
+    base = (base_url or settings.runninghub_base_url).rstrip("/")
     deadline = time.time() + timeout_seconds
     last = {}
     while time.time() < deadline:
@@ -351,6 +454,57 @@ def qwen_chat(messages: list[dict], temperature: float = 0.7) -> str:
     return str(data.get("choices", [{}])[0].get("message", {}).get("content", "")).strip()
 
 
+def qwen_chat_stream(messages: list[dict], temperature: float = 0.7):
+    """Yield content deltas from DashScope OpenAI-compatible streaming chat."""
+    import httpx
+
+    api_key = settings.dashscope_api_key.strip()
+    if not api_key:
+        raise RuntimeError("DASHSCOPE_API_KEY 未配置")
+    url = f"{settings.dashscope_base_url.rstrip('/')}/chat/completions"
+    payload = {
+        "model": settings.dashscope_model,
+        "messages": messages,
+        "temperature": temperature,
+        "stream": True,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "Accept": "text/event-stream",
+    }
+    with httpx.Client(timeout=httpx.Timeout(30.0, read=180.0)) as client:
+        with client.stream("POST", url, headers=headers, json=payload) as response:
+            if response.status_code >= 400:
+                detail = response.read().decode("utf-8", errors="ignore")[:240]
+                raise RuntimeError(f"Qwen 流式请求失败 HTTP {response.status_code}: {detail}")
+            for line in response.iter_lines():
+                if not line:
+                    continue
+                text = line.decode("utf-8", errors="ignore") if isinstance(line, (bytes, bytearray)) else str(line)
+                text = text.strip()
+                if not text or text.startswith(":"):
+                    continue
+                if not text.startswith("data:"):
+                    continue
+                data = text[5:].strip()
+                if data == "[DONE]":
+                    break
+                if not data:
+                    continue
+                try:
+                    chunk = json.loads(data)
+                except json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices") or []
+                if not choices:
+                    continue
+                delta = choices[0].get("delta") or {}
+                piece = delta.get("content")
+                if piece:
+                    yield str(piece)
+
+
 def write_lyrics(
     prompt: str,
     *,
@@ -368,26 +522,30 @@ def write_lyrics(
     duration = max(30, min(int(duration_seconds or 90), 240))
     verse_hint = "两段主歌 + 副歌反复 + 桥段" if duration >= 120 else "主歌 + 副歌即可"
     system = (
-        "你是华语影视/流行作词人。只输出歌词正文，不要标题、不要解说、不要 markdown。"
+        "你是华语流行/影视作词人，专为「已有好听旋律」填词，让人声跟着旋律唱，而不是念词。"
+        "只输出歌词正文，不要标题、不要解说、不要 markdown。"
         "必须使用结构标签，优先：[Intro]、[Verse]、[Pre Chorus]、[Chorus]、[Bridge]、[Outro]。"
-        "歌词要能跟着已完成的器乐走，句式长短适合演唱，避免口号堆砌，不要抄袭成名作品。"
-        "总字数尽量不超过 900，以便后续 Music Cover 提交（上限 1000 字）。"
-        f"目标时长约 {duration} 秒，结构用{verse_hint}。"
+        "要求：口语句式、短句、可换气；意象具体（场景/触感/时间），少空泛口号；"
+        "主歌字少、留白给旋律；副歌才略密一点但仍可唱；"
+        "严禁密密麻麻堆字、严禁朗诵腔长句、严禁口号堆叠；"
+        "不要抄袭成名作品。总字数尽量不超过 700。"
+        f"目标时长约 {duration} 秒，结构用{verse_hint}；Intro/Outro 可留空或极少词。"
     )
     user = (
         f"曲名/项目：{title or '未命名'}\n"
         f"风格：{genre_text or '未指定'}\n"
         f"BPM：{bpm or '未知'}；调性：{key or '未知'}；情绪：{mood or '未指定'}；段落：{structure or '未指定'}\n"
-        f"补充要求：{instruction.strip() or '无'}\n"
+        f"演唱目标：跟着旋律唱，字跟着腔走；像对一个人说话，不是朗诵或喊麦。\n"
+        f"补充要求：{instruction.strip() or '按已有纯音乐旋律填词，优先好听可唱'}\n"
         f"已有歌词（若有则在其基础上改写，没有则全新创作）：\n{existing_lyrics.strip() or '无'}\n\n"
-        f"音乐描述：\n{prompt[:6000]}"
+        f"音乐描述（含旋律/编曲线索）：\n{prompt[:6000]}"
     )
     text = qwen_chat(
         [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        temperature=0.75,
+        temperature=0.82,
     )
     cleaned = re.sub(r"^```(?:\w+)?\s*", "", (text or "").strip())
     cleaned = re.sub(r"\s*```$", "", cleaned).strip()

@@ -84,6 +84,7 @@ class AssetPatch(BaseModel):
     favorite: bool | None = None
     note: str | None = None
     selected: bool | None = None
+    is_public: bool | None = None
     lyrics: str | None = Field(default=None, max_length=3500)
 
 
@@ -219,7 +220,9 @@ def asset_public(asset, api_base: str = "", job=None) -> dict:
         "lyrics": asset.lyrics,
         "date": asset.created_at.strftime("%m.%d · %H:%M"),
         "favorite": asset.favorite,
+        "isPublic": bool(getattr(asset, "is_public", False)),
         "prompt": asset.prompt,
+        "projectId": str(asset.project_id),
         "version": asset.version,
         "selected": asset.selected,
         "status": asset.status,

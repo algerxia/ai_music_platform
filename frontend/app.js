@@ -1,7 +1,12 @@
+import { bindPlatformExt } from './js/platform-ext.js';
+
 const AUTH_KEY = 'studio-ai-token-v2';
 const API_BASE = (window.STUDIO_CONFIG?.API_BASE || '').replace(/\/$/, '');
 const CREDIT_COST = 10;
 const PROMPT_MAX = 6000;
+let platformExtReady = false;
+let getCreateContext = () => ({ engine: 'minimax', mode: 'parametric' });
+let onPlatformView = async () => {};
 
 let token = localStorage.getItem(AUTH_KEY) || '';
 let currentUser = null;
@@ -233,6 +238,8 @@ function renderResultCard(project, asset) {
       <button class="mini-action" data-export="${asset.id}" type="button">导出包</button>
       <button class="mini-action" data-write-lyrics="${asset.id}" type="button">填词</button>
       <button class="mini-action" data-variation="${asset.id}" type="button">变体</button>
+      <button class="mini-action" data-extend="${asset.id}" type="button">延长</button>
+      <button class="mini-action" data-like-asset="${asset.id}" type="button">喜欢</button>
     </div></div></article>`;
 }
 
@@ -376,7 +383,13 @@ const TITLE_MAP = {
   library: '素材库 · Studio AI',
   usage: '用量与方案 · Studio AI',
   settings: '设置 · Studio AI',
-  editor: '创作工作台 · Studio AI',
+  editor: '参数式工作台 · Studio AI',
+  agent: '对话式生成 · Studio AI',
+  parametric: '参数式生成 · Studio AI',
+  tools: '工具箱 · Studio AI',
+  discover: '音乐广场 · Studio AI',
+  mv: '音乐 MV · Studio AI',
+  mine: '我的 · Studio AI',
   terms: '服务条款 · Studio AI',
   privacy: '隐私政策 · Studio AI',
   rights: '版权说明 · Studio AI',
@@ -395,6 +408,12 @@ function pathFor(view, projectId) {
     library: '/library',
     usage: '/usage',
     settings: '/settings',
+    agent: '/create/agent',
+    parametric: '/create/parametric',
+    tools: '/tools',
+    discover: '/discover',
+    mv: '/mv',
+    mine: '/mine',
     terms: '/terms',
     privacy: '/privacy',
     rights: '/rights',
@@ -410,6 +429,12 @@ function parseLocation() {
   if (path === '/forgot') return { view: 'forgot' };
   if (path === '/studio') return { view: 'studio' };
   if (path === '/projects') return { view: 'projects' };
+  if (path === '/create/agent') return { view: 'agent' };
+  if (path === '/create/parametric') return { view: 'parametric' };
+  if (path === '/tools') return { view: 'tools' };
+  if (path === '/discover') return { view: 'discover' };
+  if (path === '/mv') return { view: 'mv' };
+  if (path === '/mine') return { view: 'mine' };
   const projectMatch = path.match(/^\/projects\/([^/]+)$/);
   if (projectMatch) return { view: 'editor', projectId: projectMatch[1] };
   if (path === '/library') return { view: 'library' };
@@ -441,13 +466,28 @@ function applyRoute(route) {
     if (forgotForm) forgotForm.hidden = route.view !== 'forgot';
   }
   $$('.view').forEach((section) => section.classList.toggle('active', section.id === `view-${route.view}`));
-  $$('.nav-item').forEach((item) => item.classList.toggle('active', item.dataset.view === (route.view === 'editor' ? 'projects' : route.view)));
-  const names = { studio: ['工作室', '概览'], projects: ['项目', '所有项目'], library: ['素材库', '全部素材'], usage: ['工作空间', '用量与方案'], settings: ['工作空间', '设置'], editor: ['项目', route.label || '创作工作台'] };
+  const navView = route.view === 'editor' ? 'parametric' : route.view;
+  $$('.nav-item').forEach((item) => item.classList.toggle('active', item.dataset.view === navView));
+  const names = {
+    studio: ['工作室', '概览'],
+    projects: ['项目', '所有项目'],
+    library: ['素材库', '全部素材'],
+    usage: ['工作空间', '用量与方案'],
+    settings: ['工作空间', '设置'],
+    editor: ['参数式', route.label || '工作台'],
+    agent: ['创作', '对话式生成'],
+    parametric: ['创作', '参数式生成'],
+    tools: ['工具箱', '全部工具'],
+    discover: ['发现', '音乐广场'],
+    mv: ['发现', '音乐 MV'],
+    mine: ['我的', '资产与团队'],
+  };
   const [root, current] = names[route.view] || ['工作室', '概览'];
   if ($('#crumb-root')) $('#crumb-root').textContent = root;
   if ($('#crumb-current')) $('#crumb-current').textContent = current;
   document.title = TITLE_MAP[route.view] || 'Studio AI';
   if (route.view === 'settings' && token) loadProviderSettings();
+  onPlatformView(route.view).catch(() => null);
 }
 
 function navigate(view, options = {}) {
@@ -748,7 +788,12 @@ async function startGeneration(sourceAssetId = null, options = {}) {
   if (vocalCover && lyrics.length > coverMax) {
     showToast(`歌词 ${lyrics.length} 字，Music Cover 提交时会压缩到 ${coverMax} 字。`);
   }
-  const cost = CREDIT_COST;
+  const createCtx = getCreateContext();
+  const extend = Boolean(options.extend);
+  const engine = extend ? 'mureka' : (createCtx.engine || 'minimax');
+  const mode = extend ? 'extend' : (createCtx.mode || 'parametric');
+  const costMap = { minimax: CREDIT_COST, suno: 20, mureka: 50 };
+  const cost = vocalCover ? CREDIT_COST + 5 : extend ? 30 : (costMap[engine] || CREDIT_COST);
   const button = $('#generate-button');
   button.disabled = true;
   // 立刻给反馈，避免先等保存/确认才像卡住
@@ -756,12 +801,12 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     id: 'pending-local',
     status: 'queued',
     progress_stage: 'submitting',
-    job_type: vocalCover ? 'vocal_cover' : (sourceAssetId ? 'variation' : 'initial_generate'),
+    job_type: vocalCover ? 'vocal_cover' : extend ? 'extend' : (sourceAssetId ? 'variation' : 'initial_generate'),
     credit_hold: cost,
   };
   creditBalance = Math.max(0, creditBalance - cost);
   render();
-  showToast(vocalCover ? `人声翻唱提交中，预留 ${cost} 积分…` : `正在提交生成，预留 ${cost} 积分（约 1 分钟）…`);
+  showToast(vocalCover ? `人声翻唱提交中，预留 ${cost} 积分…` : extend ? `延长提交中，预留 ${cost} 积分…` : `正在提交 ${engine} 生成，预留 ${cost} 积分…`);
   try {
     const [, payload] = await Promise.all([
       saveEditorFields().catch(() => null),
@@ -774,7 +819,7 @@ async function startGeneration(sourceAssetId = null, options = {}) {
           instrumental,
           lyrics,
           parent_asset_id: sourceAssetId,
-          job_type: vocalCover ? 'vocal_cover' : (sourceAssetId ? 'variation' : 'initial_generate'),
+          job_type: vocalCover ? 'vocal_cover' : extend ? 'extend' : (sourceAssetId ? 'variation' : 'initial_generate'),
           capability_schema_version: capabilities?.schema_version,
           context: {
             genre: project.genre || [],
@@ -786,6 +831,10 @@ async function startGeneration(sourceAssetId = null, options = {}) {
             negative_prompt: project.negativePrompt,
             time_signature: project.timeSignature || '4/4',
             vocal_cover: vocalCover,
+            engine,
+            mode,
+            title: project.name,
+            tags: (project.genre || []).join(', ') || 'pop, melodic',
           },
         }),
       }),
@@ -793,7 +842,7 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     project.pendingJob = payload.data;
     render();
     startJobPoll(project.id, payload.data.id);
-    showToast(vocalCover ? '人声翻唱已进入队列。' : '任务已进入队列，MiniMax 生成中…');
+    showToast(vocalCover ? '人声翻唱已进入队列。' : extend ? '延长任务已入队（Mureka）。' : `任务已进入队列（${engine}）…`);
     refreshSession().catch(() => null);
   } catch (error) {
     project.pendingJob = null;
@@ -1340,6 +1389,18 @@ document.addEventListener('click', (event) => {
     startGeneration(variationTarget.dataset.variation);
     return;
   }
+  const extendTarget = event.target.closest('[data-extend]');
+  if (extendTarget) {
+    startGeneration(extendTarget.dataset.extend, { extend: true });
+    return;
+  }
+  const likeTarget = event.target.closest('[data-like-asset]');
+  if (likeTarget) {
+    api(`/api/likes/${likeTarget.dataset.likeAsset}`, { method: 'POST' })
+      .then((payload) => showToast(payload.data?.liked ? '已加入喜欢' : '已取消喜欢'))
+      .catch((error) => showToast(error.message, 'error'));
+    return;
+  }
   const writeLyricsTarget = event.target.closest('[data-write-lyrics]');
   if (writeLyricsTarget) {
     requestWriteLyrics(writeLyricsTarget.dataset.writeLyrics);
@@ -1586,7 +1647,8 @@ document.addEventListener('keydown', (event) => {
 });
 
 $('.workspace-switcher')?.addEventListener('click', () => {
-  showToast('团队工作区是 P1 能力，当前仅个人工作区。');
+  navigate('mine');
+  showToast('可在「我的 → 团队」创建或加入团队。');
 });
 
 $$('[data-auth-tab]').forEach((button) => {
@@ -1594,6 +1656,35 @@ $$('[data-auth-tab]').forEach((button) => {
     navigate(button.dataset.authTab, { replace: true });
   });
 });
+
+bindPlatformExt({
+  api,
+  $,
+  $$,
+  showToast,
+  navigate,
+  newIdempotencyKey,
+  escapeHTML,
+  allProjects,
+  projectCard,
+  render,
+  allAssets,
+  refreshSession,
+  openProject,
+  get token() {
+    return token;
+  },
+  API_BASE,
+});
+platformExtReady = true;
+getCreateContext = () =>
+  window.__studioGetCreateContext?.() || {
+    engine: localStorage.getItem('studio-engine') || 'minimax',
+    mode: localStorage.getItem('studio-mode') || 'parametric',
+  };
+onPlatformView = async (view) => {
+  if (typeof window.__studioOnPlatformView === 'function') await window.__studioOnPlatformView(view);
+};
 
 bootstrapAuth();
 

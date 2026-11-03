@@ -29,8 +29,11 @@ _ALTERS = [
     "ALTER TABLE assets ADD COLUMN IF NOT EXISTS terms_version VARCHAR(16) DEFAULT '1.0'",
     "ALTER TABLE assets ADD COLUMN IF NOT EXISTS file_size_bytes INTEGER DEFAULT 0",
     "ALTER TABLE assets ADD COLUMN IF NOT EXISTS parent_asset_id UUID",
+    "ALTER TABLE assets ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT FALSE",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_hash VARCHAR(128) DEFAULT ''",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMPTZ",
+    "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS kind VARCHAR(32) DEFAULT 'general'",
+    "CREATE INDEX IF NOT EXISTS ix_agent_sessions_kind ON agent_sessions (kind)",
 ]
 
 
