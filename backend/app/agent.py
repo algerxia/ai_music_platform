@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 
 from app.models import AgentSession, Asset, GenerationJob, Project, User, utcnow
+from app.prompt_library import agent_knowledge_pack, apply_template_to_draft, enrich_prompt_for_engine
 from app.providers import parse_json_object, qwen_chat, qwen_chat_stream
 
 
@@ -23,9 +24,11 @@ SYSTEM_GENERAL = (
     "3) 仅当用户明确要求一次出带词人声时，才可 instrumental=false 并附稀疏歌词。"
     "4) 信息足够时输出 ```confirm ... ``` JSON 确认卡："
     "title, engine(minimax|suno|mureka), mode(text|custom|parametric), prompt, lyrics, tags, "
-    "instrumental(bool), genre(array), bpm, mood, estimated_credits(int), summary。"
+    "instrumental(bool), genre(array), bpm, mood, estimated_credits(int), summary, "
+    "template_id(可选，导师模板 id), quality_boost(可选 bool，苏诺高音质)。"
     "5) 面向用户字段用中文；summary 1–3 句中文。默认引擎 minimax。"
-    "6) 确认前说明：点确认才扣积分。禁止承诺版权/克隆在世艺人。"
+    "6) 用户点名导师模板/曲风时，prompt/tags 应对齐提示词库；苏诺可开 quality_boost。"
+    "7) 确认前说明：点确认才扣积分。禁止承诺版权/克隆在世艺人。"
 )
 
 SYSTEM_MELODY = (
@@ -36,9 +39,9 @@ SYSTEM_MELODY = (
     "2) 信息足够时输出确认卡 ```confirm ... ```，且必须："
     "instrumental=true；lyrics 必须是空字符串 \"\"；"
     "prompt 只写乐器、旋律动机、律动、钩子、空间感、高潮落点，并写明「纯音乐 / instrumental / 无人声」；"
-    "不要写演唱法或歌词意向。"
+    "不要写演唱法或歌词意向；可引用 template_id 并把模板编曲改写成无人声。"
     "3) 确认卡字段：title, engine(优先 minimax), mode(parametric|text), prompt, lyrics=\"\", tags, "
-    "instrumental=true, genre(array), bpm, mood, estimated_credits(int, minimax 约 10), summary。"
+    "instrumental=true, genre(array), bpm, mood, estimated_credits(int, minimax 约 10), summary, template_id(可选)。"
     "summary 用中文说明这是旋律草案，满意后再去「作词 Agent」填词。"
     "4) 用户若要求写词：礼貌说明你专攻旋律，请切换到「作词 Agent」，并把当前 Take 交给对方。"
     "5) 确认前不扣积分；默认引擎 minimax；禁止版权承诺与声音克隆。"
@@ -55,11 +58,25 @@ SYSTEM_LYRICS = (
     "title, engine=minimax, mode=parametric, prompt(人声风格/情绪，短), lyrics(必填，带 [Verse]/[Chorus] 等标签), "
     "tags, instrumental=false, genre, bpm, mood, estimated_credits(约 15), summary, "
     "melody_asset_id(必填 UUID 字符串), workflow=\"lyrics_on_melody\"。"
-    "4) 歌词：短句、留白、跟着腔走；主歌字少；总字数尽量 ≤700；禁止密密麻麻朗诵长句。"
+    "4) 歌词：短句、留白、跟着腔走；主歌字少；总字数尽量 ≤700；禁止密密麻麻朗诵长句；遵守提示词库作词准则。"
     "5) 说明：确认后会按该旋律贴人声（Music Cover，失败则同风格短句人声保底）。确认前不扣积分。"
     "6) 禁止版权承诺与声音克隆。"
 )
 
+
+def _system_for_kind(kind: str) -> str:
+    key = (kind or "general").strip().lower()
+    if key not in AGENT_KINDS:
+        key = "general"
+    base = {
+        "general": SYSTEM_GENERAL,
+        "melody": SYSTEM_MELODY,
+        "lyrics": SYSTEM_LYRICS,
+    }[key]
+    return f"{base}\n\n{agent_knowledge_pack(key)}"
+
+
+# Backward-compatible map (raw systems without library pack). Prefer _system_for_kind().
 SYSTEM_BY_KIND = {
     "general": SYSTEM_GENERAL,
     "melody": SYSTEM_MELODY,
@@ -167,12 +184,44 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
 
     title = str(data.get("title") or TITLE_BY_KIND.get(kind, "对话创作"))[:120]
     prompt = str(data.get("prompt") or data.get("summary") or "")[:6000]
+    tags = str(data.get("tags") or "")[:1000]
+    template_id = str(data.get("template_id") or "").strip()
+    quality_boost = bool(data.get("quality_boost"))
+    if template_id:
+        merged = apply_template_to_draft(
+            {
+                "title": title,
+                "prompt": prompt,
+                "tags": tags,
+                "instrumental": instrumental,
+                "lyrics": raw_lyrics,
+            },
+            template_id,
+            instrumental=instrumental,
+        )
+        title = str(merged.get("title") or title)[:120]
+        prompt = str(merged.get("prompt") or prompt)[:6000]
+        tags = str(merged.get("tags") or tags)[:1000]
+        if instrumental:
+            raw_lyrics = ""
     if instrumental:
         raw_lyrics = ""
         if "纯音乐" not in prompt and "instrumental" not in prompt.lower() and "无人声" not in prompt:
             prompt = f"{prompt}\n纯音乐，instrumental，无人声，突出可记忆旋律钩子。".strip()
     elif kind == "lyrics" and not prompt.strip():
         prompt = "保留参考旋律骨架；短句换气，跟着腔唱，禁止念词。"
+
+    enriched = enrich_prompt_for_engine(
+        engine=engine,
+        prompt=prompt,
+        tags=tags,
+        lyrics=raw_lyrics,
+        quality_boost=quality_boost,
+        template_id=template_id,
+    )
+    prompt = enriched["prompt"]
+    tags = enriched["tags"]
+    raw_lyrics = enriched["lyrics"] if not instrumental else ""
 
     summary_src = {
         **data,
@@ -193,7 +242,7 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
         "mode": mode if mode in {"text", "custom", "parametric"} else "parametric",
         "prompt": prompt,
         "lyrics": raw_lyrics[:5000],
-        "tags": str(data.get("tags") or "")[:1000],
+        "tags": tags[:1000],
         "instrumental": instrumental,
         "genre": data.get("genre") if isinstance(data.get("genre"), list) else [],
         "bpm": int(data.get("bpm") or 90),
@@ -202,7 +251,10 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
         "summary": summary,
         "workflow": workflow,
         "agent_kind": kind,
+        "quality_boost": quality_boost,
     }
+    if template_id:
+        out["template_id"] = template_id
     if melody_asset_id:
         out["melody_asset_id"] = melody_asset_id
     return out
@@ -408,7 +460,7 @@ def create_session(
 
 def _build_history(messages: list[dict], *, kind: str = "general") -> list[dict]:
     kind = normalize_agent_kind(kind)
-    history = [{"role": "system", "content": SYSTEM_BY_KIND[kind]}]
+    history = [{"role": "system", "content": _system_for_kind(kind)}]
     for item in messages[-12:]:
         role = item.get("role")
         if role in {"user", "assistant"}:

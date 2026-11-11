@@ -597,6 +597,8 @@ def agent_confirm(
             "mode": mode,
             "tags": draft.get("tags") or "",
             "title": draft.get("title") or project.name,
+            "quality_boost": bool(draft.get("quality_boost")),
+            "template_id": str(draft.get("template_id") or ""),
             "context": context,
         },
         idempotency_key=idempotency_key,
@@ -995,12 +997,16 @@ class QuickGenerateBody(BaseModel):
     key: str = "D minor"
     duration_seconds: int = 90
     genre: list[str] = Field(default_factory=list)
+    template_id: str = ""
+    quality_boost: bool = False
     idempotency_key: str | None = None
 
 
 @router.post("/api/create/quick")
 def quick_generate(body: QuickGenerateBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """One-shot parametric create: auto project + job."""
+    from app.prompt_library import apply_template_to_draft, enrich_prompt_for_engine
+
     if not settings.runninghub_api_key:
         raise HTTPException(503, "音乐服务未配置")
     engine = (body.engine or "minimax").lower()
@@ -1014,6 +1020,28 @@ def quick_generate(body: QuickGenerateBody, user: User = Depends(get_current_use
         instrumental = body.instrumental
         prompt = body.prompt
     lyrics = body.lyrics
+    tags = body.tags
+    if body.template_id:
+        merged = apply_template_to_draft(
+            {"title": body.title, "prompt": prompt, "tags": tags, "lyrics": lyrics, "instrumental": instrumental},
+            body.template_id,
+            instrumental=instrumental,
+        )
+        prompt = str(merged.get("prompt") or prompt)
+        tags = str(merged.get("tags") or tags)
+        if not body.title:
+            body.title = str(merged.get("title") or "")
+        if instrumental:
+            lyrics = ""
+    enriched = enrich_prompt_for_engine(
+        engine=engine,
+        prompt=prompt,
+        tags=tags,
+        lyrics=lyrics,
+        quality_boost=body.quality_boost,
+        template_id=body.template_id,
+    )
+    prompt, tags, lyrics = enriched["prompt"], enriched["tags"], enriched["lyrics"]
     if engine == "suno" and mode == "custom" and not lyrics.strip():
         raise HTTPException(400, "自定义模式需要歌词")
     if engine == "minimax" and mode in {"parametric", "custom"} and not instrumental and not lyrics.strip():
@@ -1057,8 +1085,10 @@ def quick_generate(body: QuickGenerateBody, user: User = Depends(get_current_use
             "lyrics": lyrics,
             "engine": engine,
             "mode": "text" if mode == "sfx" else mode,
-            "tags": body.tags or "、".join(body.genre) or "pop, melodic",
+            "tags": tags or "、".join(body.genre) or "pop, melodic",
             "title": title,
+            "quality_boost": body.quality_boost,
+            "template_id": body.template_id or "",
             "context": {
                 "engine": engine,
                 "mode": "text" if mode == "sfx" else mode,
@@ -1066,8 +1096,10 @@ def quick_generate(body: QuickGenerateBody, user: User = Depends(get_current_use
                 "bpm": body.bpm,
                 "key": body.key,
                 "duration_seconds": body.duration_seconds,
-                "tags": body.tags,
+                "tags": tags,
                 "title": title,
+                "template_id": body.template_id or "",
+                "quality_boost": body.quality_boost,
             },
         },
         idempotency_key=body.idempotency_key,
@@ -1304,3 +1336,56 @@ def list_mv(user: User = Depends(get_current_user), db: Session = Depends(get_db
             for m in rows
         ]
     }
+
+
+@router.get("/api/prompt-library")
+def prompt_library_summary():
+    """Public curated prompt pack for agents / parametric UI."""
+    from app.prompt_library import public_summary
+
+    return {"data": public_summary()}
+
+
+@router.get("/api/prompt-library/templates")
+def prompt_library_templates(full: bool = Query(False)):
+    from app.prompt_library import get_template, load_library
+
+    if full:
+        return {"data": load_library().get("templates") or []}
+    summary = []
+    for t in load_library().get("templates") or []:
+        summary.append(
+            {
+                "id": t.get("id"),
+                "title": t.get("title"),
+                "vocal": t.get("vocal"),
+                "prompt_preview": (str(t.get("prompt") or "")[:160] + "…")
+                if len(str(t.get("prompt") or "")) > 160
+                else t.get("prompt"),
+            }
+        )
+    return {"data": summary}
+
+
+@router.get("/api/prompt-library/templates/{template_id}")
+def prompt_library_template_detail(template_id: str):
+    from app.prompt_library import get_template
+
+    tpl = get_template(template_id)
+    if not tpl:
+        raise HTTPException(404, "模板不存在")
+    return {"data": tpl}
+
+
+@router.get("/api/prompt-library/genres")
+def prompt_library_genres(q: str = Query(""), limit: int = Query(30, ge=1, le=100)):
+    from app.prompt_library import search_genres
+
+    return {"data": search_genres(q, limit=limit)}
+
+
+@router.get("/api/prompt-library/structure-tags")
+def prompt_library_structure_tags():
+    from app.prompt_library import load_library
+
+    return {"data": load_library().get("structure_tags") or []}

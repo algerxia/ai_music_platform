@@ -835,6 +835,7 @@ async function startGeneration(sourceAssetId = null, options = {}) {
             mode,
             title: project.name,
             tags: (project.genre || []).join(', ') || 'pop, melodic',
+            ...(window.__studioGetLibraryCreateExtras?.() || {}),
           },
         }),
       }),

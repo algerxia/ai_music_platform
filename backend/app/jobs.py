@@ -10,6 +10,7 @@ from app.config import settings
 from app.credits import consume_hold, release_hold
 from app.db import SessionLocal
 from app.models import AgentSession, Asset, GenerationJob, MvProject, Project, User
+from app.prompt_library import enrich_prompt_for_engine
 from app.providers import (
     cover_music_runninghub,
     download_url,
@@ -122,6 +123,17 @@ def _run_music_generate(db, job, project, user, params) -> Asset:
     prompt = job.prompt
     tags = str(params.get("tags") or "")
     title = str(params.get("title") or project.name or "未命名")
+    enriched = enrich_prompt_for_engine(
+        engine=engine,
+        prompt=prompt or "",
+        tags=tags,
+        lyrics=lyrics,
+        quality_boost=bool(params.get("quality_boost")),
+        template_id=str(params.get("template_id") or ""),
+    )
+    prompt, tags, lyrics = enriched["prompt"], enriched["tags"], enriched["lyrics"]
+    if prompt and prompt != (job.prompt or ""):
+        job.prompt = prompt
 
     if job.job_type == "vocal_cover" or params.get("vocal_cover"):
         parent = db.get(Asset, job.parent_asset_id) if job.parent_asset_id else None

@@ -38,11 +38,13 @@ export function bindPlatformExt(host) {
   let mineTab = 'works';
   let discoverTab = 'tracks';
   let paramPoll = null;
+  let promptLibrary = null;
+  const templateCache = new Map();
 
   const AGENT_KIND_META = {
     general: {
       title: '对话式生成',
-      desc: '综合助手：默认先出旋律，再填词。确认前不扣费。',
+      desc: '综合助手：默认先出旋律，再填词。确认前不扣费。内置提示词库。',
       placeholder: '描述曲风、情绪或一句灵感…',
       quick: [
         ['先出一首温柔民谣纯音乐', '温柔民谣旋律'],
@@ -71,6 +73,238 @@ export function bindPlatformExt(host) {
       ],
     },
   };
+
+  async function ensurePromptLibrary() {
+    if (promptLibrary) return promptLibrary;
+    try {
+      const payload = await api('/api/prompt-library');
+      promptLibrary = payload.data || {};
+      applyPromptLibraryToUI(promptLibrary);
+      return promptLibrary;
+    } catch (error) {
+      const hint = $('#param-library-hint');
+      if (hint) hint.textContent = `提示词库暂不可用：${error.message}`;
+      return null;
+    }
+  }
+
+  function fillTemplateSelect(selectEl, lib) {
+    if (!selectEl || selectEl.dataset.ready === '1') return;
+    const opts = ['<option value="">不使用模板</option>'].concat(
+      (lib.templates || []).map((t) => `<option value="${escapeHTML(t.id)}">${escapeHTML(t.title || t.id)}</option>`)
+    );
+    selectEl.innerHTML = opts.join('');
+    selectEl.dataset.ready = '1';
+  }
+
+  function renderStructureChips(rowId, lib) {
+    const row = $(`#${rowId}`);
+    if (!row || row.dataset.ready === '1') return;
+    const tags = (lib.structure_tags || []).slice(0, 14);
+    if (!tags.length) return;
+    row.innerHTML = tags
+      .map((t) => {
+        const key = t.key || '';
+        const title = t.explain || t.zh || key;
+        return `<button class="choice-chip" type="button" data-insert-tag="${escapeHTML(key)}" title="${escapeHTML(title)}">${escapeHTML(key)}</button>`;
+      })
+      .join('');
+    row.dataset.ready = '1';
+  }
+
+  function insertAtCursor(textarea, text) {
+    if (!textarea || !text) return;
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? start;
+    const before = textarea.value.slice(0, start);
+    const after = textarea.value.slice(end);
+    const needsNl = before.length && !before.endsWith('\n');
+    const chunk = `${needsNl ? '\n' : ''}${text}\n`;
+    textarea.value = `${before}${chunk}${after}`;
+    const pos = before.length + chunk.length;
+    textarea.focus();
+    textarea.setSelectionRange(pos, pos);
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function pickGenreChip(label, { rowSelector = '#param-genre-chips', multi = true } = {}) {
+    const row = $(rowSelector);
+    if (!row || !label) return;
+    let chip = $$(`${rowSelector} .choice-chip:not(.add-chip)`).find(
+      (b) => (b.dataset.genre || b.textContent.trim()) === label
+    );
+    if (!chip) {
+      chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'choice-chip selected';
+      chip.dataset.genre = label;
+      chip.textContent = label;
+      const add = $('.add-chip', row);
+      if (add) row.insertBefore(chip, add);
+      else row.appendChild(chip);
+    } else if (multi) {
+      chip.classList.add('selected');
+    } else {
+      $$(`${rowSelector} .choice-chip:not(.add-chip)`).forEach((b) => b.classList.remove('selected'));
+      chip.classList.add('selected');
+    }
+  }
+
+  let genreSearchTimer = null;
+  async function runGenreSearch(query, resultsEl, { onPick } = {}) {
+    if (!resultsEl) return;
+    const q = (query || '').trim();
+    if (q.length < 1) {
+      resultsEl.hidden = true;
+      resultsEl.innerHTML = '';
+      return;
+    }
+    try {
+      const payload = await api(`/api/prompt-library/genres?q=${encodeURIComponent(q)}&limit=12`);
+      const items = payload.data || [];
+      if (!items.length) {
+        resultsEl.hidden = false;
+        resultsEl.innerHTML = '<div class="genre-search-item"><span>无匹配</span><small>换个词试试</small></div>';
+        return;
+      }
+      resultsEl.hidden = false;
+      resultsEl.innerHTML = items
+        .map((it) => {
+          const en = it.en || '';
+          const zh = it.zh || '';
+          const label = zh && zh !== en ? `${en} · ${zh}` : en;
+          return `<button type="button" class="genre-search-item" data-genre-pick="${escapeHTML(en)}" data-genre-zh="${escapeHTML(zh)}"><span>${escapeHTML(label)}</span><small>选用</small></button>`;
+        })
+        .join('');
+      resultsEl.onclick = (event) => {
+        const btn = event.target.closest('[data-genre-pick]');
+        if (!btn) return;
+        const en = btn.dataset.genrePick;
+        const zh = btn.dataset.genreZh;
+        onPick?.(en, zh);
+        resultsEl.hidden = true;
+        resultsEl.innerHTML = '';
+      };
+    } catch (error) {
+      resultsEl.hidden = false;
+      resultsEl.innerHTML = `<div class="genre-search-item"><span>${escapeHTML(error.message)}</span></div>`;
+    }
+  }
+
+  function scheduleGenreSearch(inputEl, resultsEl, onPick) {
+    if (genreSearchTimer) clearTimeout(genreSearchTimer);
+    genreSearchTimer = setTimeout(() => runGenreSearch(inputEl?.value || '', resultsEl, { onPick }), 220);
+  }
+
+  function applyPromptLibraryToUI(lib) {
+    if (!lib) return;
+    fillTemplateSelect($('#param-template'), lib);
+    fillTemplateSelect($('#editor-template'), lib);
+    renderStructureChips('param-structure-chips', lib);
+    renderStructureChips('editor-structure-chips', lib);
+
+    const genreRow = $('#param-genre-chips');
+    if (genreRow && lib.featured_genres?.length && genreRow.dataset.library !== '1') {
+      const selected = new Set(
+        $$('#param-genre-chips .choice-chip.selected').map((b) => b.dataset.genre || b.textContent.trim())
+      );
+      genreRow.innerHTML = lib.featured_genres
+        .map((g, i) => {
+          const label = g.label || (g.tags && g.tags[0]) || '风格';
+          const on = selected.has(label) || (selected.size === 0 && i === 0);
+          return `<button class="choice-chip${on ? ' selected' : ''}" type="button" data-genre="${escapeHTML(label)}">${escapeHTML(label)}</button>`;
+        })
+        .join('');
+      genreRow.dataset.library = '1';
+    }
+
+    // Editor featured genres (keep add-chip)
+    const editorGenres = $('#genre-chips');
+    if (editorGenres && lib.featured_genres?.length && editorGenres.dataset.library !== '1') {
+      const add = $('.add-chip', editorGenres);
+      const selected = new Set(
+        $$('#genre-chips .choice-chip:not(.add-chip).selected').map((b) => b.textContent.trim())
+      );
+      editorGenres.innerHTML = lib.featured_genres
+        .map((g, i) => {
+          const label = g.label || (g.tags && g.tags[0]) || '风格';
+          const on = selected.has(label) || (selected.size === 0 && i === 0);
+          return `<button class="choice-chip${on ? ' selected' : ''}" type="button">${escapeHTML(label)}</button>`;
+        })
+        .join('');
+      if (add) editorGenres.appendChild(add);
+      else {
+        const plus = document.createElement('button');
+        plus.type = 'button';
+        plus.className = 'choice-chip add-chip';
+        plus.textContent = '＋';
+        editorGenres.appendChild(plus);
+      }
+      editorGenres.dataset.library = '1';
+    }
+
+    const quickFromLib = lib.agent_quick || {};
+    Object.keys(AGENT_KIND_META).forEach((kind) => {
+      const items = quickFromLib[kind];
+      if (Array.isArray(items) && items.length) {
+        AGENT_KIND_META[kind].quick = items.map((it) => [it.text, it.label || it.text]);
+      }
+    });
+    syncAgentKindUI();
+    const hint = $('#param-library-hint');
+    if (hint) {
+      const c = lib.counts || {};
+      hint.textContent = `提示词库 v${lib.version || 1} · 模板 ${c.templates || 0} · 结构标签 ${c.structure_tags || 0} · 流派词典 ${c.genre_dictionary || 0}`;
+    }
+  }
+
+  async function loadTemplate(templateId) {
+    if (!templateId) return null;
+    let tpl = templateCache.get(templateId);
+    if (!tpl) {
+      const payload = await api(`/api/prompt-library/templates/${encodeURIComponent(templateId)}`);
+      tpl = payload.data;
+      templateCache.set(templateId, tpl);
+    }
+    return tpl;
+  }
+
+  async function applyParamTemplate(templateId) {
+    const desc = $('#param-desc');
+    const tags = $('#param-tags');
+    const title = $('#param-title');
+    const tpl = await loadTemplate(templateId);
+    if (!tpl) return;
+    if (desc) desc.value = tpl.prompt || '';
+    if (title && !title.value.trim()) title.value = tpl.title || '';
+    if (tags) {
+      const mentors = (promptLibrary?.mentor_styles || []).map((m) => m.tag).join(' ');
+      tags.value = [tags.value, mentors].filter(Boolean).join(' ').trim();
+    }
+    showToast(`已载入模板：${tpl.title || templateId}`);
+  }
+
+  async function applyEditorTemplate(templateId) {
+    const prompt = $('#prompt-input');
+    const tpl = await loadTemplate(templateId);
+    if (!tpl) return;
+    if (prompt) {
+      prompt.value = tpl.prompt || '';
+      prompt.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (tpl.title) {
+      const structure = $('#structure-input');
+      if (structure && !structure.value.trim()) structure.value = 'Verse / Chorus / Bridge / Outro';
+    }
+    showToast(`工作台已载入：${tpl.title || templateId}`);
+  }
+
+  function getLibraryCreateExtras() {
+    return {
+      template_id: ($('#editor-template')?.value || $('#param-template')?.value || '').trim(),
+      quality_boost: Boolean($('#editor-quality-boost')?.checked || $('#param-quality-boost')?.checked),
+    };
+  }
 
   function persistAgentSession(id, kind = agentKind) {
     agentSessionId = id || '';
@@ -102,7 +336,7 @@ export function bindPlatformExt(host) {
     }
   }
 
-  host.getCreateContext = () => ({ engine: selectedEngine, mode: selectedMode });
+  host.getCreateContext = () => ({ engine: selectedEngine, mode: selectedMode, ...getLibraryCreateExtras() });
   window.__studioGetCreateContext = host.getCreateContext;
 
   function syncEngineTabs() {
@@ -178,6 +412,8 @@ export function bindPlatformExt(host) {
     const prompt = ($('#param-desc')?.value || '').trim();
     const lyrics = ($('#param-lyrics')?.value || '').trim();
     const tags = ($('#param-tags')?.value || '').trim();
+    const templateId = ($('#param-template')?.value || '').trim();
+    const qualityBoost = Boolean($('#param-quality-boost')?.checked);
     const instrumental = Boolean($('#param-instrumental')?.checked) || selectedMode === 'sfx';
     const genre = $$('#param-genre-chips .choice-chip.selected')
       .map((b) => b.dataset.genre)
@@ -204,6 +440,8 @@ export function bindPlatformExt(host) {
           key: $('#param-key')?.value || 'D minor',
           duration_seconds: Number($('#param-duration')?.value || 90),
           genre,
+          template_id: templateId,
+          quality_boost: qualityBoost,
           idempotency_key: newIdempotencyKey(),
         }),
       });
@@ -1349,6 +1587,22 @@ export function bindPlatformExt(host) {
     if (genreBtn) {
       genreBtn.classList.toggle('selected');
     }
+    const insertBtn = event.target.closest('[data-insert-tag]');
+    if (insertBtn?.dataset.insertTag) {
+      const tag = insertBtn.dataset.insertTag;
+      const inParam = Boolean(insertBtn.closest('#param-structure-chips'));
+      const target = inParam ? $('#param-lyrics') : $('#lyrics-input');
+      if (target) {
+        if (inParam) {
+          const wrap = $('#param-lyrics-wrap');
+          if (wrap) wrap.hidden = false;
+        } else {
+          const adv = $('#advanced-fields');
+          if (adv) adv.hidden = false;
+        }
+        insertAtCursor(target, tag);
+      }
+    }
     const toolBtn = event.target.closest('[data-open-tool]');
     if (toolBtn) openTool(toolBtn.dataset.openTool);
     const mineBtn = event.target.closest('[data-mine-tab]');
@@ -1479,7 +1733,36 @@ export function bindPlatformExt(host) {
     }
   });
 
+  $('#param-template')?.addEventListener('change', (event) => {
+    const id = event.target.value;
+    if (id) applyParamTemplate(id).catch((e) => showToast(e.message, 'error'));
+  });
+  $('#editor-template')?.addEventListener('change', (event) => {
+    const id = event.target.value;
+    if (id) applyEditorTemplate(id).catch((e) => showToast(e.message, 'error'));
+  });
+  $('#param-genre-search')?.addEventListener('input', (event) => {
+    scheduleGenreSearch(event.target, $('#param-genre-results'), (en, zh) => {
+      pickGenreChip(zh || en, { rowSelector: '#param-genre-chips' });
+      const tags = $('#param-tags');
+      if (tags) tags.value = [tags.value, en].filter(Boolean).join(', ').replace(/^,\s*/, '');
+      if ($('#param-genre-search')) $('#param-genre-search').value = '';
+      showToast(`已选用流派：${zh || en}`);
+    });
+  });
+  $('#editor-genre-search')?.addEventListener('input', (event) => {
+    scheduleGenreSearch(event.target, $('#editor-genre-results'), (en, zh) => {
+      pickGenreChip(zh || en, { rowSelector: '#genre-chips', multi: true });
+      if ($('#editor-genre-search')) $('#editor-genre-search').value = '';
+      showToast(`已选用流派：${zh || en}`);
+    });
+  });
+
+  host.getLibraryCreateExtras = getLibraryCreateExtras;
+  window.__studioGetLibraryCreateExtras = getLibraryCreateExtras;
+
   ensureExclusiveMediaPlayback();
   syncEngineTabs();
   renderToolsGrid();
+  ensurePromptLibrary().catch(() => {});
 }

@@ -561,6 +561,8 @@ def create_job(
             "title": ctx.get("title") or project.name,
             "n": ctx.get("n") or 2,
             "extend_at_ms": ctx.get("extend_at_ms") or 0,
+            "quality_boost": bool(ctx.get("quality_boost")),
+            "template_id": str(ctx.get("template_id") or ""),
         },
         idempotency_key=key or None,
         provider="runninghub",

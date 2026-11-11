@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=fill-controls" />
+  <link rel="stylesheet" href="/styles.css?v=prompt-library-2" />
 </head>
 <body class="is-public">
   <div class="public-shell" id="public-shell">
@@ -205,10 +205,10 @@
           <div class="section-heading-row"><div><div class="section-kicker">JOB QUEUE</div><h2 class="section-heading">最近任务</h2></div><a class="text-button" href="/library">去素材库 <span>→</span></a></div>
           <div class="job-list" id="recent-jobs"></div>
           <div class="section-heading-row prompt-heading"><div><div class="section-kicker">A LITTLE SPARK</div><h2 class="section-heading">从一个灵感开始</h2></div></div>
-          <div class="prompt-grid">
-            <button class="prompt-card" type="button" data-prompt="一段克制而有张力的电影氛围配乐，钢琴与温暖的合成器铺底，逐渐推进，最后留白。"><span class="prompt-art art-amber"><i>♬</i><b></b></span><span class="prompt-copy"><strong>电影感氛围</strong><small>钢琴 · 弦乐 · 渐进铺陈</small></span><span class="prompt-arrow">↗</span></button>
-            <button class="prompt-card" type="button" data-prompt="温暖松弛的 neo-soul groove，复古 Rhodes 和松弛的鼓组，适合深夜城市漫步。"><span class="prompt-art art-lilac"><i>◌</i><b></b></span><span class="prompt-copy"><strong>一段松弛的 Groove</strong><small>Neo-soul · Rhodes · 轻盈</small></span><span class="prompt-arrow">↗</span></button>
-            <button class="prompt-card" type="button" data-prompt="制作一段带有颗粒质感的实验电子循环，脉冲式低频，克制的噪点和空间混响。"><span class="prompt-art art-mint"><i>⌁</i><b></b></span><span class="prompt-copy"><strong>实验电子循环</strong><small>纹理 · 脉冲 · 空间感</small></span><span class="prompt-arrow">↗</span></button>
+            <div class="prompt-grid">
+            <button class="prompt-card" type="button" data-prompt="男生城市流行，BPM 88，明亮合成器与电钢琴，先出纯音乐钩子，无人声。"><span class="prompt-art art-amber"><i>♬</i><b></b></span><span class="prompt-copy"><strong>城市流行钩子</strong><small>Urban Pop · 导师模板</small></span><span class="prompt-arrow">↗</span></button>
+            <button class="prompt-card" type="button" data-prompt="华语流行抒情女声向编曲，钢琴弦乐，BPM 70，先出纯音乐再填词。"><span class="prompt-art art-lilac"><i>◌</i><b></b></span><span class="prompt-copy"><strong>华语女声抒情</strong><small>Pop Ballad · 留白</small></span><span class="prompt-arrow">↗</span></button>
+            <button class="prompt-card" type="button" data-prompt="国风 Ethnic Fusion，笛子主旋律，氛围 Pad，冥想空灵，纯音乐无人声。"><span class="prompt-art art-mint"><i>⌁</i><b></b></span><span class="prompt-copy"><strong>国风丝竹</strong><small>Ethnic Fusion · 笛子</small></span><span class="prompt-arrow">↗</span></button>
           </div>
           <footer class="page-footer"><span>为每一种创作可能而生。</span><span>STUDIO AI <i>·</i> BUILT FOR MAKERS</span></footer>
         </div>
@@ -266,8 +266,13 @@
               </div>
               <label class="form-field"><span>歌名</span><input id="param-title" maxlength="80" placeholder="可选，留空则用描述生成" /></label>
               <label class="form-field full-field" id="param-desc-wrap"><span id="param-desc-label">歌曲描述</span><textarea id="param-desc" maxlength="6000" rows="5" placeholder="例：女声近麦轻声倾诉，字字有气息；雨夜窗边对一个人说话；木吉他+ downstream弦，副歌才抬高情绪。忌电子合成腔。"></textarea></label>
-              <label class="form-field full-field" id="param-lyrics-wrap" hidden><span>歌词（可用 [Verse]/[Chorus]）</span><textarea id="param-lyrics" maxlength="5000" rows="8" placeholder="口语、可换气，意象具体。例：&#10;[Verse]&#10;茶凉了一半 你还没回来&#10;[Chorus]&#10;我把今夜唱得很轻…"></textarea></label>
+              <label class="form-field full-field" id="param-lyrics-wrap" hidden><span>歌词（可用 [Verse]/[Chorus]）</span><textarea id="param-lyrics" maxlength="5000" rows="8" placeholder="口语、可换气，意象具体。例：&#10;[Verse]&#10;茶凉了一半 你还没回来&#10;[Chorus]&#10;我把今夜唱得很轻…"></textarea>
+                <div class="chip-row structure-chip-row" id="param-structure-chips" aria-label="结构标签"></div>
+              </label>
               <label class="form-field" id="param-tags-wrap" hidden><span>风格标签</span><input id="param-tags" maxlength="1000" placeholder="民谣, 女声, intimate vocal, emotional phrasing" /></label>
+              <label class="form-field" id="param-template-wrap"><span>导师模板（提示词库）</span>
+                <select id="param-template"><option value="">不使用模板</option></select>
+              </label>
               <div class="field-grid" id="param-fine-grid" hidden>
                 <label class="form-field"><span>BPM</span><input id="param-bpm" type="number" min="40" max="240" value="90" /></label>
                 <label class="form-field"><span>调性</span><select id="param-key"><option>D minor</option><option>C major</option><option>A minor</option><option>G major</option><option>自由调性</option></select></label>
@@ -275,6 +280,7 @@
                 <label class="form-field"><span>声音</span><select id="param-vocal"><option value="instrumental">纯音乐</option><option value="vocal">人声</option></select></label>
               </div>
               <label class="form-field" id="param-inst-wrap"><span><input type="checkbox" id="param-instrumental" /> 纯音乐（无人声）</span></label>
+              <label class="form-field" id="param-quality-wrap"><span><input type="checkbox" id="param-quality-boost" /> 音质增强标签（Suno V4~5 母带/立体声提示）</span></label>
               <div class="chip-row" id="param-genre-chips">
                 <button class="choice-chip selected" type="button" data-genre="流行">流行</button>
                 <button class="choice-chip" type="button" data-genre="国风">国风</button>
@@ -283,6 +289,11 @@
                 <button class="choice-chip" type="button" data-genre="民谣">民谣</button>
                 <button class="choice-chip" type="button" data-genre="R&amp;B">R&amp;B</button>
               </div>
+              <label class="form-field" id="param-genre-search-wrap"><span>搜索流派词典</span>
+                <input id="param-genre-search" maxlength="80" placeholder="如 jazz / 民谣 / trap…" autocomplete="off" />
+                <div class="genre-search-results" id="param-genre-results" hidden></div>
+              </label>
+              <p class="field-hint" id="param-library-hint">提示词库加载中…</p>
               <div class="generate-footer">
                 <div class="generation-cost"><span class="cost-icon">✳</span><span><strong id="param-cost-strong">10 积分</strong><small>失败退回 · 新 Take 不覆盖</small></span></div>
                 <button class="button button-generate" id="param-generate" type="button">立即生成 <span class="button-arrow">→</span></button>
@@ -379,8 +390,17 @@
             <label class="field-label" for="prompt-input">创作描述</label>
             <div class="prompt-input-wrap"><textarea id="prompt-input" maxlength="6000" placeholder="写清：对谁唱、什么情绪、近麦/远麦、轻声还是爆发、咬字与气息、配器与留白。例：克制男声，句尾收气，像忍住哽咽；忌 AI 合成腔与匀速念词。"></textarea><div class="textarea-footer"><button class="prompt-assist" type="button" id="prompt-assist">✳ <span>Qwen 创作副驾</span></button><button class="prompt-assist" type="button" id="fill-controls">↳ <span>一键填写参数</span></button><span id="prompt-count">0 / 6000</span></div></div>
             <p class="field-hint" id="prompt-provider-hint">MiniMax 实际只接收 2000 字风格描述；超过的部分会在生成时自动压缩，完整文案仍保存在项目里。</p>
+            <label class="form-field" id="editor-template-wrap"><span>导师模板</span>
+              <select id="editor-template"><option value="">不使用模板</option></select>
+            </label>
+            <label class="form-field"><span><input type="checkbox" id="editor-quality-boost" /> 音质增强标签（Suno）</span></label>
             <div class="qwen-result" id="qwen-result" hidden><div class="qwen-result-head"><span>✳ QWEN 建议</span><button type="button" id="qwen-dismiss" aria-label="关闭建议">×</button></div><div class="qwen-result-text" id="qwen-result-text"></div><div class="qwen-result-actions"><button type="button" class="mini-action" id="qwen-apply">采用创作描述</button><button type="button" class="mini-action" id="qwen-copy">复制建议</button></div></div>
-            <div class="field-section"><div class="field-section-title"><span>声音方向</span></div><div class="chip-row" id="genre-chips"><button class="choice-chip selected" type="button">Ambient</button><button class="choice-chip" type="button">Cinematic</button><button class="choice-chip" type="button">国风</button><button class="choice-chip" type="button">Neo-soul</button><button class="choice-chip add-chip" type="button">＋</button></div></div>
+            <div class="field-section"><div class="field-section-title"><span>声音方向</span></div><div class="chip-row" id="genre-chips"><button class="choice-chip selected" type="button">Ambient</button><button class="choice-chip" type="button">Cinematic</button><button class="choice-chip" type="button">国风</button><button class="choice-chip" type="button">Neo-soul</button><button class="choice-chip add-chip" type="button">＋</button></div>
+              <label class="form-field" style="margin-top:0.6rem"><span>搜索流派词典</span>
+                <input id="editor-genre-search" maxlength="80" placeholder="如 jazz / 民谣 / trap…" autocomplete="off" />
+                <div class="genre-search-results" id="editor-genre-results" hidden></div>
+              </label>
+            </div>
             <div class="field-grid">
               <label class="form-field"><span>速度 <small>BPM · 近似</small></span><div class="input-unit"><input id="bpm-input" type="number" min="40" max="240" value="82" /><span>BPM</span></div></label>
               <label class="form-field"><span>调性 · 近似</span><select id="key-select"><option>D minor</option><option>C major</option><option>A minor</option><option>G major</option><option>E minor</option><option>F major</option><option>自由调性</option></select></label>
@@ -394,7 +414,9 @@
               <label class="form-field full-field"><span>情绪</span><input id="mood-input" type="text" placeholder="例如：克制、心疼、含泪" /></label>
               <label class="form-field full-field"><span>结构</span><input id="structure-input" type="text" placeholder="Verse / Chorus / Bridge / Outro" /></label>
               <label class="form-field full-field"><span>排除描述</span><input id="negative-input" type="text" placeholder="不要念白、不要战鼓炸裂" /></label>
-              <label class="form-field full-field"><span>歌词（人声必填；纯音乐生成后也可填词）</span><textarea id="lyrics-input" maxlength="3500" placeholder="[Verse]…[Chorus]…"></textarea></label>
+              <label class="form-field full-field"><span>歌词（人声必填；纯音乐生成后也可填词）</span><textarea id="lyrics-input" maxlength="3500" placeholder="[Verse]…[Chorus]…"></textarea>
+                <div class="chip-row structure-chip-row" id="editor-structure-chips" aria-label="结构标签"></div>
+              </label>
               <div class="lyrics-actions">
                 <input id="lyrics-instruction" type="text" maxlength="2000" placeholder="填词要求，可空：更古风、少口号、留白给戏腔…" />
                 <button class="mini-action" id="write-lyrics-button" type="button">为当前版本填词</button>
@@ -458,7 +480,7 @@
   <div class="toast-region" id="toast-region" aria-live="polite"></div>
   <div class="modal-backdrop" id="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" type="button" aria-label="关闭">×</button><div class="modal-kicker">NEW CREATION</div><h2 id="modal-title">给灵感一个名字。</h2><p>先从一个项目开始。之后可以随时调整方向。</p><form id="new-project-form"><label class="field-label" for="new-project-name">项目名称</label><input class="modal-input" id="new-project-name" maxlength="80" placeholder="例如：午夜之后" required /><label class="field-label modal-second-label" for="new-project-purpose">创作类型</label><select class="modal-input" id="new-project-purpose"><option value="灵感草稿">灵感草稿</option><option value="电影 / 游戏配乐">电影 / 游戏配乐</option><option value="歌曲制作">歌曲制作</option><option value="Loop / 节奏">Loop / 节奏</option><option value="声音设计">声音设计</option></select><div class="modal-actions"><button class="button button-secondary modal-cancel" type="button">再想一想</button><button class="button button-primary" type="submit">创建项目 <span>→</span></button></div></form></div></div>
   <script src="/config.js?v=public-tunnel"></script>
-  <script type="module" src="/app.js?v=melody-agents-1"></script>
+  <script type="module" src="/app.js?v=prompt-library-2"></script>
 </body>
 </html>
 

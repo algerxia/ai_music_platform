@@ -1,0 +1,4312 @@
+{
+  "version": 1,
+  "source": "https://my.feishu.cn/wiki/K8BEwoUbqirSfmkMTHLch00mnMc",
+  "source_doc": "docs/AI_MUSIC_PROMPTS_FEISHU.md",
+  "quality_boost": {
+    "style_tag": "[ENHANCED STEREO, PROFESSIONAL PRISTINE MASTERING, FINAL STUDIO MIXDOWN]",
+    "lyrics_tag": "[SUNO, PLAY:QUALITY_SOUND_COMPETITION_WINNER_FINAL_STUDIO_MIXDOWN.WAV]",
+    "note": "适用于 Suno V4~5.0：style 栏追加 style_tag；歌词栏可追加 lyrics_tag"
+  },
+  "mentor_styles": [
+    {
+      "id": "wyy",
+      "tag": "[wyy陈易狄 style]",
+      "label": "陈易狄风",
+      "bias": "人声、情感、民谣、流行、说唱"
+    },
+    {
+      "id": "cyan",
+      "tag": "[Cyan 青幻 studio style]",
+      "label": "青幻工作室",
+      "bias": "欧美、日韩、音效、编曲结构复杂性"
+    }
+  ],
+  "production_tags": [
+    "[complex morphing dynamic EQ]",
+    "[complex dynamic multi-layering]",
+    "[complex sound effects and sound samples]",
+    "[Sophisticated sound design]",
+    "[Rich genus chord details]",
+    "[catchy chord details]",
+    "[Brilliant song structure arrangement]",
+    "[catchy and brilliant song composing]",
+    "[Condenser Mic]",
+    "[clear vocal]",
+    "[Granularity]",
+    "[440hz]",
+    "[Vocal Compression]",
+    "[complex sequencer]",
+    "[ambience sounds effects]",
+    "[masterpiece]"
+  ],
+  "templates": [
+    {
+      "id": "青幻_chill_说唱_r_b",
+      "title": "青幻 · chill 说唱 / R&B",
+      "prompt": "A hip-hop track with a melancholic yet rhythmic feel, featuring a male vocalist, The instrumentation includes a prominent synth bass providing a deep, driving rhythm, a drum machine with a consistent kick and snare pattern, and a high-pitched synth melody that occasionally interjects, The vocal delivery is a blend of rapping and melodic phrases, often layered with harmonies, The song structure follows a typical verse-chorus format, with a clear distinction between the more narrative verses and the repetitive, hook-driven chorus, The tempo is moderate, creating a head-nodding groove, Production elements include reverb on the vocals and some subtle delay effects on the synth melodies, contributing to a spacious sound, The overall key appears to be minor, enhancing the somber mood of the lyrics, The mixing emphasizes the vocals and the synth bass, with the drums providing a solid foundation",
+      "vocal": "mixed",
+      "source": "feishu_mentor"
+    },
+    {
+      "id": "男生_城市流行_bpm_85_95",
+      "title": "男生 · 城市流行（BPM 85–95）",
+      "prompt": "[Male vocal], [final vocal mix]\nUrban Pop。\nBright male vocal, with a clean background of rhythmic synth chords and smooth electric piano. The intro gradually builds with punchy electronic drums and deep bass. The verse is accented by muted electric guitar riffs, while the chorus is layered with catchy vocal hooks and shimmering synth textures, forming a vibrant and modern sound. The outro fades with soft vocal harmonies and subtle instrumental echoes, emotions remain controlled and stylish.\nStyle: Urban Pop, Modern\nRhythm: Mid-tempo groove (BPM 85-95)\nInstruments: Electric piano, synths, electric guitar, bass, electronic drums, vocal harmonies\nEmotional keywords: hope / youth / sophistication\nVocal & Harmony: Mid-close male vocals, tight harmonies, rhythmic phrasing, occasional falsetto\nArrangement: Modern pop chord progressions, syncopated beats, spatial effects, layered synths, bass-driven movement, stereo imaging",
+      "vocal": "male",
+      "source": "feishu_mentor"
+    },
+    {
+      "id": "男生_民谣_bpm_65_75",
+      "title": "男生 · 民谣（BPM 65–75）",
+      "prompt": "[Male vocal], [final vocal mix]\nFolk。\nDeep male voice interpretation, with warm background laid by string and piano, the prelude gradually progresses with bass piano and soft percussion, the main song is embellished with acoustic guitar, and the chorus is layered with bass and string music, resulting in a thick and delicate overall tone, The ending note fades away and the emotions are restrained,\nStyle: Popular Lyrical\nRhythm: Medium Slow Board (BPM 65-75)\nInstrument: Piano+String+Environmental Space Sense\nEmotional keywords: regret/tenderness/sense of destiny\nMid distance vocals and multi-layered harmonic structures, with large string instruments promoting lyrical progression, close range wind instruments embellishing, Pads expanding spatial sense, harmony and arrangement developed based on the Carnon variant of leading bass, with the seventh note of the first major seventh chord being played by the cello, and long-distance stereo harmony",
+      "vocal": "male",
+      "source": "feishu_mentor"
+    },
+    {
+      "id": "女生_华语流行抒情",
+      "title": "女生 · 华语流行抒情",
+      "prompt": "[Female vocal], [final vocal mix]\nPop Ballad。\nWarm and expressive female vocal, with a gentle background of piano and soft strings. The intro gradually unfolds with delicate piano arpeggios and subtle percussion. The verse is adorned with acoustic guitar and light harmonies, while the chorus is enriched by layered strings and emotional vocal stacks, creating a lush and heartfelt atmosphere. The ending note softly fades, leaving a sense of tenderness and restraint.\nStyle: Pop Ballad, Lyrical\nRhythm: Slow tempo (BPM 65-75)\nInstruments: Piano, strings, acoustic guitar, bass, soft percussion, vocal harmonies\nEmotional keywords: longing / warmth / hope\nVocal & Harmony: Close female vocals, gentle harmonies, emotional phrasing, smooth falsetto highlights\nArrangement: Flowing chord progressions, gradual build-up, rich reverb for space, strings supporting melodic development, bass guiding harmony, stereo layering",
+      "vocal": "female",
+      "source": "feishu_mentor"
+    },
+    {
+      "id": "女生_国风_ethnic_fusion",
+      "title": "女生 · 国风 / Ethnic Fusion",
+      "prompt": "[Female Vocal], [final vocal mix]\nEthnic Fusion.\nMarkante Dizi oder Synth-Flöte prägt das Stück mit Hauptmelodien, stark von chinesischer traditioneller Musik beeinflusst. Weiblicher Hauptgesang wird von mehrstimmigen Chören unterstützt. Atmosphärische Synthesizer-Pads und Streicher erweitern den Raum. Elektronische Perkussion und Synthesizer-Bass legen das rhythmische Fundament. Gesamtstimmung: meditativ, spirituell, mit Weltmusik-Charakter.\nStyle: Ethnic Fusion, World Music\nRhythm: Slow to Medium\nInstrument: Dizi/Synth-Flöte, Gesang, Synthesizer, Perkussion\nEmotional keywords: Meditativ, Spirituell, Traditionell, Atmosphärisch, Kulturell\nKey Features: Prominente Dizi-Melodien, Gesang auf Mandarin, Fusion chinesischer Elemente mit elektronischen Klanglandschaften.",
+      "vocal": "female",
+      "source": "feishu_mentor"
+    }
+  ],
+  "structure_tags": [
+    {
+      "key": "[Verse]",
+      "zh": "主歌",
+      "explain": "通常节奏性强且克制，相比副歌部分旋律性和能量感较弱。"
+    },
+    {
+      "key": "[Chorus]",
+      "zh": "副歌",
+      "explain": "通常是歌曲的副歌，重复出现时会让歌曲感觉更有意图和情感。"
+    },
+    {
+      "key": "[Pre-Chorus]",
+      "zh": "前副歌",
+      "explain": "用于主要模式之外的零散歌词。在歌曲过渡时制造悬念，通常不押韵或看起来不适合韵律。"
+    },
+    {
+      "key": "[Bridge]",
+      "zh": "桥段(使用描述性词汇替换即可）",
+      "explain": ""
+    },
+    {
+      "key": "[Intro]",
+      "zh": "引子",
+      "explain": "不太可靠。最好将其描述为器乐间奏"
+    },
+    {
+      "key": "[Interlude]",
+      "zh": "插曲",
+      "explain": "在歌词中创建器乐段落很有用"
+    },
+    {
+      "key": "[Outro]",
+      "zh": "片尾曲",
+      "explain": "有助于为歌曲结尾做准备，可能会创建一个循环以便后期淡出。"
+    },
+    {
+      "key": "[Refrain]",
+      "zh": "反调",
+      "explain": "在总结歌曲时更有创意"
+    },
+    {
+      "key": "[Big Finish]",
+      "zh": "大结局",
+      "explain": "可能会改变旋律或节奏以达到高潮。"
+    },
+    {
+      "key": "[End]",
+      "zh": "结束",
+      "explain": "歌词中的结束标签可能在单独的片段中效果最好。清除Style Prompt或在风格描述中添加'End'。"
+    },
+    {
+      "key": "[Fade Out]",
+      "zh": "淡出",
+      "explain": ""
+    },
+    {
+      "key": "[Fade to End]",
+      "zh": "淡入结束",
+      "explain": ""
+    },
+    {
+      "key": "[Break]",
+      "zh": "休息",
+      "explain": "主要乐器或歌手沉默的几小节"
+    },
+    {
+      "key": "[Instrumental Interlude]",
+      "zh": "器乐插曲",
+      "explain": ""
+    },
+    {
+      "key": "[Melodic Bass]",
+      "zh": "旋律低音",
+      "explain": ""
+    },
+    {
+      "key": "[Percussion Break]",
+      "zh": "打击乐断奏",
+      "explain": ""
+    },
+    {
+      "key": "[Syncopated Bass]",
+      "zh": "切分音低音",
+      "explain": ""
+    },
+    {
+      "key": "[Fingerstyle Guitar Solo]",
+      "zh": "指法吉他独奏",
+      "explain": ""
+    },
+    {
+      "key": "[Build]",
+      "zh": "构建",
+      "explain": ""
+    },
+    {
+      "key": "[Bass Drop]",
+      "zh": "低音下坠",
+      "explain": ""
+    },
+    {
+      "key": "[Hook]",
+      "zh": "钩子",
+      "explain": "一个重复的短语或器乐。"
+    }
+  ],
+  "genre_categories": [
+    "Country（乡村）",
+    "Bluegrass（草莓乐）",
+    "Country（乡村音乐）",
+    "Folk（民谣）",
+    "Dance（舞曲）",
+    "Afro-Cuban（阿弗罗-古巴）",
+    "Dance Pop（流行舞曲）",
+    "Disco（迪斯科）",
+    "Dubstep（配音步）",
+    "Disco Funk（迪斯科放克）",
+    "EDM（电子舞曲）",
+    "Electro（电子）",
+    "High-NRG（高能量）",
+    "House（浩室音乐）",
+    "Trance（迷幻舞曲）",
+    "Downtempo（缓拍）",
+    "Ambient（环境音）",
+    "Drum'n'bass（鼓与贝斯）",
+    "Electronic（电子音乐）",
+    "IDM（智能舞曲）",
+    "Synthpop（合成流行）",
+    "Synthwave（合成波）",
+    "Techno（技术音乐）",
+    "Trap（陷阱音乐）",
+    "Jazz/Soul（爵士/灵魂）",
+    "Bebop（比博普）",
+    "Gospel（福音）",
+    "Jazz（爵士）",
+    "Latin Jazz（拉丁爵士）",
+    "RnB（节奏蓝调）",
+    "Soul（灵魂乐）",
+    "Latin（拉丁）",
+    "Bossa Nova（波萨诺瓦）",
+    "Forró（弗约罗）",
+    "Salsa（萨尔萨舞）",
+    "Tango（探戈）",
+    "Reggae（雷鬼）",
+    "Dancehall（舞厅）",
+    "Dub（配音）",
+    "Reggaeton（雷盖顿）",
+    "Afrobeat（非洲节奏）",
+    "Metal（金属）",
+    "Black Metal（黑金属）",
+    "Deathcore（死亡核）",
+    "Death Metal（死亡金属）",
+    "Festive Heavy Metal（节日重金属）",
+    "Heavy Metal（重金属）",
+    "Nu Metal（新金属）",
+    "Power Metal（力量金属）",
+    "Metalcore（金属核）",
+    "Popular（流行）",
+    "Pop（流行音乐）",
+    "Pop Rock（流行摇滚）",
+    "Kpop（韩流音乐）",
+    "Jpop（日流音乐）",
+    "Rock（摇滚）",
+    "Classic Rock（经典摇滚）",
+    "Blues Rock（布鲁斯摇滚）",
+    "Emo（情绪）",
+    "Glam Rock（华丽摇滚）",
+    "Indie（独立音乐）",
+    "Industrial Rock（工业摇滚）",
+    "Punk（朋克摇滚）",
+    "Skate Rock（滑板摇滚）",
+    "Skatecore（滑板核）",
+    "Urban（城市音乐）",
+    "Funk（放克）",
+    "HipHop（嘻哈）",
+    "Phonk（酸音乐）",
+    "Rap（说唱）"
+  ],
+  "style_moods": [
+    "Danceable（可跳舞的）",
+    "Disco（迪斯科）",
+    "Syncopated（切分节奏）",
+    "Groovy（悠扬）",
+    "Tipsy（微醺）",
+    "Dark（黑暗）",
+    "Doom（末日）",
+    "Dramatic（戏剧性）",
+    "Sinister（阴险）",
+    "Electric（电子）",
+    "Art（艺术）",
+    "Nu（新流行）",
+    "Progressive（进步）",
+    "Hard（强硬）",
+    "Aggressive（激进）",
+    "Banger（热门曲目）",
+    "Power（力量）",
+    "Stadium（体育场）",
+    "Stomp（重踏）",
+    "Lyrical（抒情的）",
+    "Broadway（百老汇）",
+    "Cabaret（歌舞表演）",
+    "Lounge（酒吧歌手）",
+    "Operatic（歌剧式的）",
+    "Storytelling（讲故事）",
+    "Torch-Lounge（酒吧歌曲）",
+    "Theatrical（戏剧性的）",
+    "Troubadour（吟游诗人）",
+    "Vegas（拉斯维加斯风格）",
+    "Magical（神奇）",
+    "Ethereal（虚幻）",
+    "Majestic（雄伟）",
+    "Mysterious（神秘）",
+    "Minimal（简约）",
+    "Ambient（环境音乐）",
+    "Cinematic（电影）",
+    "Slow（缓慢）",
+    "Sparse（稀疏）",
+    "Party（派对）",
+    "Glam（华丽）",
+    "Glitter（闪耀）",
+    "Grooveout（活力爆发）",
+    "Soft（柔和）",
+    "Bedroom（卧室）",
+    "Chillwave（轻松浪潮）",
+    "Intimate（亲密）",
+    "Weird（奇怪）",
+    "Carnival（嘉年华）",
+    "Haunted（鬼屋）",
+    "Random（随机）",
+    "Musicbox（音乐盒）",
+    "Hollow（空洞）",
+    "World/Ethnic（世界/民族）",
+    "Arabian（阿拉伯）",
+    "Bangra（班格拉舞）",
+    "Calypso（卡利普索）",
+    "Egyptian（埃及）",
+    "Adhan（安讫）",
+    "Jewish Music（犹太音乐）",
+    "Klezmer（克莱兹默音乐）",
+    "Middle East（中东）",
+    "Polka（波尔卡）",
+    "Russian Navy Song（俄罗斯海军歌曲）",
+    "Suomipop（芬兰流行音乐）",
+    "Tribal（部落）"
+  ],
+  "song_types": [
+    "BackGround（背景乐）",
+    "Elevator（电梯音乐）",
+    "Jingle（广告歌曲）",
+    "Muzak（环境音乐）",
+    "Call to Prayer（祈祷呼唤）",
+    "Gregorian Chant（格里高利圣歌）",
+    "Character（角色）",
+    "Strut（趾高气昂地走）",
+    "March（进行曲）",
+    "I Want Song（渴望之歌）",
+    "Children（儿童）",
+    "Children's（儿童的）",
+    "Lullaby（摇篮曲）",
+    "Sing-along（合唱歌曲）",
+    "Retro（复古）",
+    "1960s（1960年代）",
+    "Barbershop（理发店四重唱）",
+    "Big Band（大乐队）",
+    "Classic（经典的）",
+    "Doo Wop（一种节奏蓝调风格的音乐）",
+    "Girl Group（女子组合）",
+    "Swing（摇摆乐）",
+    "Traditional（传统的）",
+    "Christmas Carol（圣诞颂歌）"
+  ],
+  "genre_dictionary": [
+    {
+      "en": "16-bit",
+      "zh": "16位"
+    },
+    {
+      "en": "16-bit celtic",
+      "zh": "16位凯尔特"
+    },
+    {
+      "en": "16-bit roots reggae",
+      "zh": "16位根源雷鬼"
+    },
+    {
+      "en": "2-step",
+      "zh": "二拍"
+    },
+    {
+      "en": "2-step country",
+      "zh": "二步乡村"
+    },
+    {
+      "en": "2-step surf",
+      "zh": "2步冲浪"
+    },
+    {
+      "en": "accordion 16-bit",
+      "zh": "手风琴 16位"
+    },
+    {
+      "en": "accordion african folk",
+      "zh": "手风琴 非洲 民间音乐"
+    },
+    {
+      "en": "accordion afro trap",
+      "zh": "手风琴非洲陷阱"
+    },
+    {
+      "en": "accordion ambient techno",
+      "zh": "手风琴 环境技术"
+    },
+    {
+      "en": "accordion delta blues",
+      "zh": "手风琴三角蓝调"
+    },
+    {
+      "en": "accordion drill",
+      "zh": "手风琴练习"
+    },
+    {
+      "en": "accordion hawaiian",
+      "zh": "夏威夷手风琴"
+    },
+    {
+      "en": "accordion jungle",
+      "zh": "手风琴丛林"
+    },
+    {
+      "en": "accordion rap",
+      "zh": "手风琴说唱"
+    },
+    {
+      "en": "accordion tango",
+      "zh": "手风琴探戈"
+    },
+    {
+      "en": "acid breaks alt-country",
+      "zh": "酸性打破了另类乡村"
+    },
+    {
+      "en": "acid house",
+      "zh": "酸浆屋"
+    },
+    {
+      "en": "acid house boom bap",
+      "zh": "酸浆屋嘣嘣"
+    },
+    {
+      "en": "acid jazz crunk",
+      "zh": "酸爵士 摇滚"
+    },
+    {
+      "en": "acid rock city pop",
+      "zh": "酸性摇滚城市流行"
+    },
+    {
+      "en": "acid rock p-funk",
+      "zh": "酸性摇滚 P-放克"
+    },
+    {
+      "en": "acid techno",
+      "zh": "酸性techno"
+    },
+    {
+      "en": "acid techno avant-garde jazz",
+      "zh": "酸性techno前卫爵士"
+    },
+    {
+      "en": "acid techno psybient",
+      "zh": "酸性techno心灵电子"
+    },
+    {
+      "en": "acid trance",
+      "zh": "酸性恍惚"
+    },
+    {
+      "en": "acoustic acid rock",
+      "zh": "原声酸性摇滚"
+    },
+    {
+      "en": "acoustic afropiano",
+      "zh": "原声非洲钢琴"
+    },
+    {
+      "en": "acoustic ambient trance",
+      "zh": "声学环境特蕾斯"
+    },
+    {
+      "en": "acoustic blues glitch hop",
+      "zh": "原声蓝调故障跳"
+    },
+    {
+      "en": "acoustic blues mariachi",
+      "zh": "原声布鲁斯 墨西哥马里亚奇"
+    },
+    {
+      "en": "acoustic blues slushwave",
+      "zh": "原声蓝调冰波"
+    },
+    {
+      "en": "acoustic carnatic",
+      "zh": "原声卡纳蒂克"
+    },
+    {
+      "en": "acoustic chicago blues",
+      "zh": "原声芝加哥蓝调"
+    },
+    {
+      "en": "acoustic chicago blues algorave",
+      "zh": "原声芝加哥蓝调算法派对"
+    },
+    {
+      "en": "acoustic chicago blues cape verdean",
+      "zh": "声学芝加哥蓝调佛得角"
+    },
+    {
+      "en": "acoustic chicago blues motown",
+      "zh": "原声芝加哥蓝调底特律灵魂乐"
+    },
+    {
+      "en": "acoustic chicago blues reggaeton",
+      "zh": "原声芝加哥蓝调雷鬼"
+    },
+    {
+      "en": "acoustic classical",
+      "zh": "原声古典"
+    },
+    {
+      "en": "acoustic electropop",
+      "zh": "声学电子流行"
+    },
+    {
+      "en": "acoustic funk",
+      "zh": "原声放克"
+    },
+    {
+      "en": "acoustic grime",
+      "zh": "原声暗黑"
+    },
+    {
+      "en": "acoustic raga",
+      "zh": "原声拉格"
+    },
+    {
+      "en": "acoustic rock",
+      "zh": "原声摇滚"
+    },
+    {
+      "en": "acoustic rock afro-jazz",
+      "zh": "原声摇滚 非洲爵士"
+    },
+    {
+      "en": "acoustic rock chillsynth",
+      "zh": "原声摇滚冷合成"
+    },
+    {
+      "en": "acoustic rockabilly",
+      "zh": "原声 摇滚比利"
+    },
+    {
+      "en": "acoustic slushwave",
+      "zh": "声学冲浪波"
+    },
+    {
+      "en": "acoustic texas blues",
+      "zh": "原声德州蓝调"
+    },
+    {
+      "en": "acoustic texas blues afrobeat",
+      "zh": "原声 德克萨斯蓝调 非洲节拍"
+    },
+    {
+      "en": "acoustic texas blues chillstep",
+      "zh": "原声德州蓝调冷步"
+    },
+    {
+      "en": "african folk",
+      "zh": "非洲民间"
+    },
+    {
+      "en": "african folk drill",
+      "zh": "非洲民间乐曲"
+    },
+    {
+      "en": "african folk math rock",
+      "zh": "非洲民谣数学摇滚"
+    },
+    {
+      "en": "afrikaner folk",
+      "zh": "南非民间音乐"
+    },
+    {
+      "en": "afrikaner folk drill",
+      "zh": "南非民间舞蹈"
+    },
+    {
+      "en": "afrikaner folk pacific reggae",
+      "zh": "非洲民谣太平雷鬼"
+    },
+    {
+      "en": "afrikaner folk tango",
+      "zh": "非洲裔民间探戈"
+    },
+    {
+      "en": "afro house",
+      "zh": "非洲之屋"
+    },
+    {
+      "en": "afro house acoustic blues",
+      "zh": "非洲之家的原声蓝调"
+    },
+    {
+      "en": "afro house dembow",
+      "zh": "非洲之家登步"
+    },
+    {
+      "en": "afro house drill and bass",
+      "zh": "非洲之家的打击和低音"
+    },
+    {
+      "en": "afro house rock",
+      "zh": "非洲之家摇滚"
+    },
+    {
+      "en": "afro trap",
+      "zh": "非洲陷阱"
+    },
+    {
+      "en": "afro trap algorave",
+      "zh": "非洲陷阱算法派对"
+    },
+    {
+      "en": "afro trap r&b",
+      "zh": "非洲陷阱 R&B"
+    },
+    {
+      "en": "afro-cuban jazz",
+      "zh": "非洲-古巴爵士乐"
+    },
+    {
+      "en": "afro-cuban jazz crunk",
+      "zh": "非洲-古巴爵士克朗克"
+    },
+    {
+      "en": "afro-cuban jazz doo-wop",
+      "zh": "非洲-古巴爵士杜-瓦普"
+    },
+    {
+      "en": "afro-cuban jazz griot",
+      "zh": "非洲-古巴爵士乐传承者"
+    },
+    {
+      "en": "afro-funk",
+      "zh": "非洲放克"
+    },
+    {
+      "en": "afro-jazz",
+      "zh": "非洲爵士"
+    },
+    {
+      "en": "afro-jazz blues rock",
+      "zh": "非洲爵士布鲁斯摇滚"
+    },
+    {
+      "en": "afro-jazz carnatic",
+      "zh": "非洲爵士卡纳蒂克"
+    },
+    {
+      "en": "afro-jazz drill",
+      "zh": "非洲爵士乐训练"
+    },
+    {
+      "en": "afro-rock",
+      "zh": "非洲摇滚"
+    },
+    {
+      "en": "afro-rock ambient dub",
+      "zh": "非洲摇滚环境哑板"
+    },
+    {
+      "en": "afro-rock bachata",
+      "zh": "非洲摇滚 巴恰塔"
+    },
+    {
+      "en": "afrobeat",
+      "zh": "非洲节拍"
+    },
+    {
+      "en": "afrobeat disco",
+      "zh": "非洲节拍 迪斯科"
+    },
+    {
+      "en": "afrobeat garage",
+      "zh": "非洲节拍车库"
+    },
+    {
+      "en": "afrobeat griot",
+      "zh": "非洲节拍传说"
+    },
+    {
+      "en": "afrobeat new jack swing",
+      "zh": "非洲节拍 新杰克摇摆"
+    },
+    {
+      "en": "afrobeat rockabilly",
+      "zh": "非洲节拍 摇滚比利"
+    },
+    {
+      "en": "afrobeat swing",
+      "zh": "非洲节拍摇摆"
+    },
+    {
+      "en": "afropiano",
+      "zh": "非洲钢琴"
+    },
+    {
+      "en": "afropiano blues rock",
+      "zh": "非洲钢琴布鲁斯摇滚"
+    },
+    {
+      "en": "afroswing",
+      "zh": "非洲摇摆"
+    },
+    {
+      "en": "afroswing k-pop",
+      "zh": "非洲摇摆 韩国流行"
+    },
+    {
+      "en": "afroswing new wave",
+      "zh": "非洲摇摆新浪潮"
+    },
+    {
+      "en": "algorave",
+      "zh": "算法派对"
+    },
+    {
+      "en": "algorave acid jazz",
+      "zh": "算法派对酸爵士"
+    },
+    {
+      "en": "algorave garage",
+      "zh": "算法派对车库"
+    },
+    {
+      "en": "algorave hawaiian",
+      "zh": "算法派对夏威夷"
+    },
+    {
+      "en": "algorave psybient",
+      "zh": "算法派对 哲幻电子"
+    },
+    {
+      "en": "alt-country 2-step",
+      "zh": "交替乡村音乐的二步舞"
+    },
+    {
+      "en": "alt-country disco",
+      "zh": "交替乡村迪斯科"
+    },
+    {
+      "en": "alt-country dubstep",
+      "zh": "交替乡村 都步"
+    },
+    {
+      "en": "alt-country surf rock",
+      "zh": "交替乡村冲浪摇滚"
+    },
+    {
+      "en": "alt-pop afropiano",
+      "zh": "另类流行非洲钢琴"
+    },
+    {
+      "en": "alternative r&b",
+      "zh": "另类R&B"
+    },
+    {
+      "en": "alternative r&b dembow",
+      "zh": "另类R&B dembow"
+    },
+    {
+      "en": "alternative r&b griot",
+      "zh": "另类R&B故事歌手"
+    },
+    {
+      "en": "alternative rock",
+      "zh": "另类摇滚"
+    },
+    {
+      "en": "ambient dub bedroom pop",
+      "zh": "环境哑板卧室流行"
+    },
+    {
+      "en": "ambient dub boogie",
+      "zh": "环境哑舞"
+    },
+    {
+      "en": "ambient dub techno",
+      "zh": "氛围 dub techno"
+    },
+    {
+      "en": "ambient house 16-bit",
+      "zh": "环境浩室 16位"
+    },
+    {
+      "en": "ambient house breakstep",
+      "zh": "环境浩室断拍"
+    },
+    {
+      "en": "ambient house cajun",
+      "zh": "环境浩室 路易斯安那州凯真音乐"
+    },
+    {
+      "en": "ambient house electropop",
+      "zh": "环境浩室电子流行"
+    },
+    {
+      "en": "ambient house p-funk",
+      "zh": "环境浩室 P-放克"
+    },
+    {
+      "en": "ambient noise wall chanson",
+      "zh": "环境噪音墙歌谣"
+    },
+    {
+      "en": "ambient techno",
+      "zh": "环境技术"
+    },
+    {
+      "en": "ambient techno afroswing",
+      "zh": "氛围技术非洲摇摆"
+    },
+    {
+      "en": "ambient techno chanson",
+      "zh": "环境技术唱歌"
+    },
+    {
+      "en": "ambient techno hyphy",
+      "zh": "氛围技术音乐 海菲风格"
+    },
+    {
+      "en": "ambient techno mento",
+      "zh": "环境技术门托"
+    },
+    {
+      "en": "ambient trance alternative rock",
+      "zh": "氛围舞曲另类摇滚"
+    },
+    {
+      "en": "ambient trance chanson",
+      "zh": "环境特莱恩歌谣"
+    },
+    {
+      "en": "ambient trance folk",
+      "zh": "氛围电子民谣"
+    },
+    {
+      "en": "ambient trance jungle",
+      "zh": "环境舞曲丛林"
+    },
+    {
+      "en": "ambient trance mento",
+      "zh": "环境特莱恩门托"
+    },
+    {
+      "en": "american primitivism 2-step",
+      "zh": "美国原始主义2步舞"
+    },
+    {
+      "en": "american primitivism bedroom pop",
+      "zh": "美国原始主义卧室流行"
+    },
+    {
+      "en": "american primitivism illbient",
+      "zh": "美国原始主义电子音乐"
+    },
+    {
+      "en": "americana jungle",
+      "zh": "美国乡村"
+    },
+    {
+      "en": "americana soul",
+      "zh": "美国灵魂"
+    },
+    {
+      "en": "anti-folk",
+      "zh": "反民谣"
+    },
+    {
+      "en": "anti-folk big band",
+      "zh": "反民谣大乐队"
+    },
+    {
+      "en": "anti-folk drumstep",
+      "zh": "反民谣鼓步"
+    },
+    {
+      "en": "anti-folkwave",
+      "zh": "反民谣浪潮"
+    },
+    {
+      "en": "appalachian folk anti-folk",
+      "zh": "阿巴拉契亚民谣反民谣"
+    },
+    {
+      "en": "appalachian folk cloud rap",
+      "zh": "阿巴拉契亚民谣云饶舌"
+    },
+    {
+      "en": "appalachian folk flamenco",
+      "zh": "阿巴拉契亚民谣弗拉明戈"
+    },
+    {
+      "en": "arabic 16-bit",
+      "zh": "阿拉伯数字 16 位"
+    },
+    {
+      "en": "arabic acid house",
+      "zh": "阿拉伯酸浆屋"
+    },
+    {
+      "en": "arabic afrobeat",
+      "zh": "阿拉伯非洲节拍"
+    },
+    {
+      "en": "arabic ambient techno",
+      "zh": "阿拉伯氛围技术"
+    },
+    {
+      "en": "arabic classical",
+      "zh": "阿拉伯古典"
+    },
+    {
+      "en": "arabic egyptian",
+      "zh": "阿拉伯埃及音乐"
+    },
+    {
+      "en": "arabic mariachi",
+      "zh": "阿拉伯马里亚奇"
+    },
+    {
+      "en": "arabic pop",
+      "zh": "阿拉伯流行音乐"
+    },
+    {
+      "en": "arabic reggae",
+      "zh": "阿拉伯雷鬼"
+    },
+    {
+      "en": "avant-garde jazz disco",
+      "zh": "前卫爵士迪斯科"
+    },
+    {
+      "en": "avant-garde jazz",
+      "zh": "前卫爵士"
+    },
+    {
+      "en": "avant-garde jazz griot",
+      "zh": "前卫爵士乐传说"
+    },
+    {
+      "en": "avant-garde jazz illbient",
+      "zh": "前卫爵士 illbient"
+    },
+    {
+      "en": "avant-garde jazz rap",
+      "zh": "前卫爵士说唱"
+    },
+    {
+      "en": "bachata",
+      "zh": "巴恰塔"
+    },
+    {
+      "en": "balkan brass band classical",
+      "zh": "巴尔干铜管乐队古典"
+    },
+    {
+      "en": "balkan brass band raga",
+      "zh": "巴尔干铜管乐队的拉格"
+    },
+    {
+      "en": "barbershop balkan brass band",
+      "zh": "巴尔干铜管乐队"
+    },
+    {
+      "en": "barbershop breakbeat",
+      "zh": "理发店节拍"
+    },
+    {
+      "en": "bedroom pop",
+      "zh": "卧室流行"
+    },
+    {
+      "en": "bedroom pop new jack swing",
+      "zh": "卧室流行 新杰克摇摆"
+    },
+    {
+      "en": "bedroom pop samba",
+      "zh": "卧室流行桑巴"
+    },
+    {
+      "en": "bedroom pop ska",
+      "zh": "卧室流行斯卡"
+    },
+    {
+      "en": "bengali acoustic chicago blues",
+      "zh": "孟加拉民谣芝加哥蓝调"
+    },
+    {
+      "en": "bengali afroswing",
+      "zh": "孟加拉非洲摇摆"
+    },
+    {
+      "en": "bengali american primitivism",
+      "zh": "孟加拉美国原始主义"
+    },
+    {
+      "en": "bengali barbershop",
+      "zh": "孟加拉理发店"
+    },
+    {
+      "en": "bengali cape verdean",
+      "zh": "孟加拉国的佛得角"
+    },
+    {
+      "en": "bengali drill",
+      "zh": "孟加拉钻"
+    },
+    {
+      "en": "bengali egyptian",
+      "zh": "孟加拉埃及"
+    },
+    {
+      "en": "bengali electropop",
+      "zh": "孟加拉电子流行"
+    },
+    {
+      "en": "bengali grunge",
+      "zh": "孟加拉格伦琴"
+    },
+    {
+      "en": "bengali math rock",
+      "zh": "孟加拉数学摇滚"
+    },
+    {
+      "en": "bengali psybient",
+      "zh": "孟加拉psybient"
+    },
+    {
+      "en": "bengali surf",
+      "zh": "孟加拉冲浪"
+    },
+    {
+      "en": "bengali surf rock",
+      "zh": "孟加拉冲浪摇滚"
+    },
+    {
+      "en": "bengali swamp blues",
+      "zh": "孟加拉沼泽布鲁斯"
+    },
+    {
+      "en": "big band alt-country",
+      "zh": "大乐队另类乡村"
+    },
+    {
+      "en": "big band ambient house",
+      "zh": "大乐队氛围浩室"
+    },
+    {
+      "en": "big band boogie",
+      "zh": "大乐队布吉"
+    },
+    {
+      "en": "big band cumbia",
+      "zh": "大乐队库恰舞曲"
+    },
+    {
+      "en": "big band grunge",
+      "zh": "大乐队垃圾摇滚"
+    },
+    {
+      "en": "big band new jack swing",
+      "zh": "大乐队新杰克摇摆"
+    },
+    {
+      "en": "bluegrass",
+      "zh": "蓝草"
+    },
+    {
+      "en": "instrumental bluegrass",
+      "zh": "器乐蓝草"
+    },
+    {
+      "en": "bluegrass bubblegum bass",
+      "zh": "蓝草泡泡糖贝斯"
+    },
+    {
+      "en": "bluegrass k-pop",
+      "zh": "蓝草K-pop"
+    },
+    {
+      "en": "bluegrass punk",
+      "zh": "蓝草朋克"
+    },
+    {
+      "en": "bluegrass rock",
+      "zh": "蓝草摇滚"
+    },
+    {
+      "en": "blues afro house",
+      "zh": "蓝调非洲之家"
+    },
+    {
+      "en": "blues cumbia",
+      "zh": "布鲁斯库恰"
+    },
+    {
+      "en": "blues folk",
+      "zh": "蓝调民谣"
+    },
+    {
+      "en": "blues rock",
+      "zh": "蓝调摇滚"
+    },
+    {
+      "en": "blues rock afropiano",
+      "zh": "蓝调摇滚非洲钢琴"
+    },
+    {
+      "en": "blues rock american primitivism",
+      "zh": "蓝调摇滚美国原始主义"
+    },
+    {
+      "en": "boogie",
+      "zh": "布吉"
+    },
+    {
+      "en": "boogie caribbean",
+      "zh": "布吉加勒比"
+    },
+    {
+      "en": "boogie celtic",
+      "zh": "布吉凯尔特"
+    },
+    {
+      "en": "boom bap celtic",
+      "zh": "爆破拍击凯尔特"
+    },
+    {
+      "en": "boom bap p-funk",
+      "zh": "节奏重击的P-放克"
+    },
+    {
+      "en": "bossa nova",
+      "zh": "巴萨诺瓦"
+    },
+    {
+      "en": "bossa nova merengue",
+      "zh": "玻萨诺瓦梅伦格"
+    },
+    {
+      "en": "breakbeat balkan brass band",
+      "zh": "打破拍子的巴尔干铜管乐队"
+    },
+    {
+      "en": "breakbeat coptic",
+      "zh": "打破拍子 科普特"
+    },
+    {
+      "en": "breakbeat trance",
+      "zh": "打破拍子的电子舞曲"
+    },
+    {
+      "en": "breakbeatwave",
+      "zh": "打破节奏波"
+    },
+    {
+      "en": "breakstep samba",
+      "zh": "打破步伐 伦巴"
+    },
+    {
+      "en": "bubblegum bass",
+      "zh": "泡泡糖贝斯"
+    },
+    {
+      "en": "breakstep synthwave",
+      "zh": "打破步进合成波"
+    },
+    {
+      "en": "bubblegum bass grime",
+      "zh": "泡泡糖贝斯暗黑"
+    },
+    {
+      "en": "bubblegum dance",
+      "zh": "泡泡糖舞曲"
+    },
+    {
+      "en": "bubblegum dance chanson",
+      "zh": "泡泡糖舞曲唱词"
+    },
+    {
+      "en": "cabaret",
+      "zh": "卡巴莱"
+    },
+    {
+      "en": "cabaret americana",
+      "zh": "美国卡巴莱"
+    },
+    {
+      "en": "cabaret rock",
+      "zh": "卡巴莱摇滚"
+    },
+    {
+      "en": "cabaretwave",
+      "zh": "卡巴莱浪潮"
+    },
+    {
+      "en": "cajun",
+      "zh": "卡真音乐"
+    },
+    {
+      "en": "cajun acid rock",
+      "zh": "卡真酸岩"
+    },
+    {
+      "en": "cajun afrikaner folk",
+      "zh": "卡真非洲民谣"
+    },
+    {
+      "en": "cajun algorave",
+      "zh": "卡真风格的算法派对"
+    },
+    {
+      "en": "cajun griot",
+      "zh": "开扬的故事"
+    },
+    {
+      "en": "cajun new wave",
+      "zh": "卡真新浪潮"
+    },
+    {
+      "en": "cajun synthpop",
+      "zh": "路易斯安那州合成流行音乐"
+    },
+    {
+      "en": "calypso afroswing",
+      "zh": "卡利普索 非洲摇摆"
+    },
+    {
+      "en": "calypso bachata",
+      "zh": "卡利普索 巴恰塔"
+    },
+    {
+      "en": "calypso opera",
+      "zh": "卡利普索歌剧"
+    },
+    {
+      "en": "calypso surf",
+      "zh": "卡利普索冲浪"
+    },
+    {
+      "en": "cape verdean",
+      "zh": "佛得角的"
+    },
+    {
+      "en": "cape verdean acoustic rock",
+      "zh": "佛得角民谣摇滚"
+    },
+    {
+      "en": "caribbean",
+      "zh": "加勒比"
+    },
+    {
+      "en": "carnatic",
+      "zh": "卡纳蒂克"
+    },
+    {
+      "en": "carnatic acid trance",
+      "zh": "卡纳蒂克酸迷幻"
+    },
+    {
+      "en": "carnatic glitch hop",
+      "zh": "南印度经典音乐 毛刺嘻哈"
+    },
+    {
+      "en": "celtic",
+      "zh": "凯尔特音乐"
+    },
+    {
+      "en": "celtic cloud rap",
+      "zh": "凯尔特云饶舌"
+    },
+    {
+      "en": "celtic tango",
+      "zh": "凯尔特探戈"
+    },
+    {
+      "en": "chanson",
+      "zh": "歌曲"
+    },
+    {
+      "en": "chanson alt-pop",
+      "zh": "另类流行歌曲"
+    },
+    {
+      "en": "chanson funk",
+      "zh": "放克歌曲"
+    },
+    {
+      "en": "chanson soul",
+      "zh": "歌曲灵魂"
+    },
+    {
+      "en": "chillstep",
+      "zh": "冷静步"
+    },
+    {
+      "en": "chillstep chillwave",
+      "zh": "冷步 风格"
+    },
+    {
+      "en": "chillsynth",
+      "zh": "寒冷合成"
+    },
+    {
+      "en": "chillsynth mento",
+      "zh": "寒冷合成薄荷"
+    },
+    {
+      "en": "chillwave bubblegum bass",
+      "zh": "冷波泡泡糖贝斯"
+    },
+    {
+      "en": "chillwave egyptian",
+      "zh": "冷波埃及"
+    },
+    {
+      "en": "chillwave caribbean",
+      "zh": "冷波 加勒比"
+    },
+    {
+      "en": "chillwave samba",
+      "zh": "冷波桑巴"
+    },
+    {
+      "en": "chillwave swing",
+      "zh": "冷波摇摆"
+    },
+    {
+      "en": "chillwavewave",
+      "zh": "冷静波浪"
+    },
+    {
+      "en": "choral 16-bit",
+      "zh": "合唱 16位"
+    },
+    {
+      "en": "choral alt-country",
+      "zh": "合唱式另类乡村音乐"
+    },
+    {
+      "en": "choral ambient noise wall",
+      "zh": "合唱环境噪音墙"
+    },
+    {
+      "en": "choral ambient techno",
+      "zh": "合唱环境技术"
+    },
+    {
+      "en": "choral bedroom pop",
+      "zh": "合唱卧室流行"
+    },
+    {
+      "en": "choral big band",
+      "zh": "合唱大乐队"
+    },
+    {
+      "en": "choral celtic",
+      "zh": "合唱凯尔特"
+    },
+    {
+      "en": "choral chanson",
+      "zh": "合唱歌曲"
+    },
+    {
+      "en": "choral chillsynth",
+      "zh": "合唱寒波合成音"
+    },
+    {
+      "en": "choral country",
+      "zh": "合唱乡村"
+    },
+    {
+      "en": "choral drill and bass",
+      "zh": "合唱打击贝斯"
+    },
+    {
+      "en": "choral folk",
+      "zh": "合唱民谣"
+    },
+    {
+      "en": "choral reggae",
+      "zh": "合唱雷鬼"
+    },
+    {
+      "en": "city pop breakbeat",
+      "zh": "城市流行breakbeat"
+    },
+    {
+      "en": "city pop classical",
+      "zh": "城市流行 古典"
+    },
+    {
+      "en": "city pop psybient",
+      "zh": "城市流行 音乐环境"
+    },
+    {
+      "en": "city pop symphonic metal",
+      "zh": "城市流行交响金属"
+    },
+    {
+      "en": "classical",
+      "zh": "古典音乐"
+    },
+    {
+      "en": "classical boom bap",
+      "zh": "古典嘻哈"
+    },
+    {
+      "en": "classical caribbean",
+      "zh": "古典加勒比"
+    },
+    {
+      "en": "classical dirty south",
+      "zh": "古典南部"
+    },
+    {
+      "en": "classical folk",
+      "zh": "古典民间"
+    },
+    {
+      "en": "classical grime",
+      "zh": "古典格雷姆"
+    },
+    {
+      "en": "classical surf",
+      "zh": "古典冲浪"
+    },
+    {
+      "en": "classicalwave",
+      "zh": "古典音乐波"
+    },
+    {
+      "en": "cloud rap",
+      "zh": "云端说唱"
+    },
+    {
+      "en": "cloud rap slushwave",
+      "zh": "云端说唱 冰泥浪"
+    },
+    {
+      "en": "cloud rap symphonic metal",
+      "zh": "云端说唱交响金属"
+    },
+    {
+      "en": "coptic",
+      "zh": "科普特"
+    },
+    {
+      "en": "coptic afro-rock",
+      "zh": "科普特非洲摇滚"
+    },
+    {
+      "en": "coptic flamenco",
+      "zh": "科普特弗拉门戈"
+    },
+    {
+      "en": "coptic grunge",
+      "zh": "科普蒂克朋克"
+    },
+    {
+      "en": "country dancehall",
+      "zh": "乡村舞厅"
+    },
+    {
+      "en": "country afro-cuban jazz",
+      "zh": "乡村非洲-古巴爵士"
+    },
+    {
+      "en": "country jazz",
+      "zh": "乡村爵士"
+    },
+    {
+      "en": "crunk calypso",
+      "zh": "疯狂卡利普索"
+    },
+    {
+      "en": "crunk goa trance",
+      "zh": "兴奋的果亚曲风"
+    },
+    {
+      "en": "crunk punk",
+      "zh": "疯狂朋克"
+    },
+    {
+      "en": "crunk swamp blues",
+      "zh": "疯狂沼泽蓝调"
+    },
+    {
+      "en": "cumbia",
+      "zh": "康比亚"
+    },
+    {
+      "en": "cumbia acoustic blues",
+      "zh": "康比亚原声布鲁斯"
+    },
+    {
+      "en": "cumbia metal",
+      "zh": "康比亚金属"
+    },
+    {
+      "en": "dakar afro-cuban jazz",
+      "zh": "达喀尔非洲-古巴爵士乐"
+    },
+    {
+      "en": "dakar afrobeat",
+      "zh": "达喀尔 非洲 节拍"
+    },
+    {
+      "en": "dakar ambient dub",
+      "zh": "达喀尔氛围Dub"
+    },
+    {
+      "en": "dakar boom bap",
+      "zh": "达喀尔嘭巴"
+    },
+    {
+      "en": "dakar drumstep",
+      "zh": "达喀尔鼓步"
+    },
+    {
+      "en": "dakar flamenco",
+      "zh": "达卡弗拉门戈"
+    },
+    {
+      "en": "dakar future bass",
+      "zh": "达卡未来贝斯"
+    },
+    {
+      "en": "dakar gospel",
+      "zh": "达喀尔福音"
+    },
+    {
+      "en": "dakar house",
+      "zh": "达卡之家"
+    },
+    {
+      "en": "dakar j-pop",
+      "zh": "达卡尔J流行"
+    },
+    {
+      "en": "dakar math rock",
+      "zh": "达喀尔数学摇滚"
+    },
+    {
+      "en": "dakar new wave",
+      "zh": "达喀尔新浪潮"
+    },
+    {
+      "en": "dakar raga",
+      "zh": "达卡拉格"
+    },
+    {
+      "en": "dance",
+      "zh": "舞蹈"
+    },
+    {
+      "en": "dance illbient",
+      "zh": "舞蹈illbient"
+    },
+    {
+      "en": "dance southern rock",
+      "zh": "跳南方摇滚"
+    },
+    {
+      "en": "dancecore",
+      "zh": "舞蹈核心"
+    },
+    {
+      "en": "dancehall",
+      "zh": "舞厅"
+    },
+    {
+      "en": "dancehall acoustic texas blues",
+      "zh": "跳舞厅原声德克萨斯蓝调"
+    },
+    {
+      "en": "dancehall city pop",
+      "zh": "舞厅城市流行"
+    },
+    {
+      "en": "dancehall country",
+      "zh": "舞厅乡村"
+    },
+    {
+      "en": "dancehall flamenco",
+      "zh": "舞厅弗拉明戈"
+    },
+    {
+      "en": "dancehall new wave",
+      "zh": "舞厅新浪潮"
+    },
+    {
+      "en": "dancehall synthwave",
+      "zh": "舞厅合成波"
+    },
+    {
+      "en": "dancepop",
+      "zh": "舞曲流行"
+    },
+    {
+      "en": "dancepop breakbeat",
+      "zh": "舞曲流行节拍"
+    },
+    {
+      "en": "dark acid house",
+      "zh": "暗黑酸浆屋"
+    },
+    {
+      "en": "dark acid jazz",
+      "zh": "暗黑酸爵士"
+    },
+    {
+      "en": "dark alt-pop",
+      "zh": "暗黑另类流行"
+    },
+    {
+      "en": "dark alternative rock",
+      "zh": "暗黑另类摇滚"
+    },
+    {
+      "en": "dark blues",
+      "zh": "深蓝调"
+    },
+    {
+      "en": "dark chillstep",
+      "zh": "暗黑冷步"
+    },
+    {
+      "en": "dark coptic",
+      "zh": "暗黑科普特"
+    },
+    {
+      "en": "dark dance",
+      "zh": "暗黑舞曲"
+    },
+    {
+      "en": "dark drum and bass",
+      "zh": "暗黑鼓和贝斯"
+    },
+    {
+      "en": "dark electropop",
+      "zh": "暗黑电子流行"
+    },
+    {
+      "en": "dark goa trance",
+      "zh": "暗黑歌阿曲风"
+    },
+    {
+      "en": "dark jazz",
+      "zh": "暗黑爵士"
+    },
+    {
+      "en": "dark merengue",
+      "zh": "暗黑梅伦格"
+    },
+    {
+      "en": "dark reggaeton",
+      "zh": "暗黑雷鬼"
+    },
+    {
+      "en": "dark salsa",
+      "zh": "暗黑萨尔萨"
+    },
+    {
+      "en": "dembow",
+      "zh": "dembow"
+    },
+    {
+      "en": "dembow balkan brass band",
+      "zh": "巴尔干铜管乐队的登波音乐"
+    },
+    {
+      "en": "dembow punk",
+      "zh": "德堡朋克"
+    },
+    {
+      "en": "dirty south",
+      "zh": "南部嘻哈"
+    },
+    {
+      "en": "dirty south balkan brass band",
+      "zh": "肮脏的南巴尔干铜管乐队"
+    },
+    {
+      "en": "dirty south boom bap",
+      "zh": "南部脏乱的boom bap"
+    },
+    {
+      "en": "disco alternative r&b",
+      "zh": "迪斯科 另类 R&B"
+    },
+    {
+      "en": "disco chillstep",
+      "zh": "迪斯科冷步"
+    },
+    {
+      "en": "disco chillsynth",
+      "zh": "迪斯科冷合成"
+    },
+    {
+      "en": "disco classical",
+      "zh": "迪斯科古典"
+    },
+    {
+      "en": "disco cloud rap",
+      "zh": "迪斯科云饶舌"
+    },
+    {
+      "en": "doo-wop classical",
+      "zh": "迪瓦普古典"
+    },
+    {
+      "en": "doo-wop drumstep",
+      "zh": "迪瓦普鼓步"
+    },
+    {
+      "en": "doo-wop pop",
+      "zh": "迪士尼流行"
+    },
+    {
+      "en": "dream pop",
+      "zh": "梦幻流行"
+    },
+    {
+      "en": "dream pop appalachian folk",
+      "zh": "梦幻流行阿巴拉契亚民谣"
+    },
+    {
+      "en": "dream pop g-funk",
+      "zh": "梦幻流行 g-funk"
+    },
+    {
+      "en": "dreamy acid house",
+      "zh": "梦幻酸浆屋"
+    },
+    {
+      "en": "dreamy acoustic rock",
+      "zh": "梦幻的原声摇滚"
+    },
+    {
+      "en": "dreamy afro-jazz",
+      "zh": "梦幻非洲爵士"
+    },
+    {
+      "en": "dreamy boom bap",
+      "zh": "梦幻的嘭巴"
+    },
+    {
+      "en": "dreamy bubblegum dance",
+      "zh": "梦幻泡泡糖舞曲"
+    },
+    {
+      "en": "dreamy chillwave",
+      "zh": "梦幻冷波"
+    },
+    {
+      "en": "dreamy dembow",
+      "zh": "梦幻的登步"
+    },
+    {
+      "en": "dreamy drum and bass",
+      "zh": "梦幻鼓和贝斯"
+    },
+    {
+      "en": "dreamy fife and drum blues",
+      "zh": "梦幻的长笛和鼓蓝调"
+    },
+    {
+      "en": "dreamy grime",
+      "zh": "梦幻磨沙"
+    },
+    {
+      "en": "dreamy house",
+      "zh": "梦幻之屋"
+    },
+    {
+      "en": "dreamy pacific reggae",
+      "zh": "梦幻太平洋雷鬼"
+    },
+    {
+      "en": "dreamy shoegaze",
+      "zh": "梦幻的响鞋"
+    },
+    {
+      "en": "dreamy soul",
+      "zh": "梦幻灵魂"
+    },
+    {
+      "en": "dreamy swing",
+      "zh": "梦幻摇摆"
+    },
+    {
+      "en": "dreamy tango",
+      "zh": "梦幻探戈"
+    },
+    {
+      "en": "dreamy trance",
+      "zh": "梦幻般的恍惚"
+    },
+    {
+      "en": "drill",
+      "zh": "练习"
+    },
+    {
+      "en": "drill and bass balkan brass band",
+      "zh": "钻孔与低音巴尔干铜管乐队"
+    },
+    {
+      "en": "drill and bass gnawa",
+      "zh": "钻孔与贝斯格瓦纳"
+    },
+    {
+      "en": "drill breakbeat",
+      "zh": "打击式breakbeat"
+    },
+    {
+      "en": "drill bubblegum dance",
+      "zh": "进行泡泡糖舞"
+    },
+    {
+      "en": "drill cajun",
+      "zh": "进行卡津节奏的练习"
+    },
+    {
+      "en": "drill chillwave",
+      "zh": "进行冷波音乐的练习"
+    },
+    {
+      "en": "drill raga",
+      "zh": "练习拉格"
+    },
+    {
+      "en": "drill sertanejo",
+      "zh": "乡村音乐舞曲"
+    },
+    {
+      "en": "drum and bass acoustic rock",
+      "zh": "打击乐和低音贝斯的原声摇滚"
+    },
+    {
+      "en": "drum and bass goa trance",
+      "zh": "敲击与低音贝斯 哥亚曲风"
+    },
+    {
+      "en": "drum and bass swing",
+      "zh": "敲击和贝斯摇摆"
+    },
+    {
+      "en": "drumstep chillsynth",
+      "zh": "鼓步骤 冷合成"
+    },
+    {
+      "en": "dubstep",
+      "zh": "重低音音乐"
+    },
+    {
+      "en": "dubstep kawaii future bass",
+      "zh": "未来贝斯中的dubstep可爱风格"
+    },
+    {
+      "en": "dubstep samba",
+      "zh": "dubstep桑巴"
+    },
+    {
+      "en": "dubstepcore",
+      "zh": "重低音核心"
+    },
+    {
+      "en": "edm",
+      "zh": "电子舞曲"
+    },
+    {
+      "en": "edm anti-folk",
+      "zh": "电子民谣"
+    },
+    {
+      "en": "edm breakbeat",
+      "zh": "电子舞曲打击节奏"
+    },
+    {
+      "en": "edm disco",
+      "zh": "电子舞曲 迪斯科"
+    },
+    {
+      "en": "edm g-funk",
+      "zh": "电子舞曲 G-Funk"
+    },
+    {
+      "en": "edm grime",
+      "zh": "电子舞曲 格莱姆"
+    },
+    {
+      "en": "edm jungle",
+      "zh": "电子舞曲 丛林"
+    },
+    {
+      "en": "edm swamp blues",
+      "zh": "电子沼泽布鲁斯"
+    },
+    {
+      "en": "egyptian",
+      "zh": "埃及的"
+    },
+    {
+      "en": "egyptian flamenco",
+      "zh": "埃及弗拉明戈"
+    },
+    {
+      "en": "egyptian swing",
+      "zh": "埃及摇摆"
+    },
+    {
+      "en": "electro-acid house",
+      "zh": "电子酸房"
+    },
+    {
+      "en": "electro-alternative r&b",
+      "zh": "电子替代节奏蓝调"
+    },
+    {
+      "en": "electro-bossa nova",
+      "zh": "电子波萨诺瓦"
+    },
+    {
+      "en": "electro-chanson",
+      "zh": "电子唱情歌"
+    },
+    {
+      "en": "garage",
+      "zh": "车库"
+    },
+    {
+      "en": "garage tango",
+      "zh": "车库探戈"
+    },
+    {
+      "en": "glitch hop 2-step",
+      "zh": "故障嘻哈 2步"
+    },
+    {
+      "en": "glitch hop acoustic texas blues",
+      "zh": "故障跳跃原声德克萨斯蓝调"
+    },
+    {
+      "en": "glitch hop swing",
+      "zh": "故障嘻哈摇摆"
+    },
+    {
+      "en": "gnawa",
+      "zh": "格瓦纳"
+    },
+    {
+      "en": "gnawa afrobeat",
+      "zh": "格瓦纳非洲节拍"
+    },
+    {
+      "en": "gnawa bubblegum bass",
+      "zh": "格瓦纳泡泡糖低音"
+    },
+    {
+      "en": "gnawa funk",
+      "zh": "格瓦纳放克"
+    },
+    {
+      "en": "gnawawave",
+      "zh": "gnawawave"
+    },
+    {
+      "en": "goa trance",
+      "zh": "果阿恍惚"
+    },
+    {
+      "en": "goa trance afro-cuban jazz",
+      "zh": "果阿恍惚 非洲-古巴爵士"
+    },
+    {
+      "en": "gospel acid breaks",
+      "zh": "福音酸性节拍"
+    },
+    {
+      "en": "gospel disco",
+      "zh": "福音迪斯科"
+    },
+    {
+      "en": "gospel dream pop",
+      "zh": "福音梦幻流行"
+    },
+    {
+      "en": "gospel shoegaze",
+      "zh": "福音哥特"
+    },
+    {
+      "en": "gospelwave",
+      "zh": "福音波"
+    },
+    {
+      "en": "grime",
+      "zh": "煤尘音乐"
+    },
+    {
+      "en": "grime 2-step",
+      "zh": "格莱姆 2步"
+    },
+    {
+      "en": "grime avant-garde jazz",
+      "zh": "前卫爵士音乐"
+    },
+    {
+      "en": "grime calypso",
+      "zh": "格莱姆卡利普索"
+    },
+    {
+      "en": "grime norte\\xf1o",
+      "zh": "墨西哥北部灰暗音乐"
+    },
+    {
+      "en": "grime reggae",
+      "zh": "格莱姆雷鬼"
+    },
+    {
+      "en": "grime reggaeton",
+      "zh": "格莱姆雷鬼雷鬼"
+    },
+    {
+      "en": "grime surf rock",
+      "zh": "垃圾冲浪摇滚"
+    },
+    {
+      "en": "grime synthpop",
+      "zh": "暗黑合成流行"
+    },
+    {
+      "en": "grime tango",
+      "zh": "灰暗探戈"
+    },
+    {
+      "en": "griot",
+      "zh": "griot"
+    },
+    {
+      "en": "griot indie",
+      "zh": "griot indie"
+    },
+    {
+      "en": "griot reggae",
+      "zh": "格里奥雷鲁格"
+    },
+    {
+      "en": "griot shoegaze",
+      "zh": "griot shoegaze"
+    },
+    {
+      "en": "grunge",
+      "zh": "『垃圾摇滚』"
+    },
+    {
+      "en": "grunge african folk",
+      "zh": "磨砂非洲民谣"
+    },
+    {
+      "en": "grunge afro-cuban jazz",
+      "zh": "垃圾阿非罗古巴爵士"
+    },
+    {
+      "en": "grunge american primitivism",
+      "zh": "垃圾摇滚美国原始主义"
+    },
+    {
+      "en": "grunge americana",
+      "zh": "磨砂美国风"
+    },
+    {
+      "en": "grunge bedroom pop",
+      "zh": "磨砂卧室流行"
+    },
+    {
+      "en": "grunge cumbia",
+      "zh": "磨砂康比亚"
+    },
+    {
+      "en": "grunge funk",
+      "zh": "垃圾摇滚"
+    },
+    {
+      "en": "grunge new jack swing",
+      "zh": "垃圾摇摆新杰克"
+    },
+    {
+      "en": "harpischord acid jazz",
+      "zh": "大键琴酸爵士乐"
+    },
+    {
+      "en": "harpischord ambient house",
+      "zh": "大键琴氛围浩室"
+    },
+    {
+      "en": "harpischord anti-folk",
+      "zh": "大键琴 反民谣"
+    },
+    {
+      "en": "harpischord boogie",
+      "zh": "大键琴布吉"
+    },
+    {
+      "en": "harpischord doo-wop",
+      "zh": "大键琴迪斯科"
+    },
+    {
+      "en": "harpischord drill and bass",
+      "zh": "大键琴的打孞与低音节拍"
+    },
+    {
+      "en": "harpischord drill",
+      "zh": "大键琴练习"
+    },
+    {
+      "en": "harpischord g-funk",
+      "zh": "大键琴 g-funk"
+    },
+    {
+      "en": "harpischord hip hop",
+      "zh": "大键琴嘻哈"
+    },
+    {
+      "en": "harpischord klezmer",
+      "zh": "大键琴克莱兹默"
+    },
+    {
+      "en": "havana american primitivism",
+      "zh": "哈瓦那美国原始主义"
+    },
+    {
+      "en": "havana 2-step",
+      "zh": "哈瓦那2步舞"
+    },
+    {
+      "en": "havana bedroom pop",
+      "zh": "哈瓦那卧室流行"
+    },
+    {
+      "en": "havana bubblegum bass",
+      "zh": "哈瓦那泡泡糖贝斯"
+    },
+    {
+      "en": "havana cajun",
+      "zh": "哈瓦那风情"
+    },
+    {
+      "en": "havana chillstep",
+      "zh": "哈瓦那冷步"
+    },
+    {
+      "en": "havana electropop",
+      "zh": "哈瓦那电子流行"
+    },
+    {
+      "en": "havana funk",
+      "zh": "哈瓦那放克"
+    },
+    {
+      "en": "havana glitch hop",
+      "zh": "哈瓦那的故障跳"
+    },
+    {
+      "en": "urdu shoegaze",
+      "zh": "乌尔都语梦幻摇滚"
+    },
+    {
+      "en": "electro-classical",
+      "zh": "电子古典"
+    },
+    {
+      "en": "tuareg",
+      "zh": "图瓦雷格"
+    },
+    {
+      "en": "dubstep rock",
+      "zh": "重摇滚"
+    },
+    {
+      "en": "illbient egyptian",
+      "zh": "伊尔比恩特埃及"
+    },
+    {
+      "en": "dance drill",
+      "zh": "舞蹈训练"
+    },
+    {
+      "en": "liverpool big band",
+      "zh": "利物浦大乐队"
+    },
+    {
+      "en": "arabic african folk",
+      "zh": "阿拉伯非洲民间音乐"
+    },
+    {
+      "en": "liquid drum and bass house",
+      "zh": "液体鼓和贝斯混合了house"
+    },
+    {
+      "en": "delta blues house",
+      "zh": "三角蓝调之家"
+    },
+    {
+      "en": "drumstep soul",
+      "zh": "鼓步灵魂"
+    },
+    {
+      "en": "ambient dub bachata",
+      "zh": "氛围 dub 巴恰塔"
+    },
+    {
+      "en": "bubblegum bass symphonic metal",
+      "zh": "泡泡糖低音交响金属"
+    },
+    {
+      "en": "choral afro-jazz",
+      "zh": "合唱非洲爵士"
+    },
+    {
+      "en": "classical cumbia",
+      "zh": "古典库恰"
+    },
+    {
+      "en": "electro-jungle",
+      "zh": "电子丛林"
+    },
+    {
+      "en": "electro-new wave",
+      "zh": "电子新浪潮"
+    },
+    {
+      "en": "electro-techno",
+      "zh": "电子技术音乐"
+    },
+    {
+      "en": "electronic disco",
+      "zh": "电子迪斯科"
+    },
+    {
+      "en": "electronic grunge",
+      "zh": "电子垃圾"
+    },
+    {
+      "en": "electronic math rock",
+      "zh": "电子数学摇滚"
+    },
+    {
+      "en": "electropop grunge",
+      "zh": "电子流行摇滚"
+    },
+    {
+      "en": "fife and drum blues acid breaks",
+      "zh": "长笛和鼓蓝调酸性节拍"
+    },
+    {
+      "en": "flamenco hip hop",
+      "zh": "佛拉明戈嘻哈"
+    },
+    {
+      "en": "fife and drum blues p-funk",
+      "zh": "长笛和鼓蓝调P-Funk"
+    },
+    {
+      "en": "french afro-rock",
+      "zh": "法国非洲摇滚"
+    },
+    {
+      "en": "french big band",
+      "zh": "法国大乐队"
+    },
+    {
+      "en": "french dembow",
+      "zh": "法国登步"
+    },
+    {
+      "en": "french dubstep",
+      "zh": "法国 都步"
+    },
+    {
+      "en": "french glitch hop",
+      "zh": "法国的故障跳舞"
+    },
+    {
+      "en": "french grunge",
+      "zh": "法国垃圾摇滚"
+    },
+    {
+      "en": "french psybient",
+      "zh": "法国的心灵电子音乐"
+    },
+    {
+      "en": "french samba",
+      "zh": "法国桑巴"
+    },
+    {
+      "en": "french shoegaze",
+      "zh": "法国梦幻摇滚"
+    },
+    {
+      "en": "french ska",
+      "zh": "法国斯卡"
+    },
+    {
+      "en": "future chillwave",
+      "zh": "未来冷波"
+    },
+    {
+      "en": "future egyptian",
+      "zh": "未来埃及"
+    },
+    {
+      "en": "harpischord gospel",
+      "zh": "大键琴福音"
+    },
+    {
+      "en": "harpischord symphonic metal",
+      "zh": "大键琴交响金属"
+    },
+    {
+      "en": "hindi acid rock",
+      "zh": "印地语酸摇滚"
+    },
+    {
+      "en": "hindi acoustic rock",
+      "zh": "印地语原声摇滚"
+    },
+    {
+      "en": "hindi african folk",
+      "zh": "印度非洲民间音乐"
+    },
+    {
+      "en": "hindi afrobeat",
+      "zh": "印地语非洲节拍"
+    },
+    {
+      "en": "hindi alt-country",
+      "zh": "印地语另类乡村"
+    },
+    {
+      "en": "hindi ambient house",
+      "zh": "印度氛围浩室"
+    },
+    {
+      "en": "hindi bubblegum dance",
+      "zh": "印地泡泡糖舞曲"
+    },
+    {
+      "en": "hindi carnatic",
+      "zh": "印度卡纳提克"
+    },
+    {
+      "en": "hindi chanson",
+      "zh": "印地歌曲"
+    },
+    {
+      "en": "hindi doo-wop",
+      "zh": "印地语杜瓦普"
+    },
+    {
+      "en": "hindi dream pop",
+      "zh": "印地语梦幻流行"
+    },
+    {
+      "en": "hindi jungle",
+      "zh": "印地语 丛林"
+    },
+    {
+      "en": "hindi southern rock",
+      "zh": "印地语南方摇滚"
+    },
+    {
+      "en": "japanese algorave",
+      "zh": "日本算法派对"
+    },
+    {
+      "en": "japanese ambient house",
+      "zh": "日本氛围浩室"
+    },
+    {
+      "en": "japanese americana",
+      "zh": "日式美国风"
+    },
+    {
+      "en": "japanese boogie",
+      "zh": "日本布吉"
+    },
+    {
+      "en": "japanese chanson",
+      "zh": "日本歌谣"
+    },
+    {
+      "en": "japanese dancehall",
+      "zh": "日本舞厅"
+    },
+    {
+      "en": "japanese jungle",
+      "zh": "日本丛林"
+    },
+    {
+      "en": "japanese merengue",
+      "zh": "日本美林格舞"
+    },
+    {
+      "en": "japanese shoegaze",
+      "zh": "日本梦幻摇滚"
+    },
+    {
+      "en": "japanese surf",
+      "zh": "日本冲浪"
+    },
+    {
+      "en": "japanese surf rock",
+      "zh": "日本冲浪摇滚"
+    },
+    {
+      "en": "japanese swing",
+      "zh": "日本摇摆"
+    },
+    {
+      "en": "korean acid trance",
+      "zh": "韩国酸性trance"
+    },
+    {
+      "en": "korean afro-funk",
+      "zh": "韩国非洲放克"
+    },
+    {
+      "en": "korean afrobeat",
+      "zh": "韩国 非洲 节拍"
+    },
+    {
+      "en": "korean algorave",
+      "zh": "韩国算法派对"
+    },
+    {
+      "en": "korean americana",
+      "zh": "韩国美国乡村音乐"
+    },
+    {
+      "en": "korean cabaret",
+      "zh": "韩国歌舞厅"
+    },
+    {
+      "en": "korean drumstep",
+      "zh": "韩国 鼓步"
+    },
+    {
+      "en": "korean opera",
+      "zh": "韩国歌剧"
+    },
+    {
+      "en": "korean fife and drum blues",
+      "zh": "韩国笛鼓蓝调"
+    },
+    {
+      "en": "mandarin acid trance",
+      "zh": "橘子酸性trance"
+    },
+    {
+      "en": "mandarin afrobeat",
+      "zh": "柑橘非洲节拍"
+    },
+    {
+      "en": "mandarin american primitivism",
+      "zh": "橘子美国原始主义"
+    },
+    {
+      "en": "mandarin cumbia",
+      "zh": "橘子康比亚"
+    },
+    {
+      "en": "mandarin delta blues",
+      "zh": "橘子三角蓝调"
+    },
+    {
+      "en": "mandarin disco",
+      "zh": "柑橘迪斯科"
+    },
+    {
+      "en": "mandarin drum and bass",
+      "zh": "橘子鼓和贝斯"
+    },
+    {
+      "en": "mandarin hawaiian",
+      "zh": "橙汁 夏威夷"
+    },
+    {
+      "en": "mandarin house",
+      "zh": "橘子洲头"
+    },
+    {
+      "en": "mandarin math rock",
+      "zh": "橘子数学摇滚"
+    },
+    {
+      "en": "mandarin trance",
+      "zh": "柑橘色的恍惚"
+    },
+    {
+      "en": "portuguese 16-bit",
+      "zh": "葡萄牙 16 位"
+    },
+    {
+      "en": "portuguese acoustic rock",
+      "zh": "葡萄牙民谣摇滚"
+    },
+    {
+      "en": "portuguese barbershop",
+      "zh": "葡萄牙理发店"
+    },
+    {
+      "en": "portuguese breakbeat",
+      "zh": "葡萄牙式打碟"
+    },
+    {
+      "en": "portuguese chillstep",
+      "zh": "葡萄牙冷步"
+    },
+    {
+      "en": "portuguese chillsynth",
+      "zh": "葡萄牙冷合成"
+    },
+    {
+      "en": "portuguese dancehall",
+      "zh": "葡萄牙舞厅"
+    },
+    {
+      "en": "portuguese southern rock",
+      "zh": "葡萄牙南方摇滚"
+    },
+    {
+      "en": "portuguese surf rock",
+      "zh": "葡萄牙冲浪摇滚"
+    },
+    {
+      "en": "russian afrikaner folk",
+      "zh": "俄罗斯非洲裔民谣"
+    },
+    {
+      "en": "russian ambient techno",
+      "zh": "俄罗斯氛围技术音乐"
+    },
+    {
+      "en": "russian appalachian folk",
+      "zh": "俄罗斯阿巴拉契亚民间音乐"
+    },
+    {
+      "en": "russian cumbia",
+      "zh": "俄罗斯库恰舞曲"
+    },
+    {
+      "en": "russian celtic",
+      "zh": "俄罗斯凯尔特"
+    },
+    {
+      "en": "russian dubstep",
+      "zh": "俄罗斯 都步"
+    },
+    {
+      "en": "russian flamenco",
+      "zh": "俄罗斯弗拉明戈"
+    },
+    {
+      "en": "russian glitch hop",
+      "zh": "俄罗斯的故障跳"
+    },
+    {
+      "en": "russian grime",
+      "zh": "俄罗斯 grime"
+    },
+    {
+      "en": "russian grunge",
+      "zh": "俄罗斯垃圾摇滚"
+    },
+    {
+      "en": "russian k-pop",
+      "zh": "俄罗斯 韩流"
+    },
+    {
+      "en": "russian roots reggae",
+      "zh": "俄罗斯 根源雷鬼"
+    },
+    {
+      "en": "russian salsa",
+      "zh": "俄罗斯萨尔萨"
+    },
+    {
+      "en": "russian samba",
+      "zh": "俄罗斯桑巴"
+    },
+    {
+      "en": "russian techno",
+      "zh": "俄罗斯techno"
+    },
+    {
+      "en": "spanish acoustic rock",
+      "zh": "西班牙原声摇滚"
+    },
+    {
+      "en": "spanish ambient trance",
+      "zh": "西班牙氛围Trance"
+    },
+    {
+      "en": "spanish funk",
+      "zh": "西班牙放克"
+    },
+    {
+      "en": "spanish mariachi",
+      "zh": "西班牙马里亚奇"
+    },
+    {
+      "en": "spanish merengue",
+      "zh": "西班牙梅伦格舞"
+    },
+    {
+      "en": "spanish pop",
+      "zh": "西班牙流行"
+    },
+    {
+      "en": "spanish samba",
+      "zh": "西班牙桑巴"
+    },
+    {
+      "en": "urdu acid jazz",
+      "zh": "乌尔都酸爵士"
+    },
+    {
+      "en": "urdu coptic",
+      "zh": "乌尔都科普特"
+    },
+    {
+      "en": "urdu drill",
+      "zh": "乌尔都语练习"
+    },
+    {
+      "en": "urdu electropop",
+      "zh": "乌尔都语电子流行"
+    },
+    {
+      "en": "urdu house",
+      "zh": "乌尔都语乐队"
+    },
+    {
+      "en": "urdu jazzwave",
+      "zh": "乌尔都爵士波"
+    },
+    {
+      "en": "urdu rumba",
+      "zh": "乌尔都隆巴"
+    },
+    {
+      "en": "russian dembow",
+      "zh": "俄罗斯登步舞"
+    },
+    {
+      "en": "korean pacific reggae",
+      "zh": "韩国太平洋雷鬼"
+    },
+    {
+      "en": "funk bedroom pop",
+      "zh": "放克 卧室流行"
+    },
+    {
+      "en": "french acoustic chicago blues",
+      "zh": "法国原声芝加哥蓝调"
+    },
+    {
+      "en": "havana grime",
+      "zh": "哈瓦那灰暗"
+    },
+    {
+      "en": "havana synthwave",
+      "zh": "哈瓦那合成波"
+    },
+    {
+      "en": "havana techno",
+      "zh": "哈瓦那techno"
+    },
+    {
+      "en": "havana trap",
+      "zh": "哈瓦那陷阱"
+    },
+    {
+      "en": "hawaiian electropop",
+      "zh": "夏威夷电子流行"
+    },
+    {
+      "en": "hawaiian merengue",
+      "zh": "夏威夷美仑格"
+    },
+    {
+      "en": "hawaiian r&b",
+      "zh": "夏威夷节奏蓝调"
+    },
+    {
+      "en": "hip hop",
+      "zh": "嘻哈"
+    },
+    {
+      "en": "hip hop techno",
+      "zh": "嘻哈电子"
+    },
+    {
+      "en": "hip hop dubstep",
+      "zh": "嘻哈 都步"
+    },
+    {
+      "en": "house reggae",
+      "zh": "house reggae"
+    },
+    {
+      "en": "house symphonic metal",
+      "zh": "交响金属"
+    },
+    {
+      "en": "hyper-2-step",
+      "zh": "超级二步"
+    },
+    {
+      "en": "hyper-acid house",
+      "zh": "超酸房"
+    },
+    {
+      "en": "hyper-afrobeat",
+      "zh": "超级非洲节拍"
+    },
+    {
+      "en": "hyper-blues rock",
+      "zh": "超级蓝调摇滚"
+    },
+    {
+      "en": "hyper-crunk",
+      "zh": "超级疯狂"
+    },
+    {
+      "en": "hyper-dance",
+      "zh": "超级舞蹈"
+    },
+    {
+      "en": "hyper-egyptian",
+      "zh": "超埃及风"
+    },
+    {
+      "en": "hyper-grime",
+      "zh": "超级灰暗"
+    },
+    {
+      "en": "hyper-indie",
+      "zh": "超独立"
+    },
+    {
+      "en": "hyper-jungle",
+      "zh": "超级丛林"
+    },
+    {
+      "en": "hyper-motown",
+      "zh": "超级城镇"
+    },
+    {
+      "en": "hyper-southern rock",
+      "zh": "超级南方摇滚"
+    },
+    {
+      "en": "hyphy",
+      "zh": "hyphy"
+    },
+    {
+      "en": "hyphy alternative r&b",
+      "zh": "具有独特风格的替代节奏蓝调"
+    },
+    {
+      "en": "hyphy bluegrass",
+      "zh": "海菲蓝草"
+    },
+    {
+      "en": "hyphy egyptian",
+      "zh": "海菲埃及"
+    },
+    {
+      "en": "hypnagogic algorave",
+      "zh": "入睡前的算法派对"
+    },
+    {
+      "en": "hypnagogic ambient trance",
+      "zh": "半梦半醒的氛围曲"
+    },
+    {
+      "en": "hypnagogic electropop",
+      "zh": "「催眠前电子流行」"
+    },
+    {
+      "en": "hypnagogic garage",
+      "zh": "催眠车库"
+    },
+    {
+      "en": "hypnagogic goa trance",
+      "zh": "催眠前沿Goa Trance"
+    },
+    {
+      "en": "hypnagogic pacific reggae",
+      "zh": "催眠太平雷鬼"
+    },
+    {
+      "en": "hypnagogic shoegaze",
+      "zh": "催眠前梦幻"
+    },
+    {
+      "en": "hypnagogic swamp blues",
+      "zh": "催眠沼泽布鲁斯"
+    },
+    {
+      "en": "illbient",
+      "zh": "病态环境"
+    },
+    {
+      "en": "illbient afrikaner folk",
+      "zh": "非洲民谣电子音乐"
+    },
+    {
+      "en": "illbient alternative rock",
+      "zh": "illbient替代摇滚"
+    },
+    {
+      "en": "illbient cumbia",
+      "zh": "病态氛围 库恰舞曲"
+    },
+    {
+      "en": "illbientwave",
+      "zh": "病态电子浪潮"
+    },
+    {
+      "en": "indie",
+      "zh": "独立音乐"
+    },
+    {
+      "en": "indie g-funk",
+      "zh": "独立的g-funk"
+    },
+    {
+      "en": "indie grunge",
+      "zh": "独立垃圾"
+    },
+    {
+      "en": "j-pop acid breaks",
+      "zh": "J-流行酸性节拍"
+    },
+    {
+      "en": "j-pop acid jazz",
+      "zh": "J-流行酸爵士"
+    },
+    {
+      "en": "j-pop blues",
+      "zh": "J-流行蓝调"
+    },
+    {
+      "en": "j-pop chillsynth",
+      "zh": "日本流行冷合成"
+    },
+    {
+      "en": "jazz",
+      "zh": "爵士乐"
+    },
+    {
+      "en": "jazz future bass",
+      "zh": "爵士未来贝斯"
+    },
+    {
+      "en": "jazz sertanejo",
+      "zh": "爵士音乐 乡村音乐"
+    },
+    {
+      "en": "jazz soul",
+      "zh": "爵士灵魂"
+    },
+    {
+      "en": "jungle",
+      "zh": "「丛林」"
+    },
+    {
+      "en": "jungle afrobeat",
+      "zh": "丛林风格的非洲节拍"
+    },
+    {
+      "en": "jungle ambient noise wall",
+      "zh": "丛林环境噪音墙"
+    },
+    {
+      "en": "k-pop",
+      "zh": "韩流"
+    },
+    {
+      "en": "k-pop acoustic texas blues",
+      "zh": "韩流民谣德州蓝调"
+    },
+    {
+      "en": "kawaii future bass",
+      "zh": "可爱未来贝斯"
+    },
+    {
+      "en": "kawaii future bass afro-cuban jazz",
+      "zh": "可爱未来贝斯非洲-古巴爵士"
+    },
+    {
+      "en": "kawaii future bass afropiano",
+      "zh": "可爱未来贝斯非洲钢琴"
+    },
+    {
+      "en": "kawaii future bass polka",
+      "zh": "可爱未来贝斯波尔卡"
+    },
+    {
+      "en": "klezmer",
+      "zh": "克莱兹默"
+    },
+    {
+      "en": "klezmer pop",
+      "zh": "克莱兹默流行"
+    },
+    {
+      "en": "koto alt-pop",
+      "zh": "古筝 另类流行"
+    },
+    {
+      "en": "koto boom bap",
+      "zh": "箏嘭嗒篮"
+    },
+    {
+      "en": "koto coptic",
+      "zh": "古典吉他"
+    },
+    {
+      "en": "koto dembow",
+      "zh": "koto dembow"
+    },
+    {
+      "en": "koto drill and bass",
+      "zh": "箏式电子音乐"
+    },
+    {
+      "en": "koto g-funk",
+      "zh": "箏式G-funk"
+    },
+    {
+      "en": "koto gnawa",
+      "zh": "古筝格瓦纳"
+    },
+    {
+      "en": "koto house",
+      "zh": "箏屋"
+    },
+    {
+      "en": "koto polka",
+      "zh": "箜篌波尔卡"
+    },
+    {
+      "en": "koto surf",
+      "zh": "箏樂風"
+    },
+    {
+      "en": "koto swing",
+      "zh": "箏摇摆"
+    },
+    {
+      "en": "koto trap",
+      "zh": "箏陷阱"
+    },
+    {
+      "en": "koto tuareg",
+      "zh": "koto tuareg"
+    },
+    {
+      "en": "liquid drum and bass",
+      "zh": "液体鼓和贝斯"
+    },
+    {
+      "en": "liquid drum and bass bluegrass",
+      "zh": "液体鼓和贝斯蓝草"
+    },
+    {
+      "en": "liquid drum and bass blues",
+      "zh": "液体鼓和贝斯蓝调"
+    },
+    {
+      "en": "liquid drum and bass new jack swing",
+      "zh": "液体鼓和贝斯新杰克摇摆"
+    },
+    {
+      "en": "liquid drum and bass rockabilly",
+      "zh": "液体鼓和贝斯摇滚比利"
+    },
+    {
+      "en": "liquid drum and bass slushwave",
+      "zh": "液体鼓和贝斯冰波"
+    },
+    {
+      "en": "lo-fi afro house",
+      "zh": "低保真非洲混音"
+    },
+    {
+      "en": "lo-fi afro-cuban jazz",
+      "zh": "低保真非洲-古巴爵士"
+    },
+    {
+      "en": "lo-fi ambient dub",
+      "zh": "低保真氛围达布"
+    },
+    {
+      "en": "lo-fi bubblegum bass",
+      "zh": "低保真泡泡糖贝斯"
+    },
+    {
+      "en": "lo-fi cloud rap",
+      "zh": "低保真云饶舌"
+    },
+    {
+      "en": "lo-fi pacific reggae",
+      "zh": "低保真太平洋雷鬼"
+    },
+    {
+      "en": "lo-fi roots reggae",
+      "zh": "低保真根源雷鬼"
+    },
+    {
+      "en": "lo-fi synthpop",
+      "zh": "低保真合成流行"
+    },
+    {
+      "en": "lo-fi trap",
+      "zh": "低保真陷阱"
+    },
+    {
+      "en": "mariachi",
+      "zh": "墨西哥马里亚奇乐队"
+    },
+    {
+      "en": "math rock",
+      "zh": "数学摇滚"
+    },
+    {
+      "en": "math rock ambient noise wall",
+      "zh": "数学摇滚环境噪音墙"
+    },
+    {
+      "en": "merengue",
+      "zh": "merengue"
+    },
+    {
+      "en": "metal grunge",
+      "zh": "金属垃圾"
+    },
+    {
+      "en": "motown",
+      "zh": "摩城"
+    },
+    {
+      "en": "new jack swing",
+      "zh": "新杰克摇摆"
+    },
+    {
+      "en": "new jack swing big band",
+      "zh": "新杰克摇摆大乐队"
+    },
+    {
+      "en": "new orleans alternative r&b",
+      "zh": "新奥尔良另类节奏蓝调"
+    },
+    {
+      "en": "new orleans cajun",
+      "zh": "新奥尔良风格的克里奇音乐"
+    },
+    {
+      "en": "new orleans carnatic",
+      "zh": "新奥尔良卡纳蒂克"
+    },
+    {
+      "en": "new orleans chillwave",
+      "zh": "新奥尔良冷波"
+    },
+    {
+      "en": "new orleans cloud rap",
+      "zh": "新奥尔良云朵说唱"
+    },
+    {
+      "en": "new orleans dembow",
+      "zh": "新奥尔良登堡"
+    },
+    {
+      "en": "new orleans grunge",
+      "zh": "新奥尔良垃圾摇滚"
+    },
+    {
+      "en": "new orleans house",
+      "zh": "新奥尔良风格的房屋"
+    },
+    {
+      "en": "new orleans samba",
+      "zh": "新奥尔良桑巴"
+    },
+    {
+      "en": "new orleans trance",
+      "zh": "新奥尔良的迷幻音乐"
+    },
+    {
+      "en": "new wave",
+      "zh": "新浪潮"
+    },
+    {
+      "en": "new wave acid trance",
+      "zh": "新浪潮酸性trance"
+    },
+    {
+      "en": "norte\\xf1o pop",
+      "zh": "北墨西哥流行音乐"
+    },
+    {
+      "en": "norte\\xf1owave",
+      "zh": "诺特涅瓦浪"
+    },
+    {
+      "en": "p-funk",
+      "zh": "P-放克"
+    },
+    {
+      "en": "p-funk cloud rap",
+      "zh": "P-幻灵云饶舌"
+    },
+    {
+      "en": "p-funk jazz",
+      "zh": "P-放克爵士"
+    },
+    {
+      "en": "p-funk mariachi",
+      "zh": "P-放克 墨西哥马里亚奇"
+    },
+    {
+      "en": "p-funk samba",
+      "zh": "P-放克桑巴"
+    },
+    {
+      "en": "pacific reggae afrobeat",
+      "zh": "太平洋雷鬼非洲节拍"
+    },
+    {
+      "en": "pacific reggae samba",
+      "zh": "太平洋雷鬼桑巴"
+    },
+    {
+      "en": "pacific reggae ska",
+      "zh": "太平洋雷鬼斯卡"
+    },
+    {
+      "en": "piano african folk",
+      "zh": "钢琴非洲民间音乐"
+    },
+    {
+      "en": "piano afro-rock",
+      "zh": "钢琴非洲摇滚"
+    },
+    {
+      "en": "piano afroswing",
+      "zh": "钢琴非洲摇摆"
+    },
+    {
+      "en": "piano caribbean",
+      "zh": "钢琴 加勒比"
+    },
+    {
+      "en": "piano cape verdean",
+      "zh": "钢琴佛得角"
+    },
+    {
+      "en": "piano chillstep",
+      "zh": "钢琴冷步"
+    },
+    {
+      "en": "piano country",
+      "zh": "钢琴乡"
+    },
+    {
+      "en": "piano klezmer",
+      "zh": "钢琴克莱兹默"
+    },
+    {
+      "en": "polka",
+      "zh": "波尔卡"
+    },
+    {
+      "en": "polka emo",
+      "zh": "波尔卡情绪"
+    },
+    {
+      "en": "pop",
+      "zh": "流行音乐"
+    },
+    {
+      "en": "pop bossa nova",
+      "zh": "流行波萨诺瓦"
+    },
+    {
+      "en": "pop g-funk",
+      "zh": "流行 g-funk"
+    },
+    {
+      "en": "pop synthpop",
+      "zh": "流行合成流行"
+    },
+    {
+      "en": "popcore",
+      "zh": "流行核心"
+    },
+    {
+      "en": "prog acoustic texas blues",
+      "zh": "进口原声德克萨斯蓝调"
+    },
+    {
+      "en": "prog afro-funk",
+      "zh": "非洲放克进步"
+    },
+    {
+      "en": "prog afro-jazz",
+      "zh": "非洲爵士乐"
+    },
+    {
+      "en": "prog afrobeat",
+      "zh": "非洲节拍的前卫音乐"
+    },
+    {
+      "en": "prog ambient noise wall",
+      "zh": "前卫氛围噪音墙"
+    },
+    {
+      "en": "prog avant-garde jazz",
+      "zh": "前卫爵士乐"
+    },
+    {
+      "en": "prog big band",
+      "zh": "前卫大乐队"
+    },
+    {
+      "en": "prog breakbeat",
+      "zh": "前卫breakbeat"
+    },
+    {
+      "en": "prog disco",
+      "zh": "渐进迪斯科"
+    },
+    {
+      "en": "prog dream pop",
+      "zh": "前卫梦幻流行"
+    },
+    {
+      "en": "prog drum and bass",
+      "zh": "前卫鼓和贝斯"
+    },
+    {
+      "en": "prog dubstep",
+      "zh": "渐进 都步"
+    },
+    {
+      "en": "prog rockabilly",
+      "zh": "渐进式摇滚比利音乐"
+    },
+    {
+      "en": "prog shoegaze",
+      "zh": "迷幻摇滚"
+    },
+    {
+      "en": "prog swamp blues",
+      "zh": "进行沼泽布鲁斯"
+    },
+    {
+      "en": "psybient griot",
+      "zh": "迷幻氛围音乐故事讲述者"
+    },
+    {
+      "en": "psybient new wave",
+      "zh": "迷幻氛围新浪潮"
+    },
+    {
+      "en": "psychedelic acid trance",
+      "zh": "迷幻酸嗨"
+    },
+    {
+      "en": "psychedelic cabaret",
+      "zh": "迷幻歌舞厅"
+    },
+    {
+      "en": "psychedelic dream pop",
+      "zh": "迷幻梦幻流行"
+    },
+    {
+      "en": "psychedelic hawaiian",
+      "zh": "迷幻夏威夷"
+    },
+    {
+      "en": "psychedelic house",
+      "zh": "迷幻浩室"
+    },
+    {
+      "en": "psychedelic motown",
+      "zh": "迷幻灵魂乐"
+    },
+    {
+      "en": "psychedelic psybient",
+      "zh": "迷幻心灵电子"
+    },
+    {
+      "en": "psychedelic swing",
+      "zh": "迷幻摇摆"
+    },
+    {
+      "en": "punk acid trance",
+      "zh": "朋克酸性trance"
+    },
+    {
+      "en": "punk electropop",
+      "zh": "朋克电子流行"
+    },
+    {
+      "en": "punk polka",
+      "zh": "朋克波尔卡"
+    },
+    {
+      "en": "r&b gospel",
+      "zh": "节奏蓝调福音"
+    },
+    {
+      "en": "raga",
+      "zh": "拉格"
+    },
+    {
+      "en": "raga acid breaks",
+      "zh": "拉格阿酸性节拍"
+    },
+    {
+      "en": "raga algorave",
+      "zh": "拉格阿尔戈雷夫"
+    },
+    {
+      "en": "raga edm",
+      "zh": "拉格 音乐电子舞曲"
+    },
+    {
+      "en": "raga egyptian",
+      "zh": "埃及拉格"
+    },
+    {
+      "en": "raga jazz",
+      "zh": "拉格爵士"
+    },
+    {
+      "en": "rap",
+      "zh": "说唱"
+    },
+    {
+      "en": "rap bedroom pop",
+      "zh": "说唱 卧室流行"
+    },
+    {
+      "en": "rap dirty south",
+      "zh": "说唱 南部"
+    },
+    {
+      "en": "reggae cumbia",
+      "zh": "雷鬼 康比亚"
+    },
+    {
+      "en": "reggae",
+      "zh": "雷鬼"
+    },
+    {
+      "en": "reggae dirty south",
+      "zh": "雷鬼南部"
+    },
+    {
+      "en": "reggaetonwave",
+      "zh": "雷鬼波"
+    },
+    {
+      "en": "rock",
+      "zh": "摇滚"
+    },
+    {
+      "en": "rock americana",
+      "zh": "摇滚美国乡村"
+    },
+    {
+      "en": "rock balkan brass band",
+      "zh": "摇滚巴尔干铜管乐队"
+    },
+    {
+      "en": "rock dance",
+      "zh": "摇滚舞"
+    },
+    {
+      "en": "rock liquid drum and bass",
+      "zh": "摇滚液体鼓和贝斯"
+    },
+    {
+      "en": "rockabilly",
+      "zh": "摇滚乡村"
+    },
+    {
+      "en": "rockabilly country",
+      "zh": "摇滚乡村"
+    },
+    {
+      "en": "rockabilly raga",
+      "zh": "摇滚比利拉嘎"
+    },
+    {
+      "en": "rockabilly tango",
+      "zh": "摇滚比利探戈"
+    },
+    {
+      "en": "roots reggae avant-garde jazz",
+      "zh": "根源雷鬼前卫爵士"
+    },
+    {
+      "en": "roots reggae flamenco",
+      "zh": "根源雷鬼佛拉明哥"
+    },
+    {
+      "en": "roots reggae house",
+      "zh": "根源雷鬼之屋"
+    },
+    {
+      "en": "rumba",
+      "zh": "伦巴"
+    },
+    {
+      "en": "rumba cape verdean",
+      "zh": "卢巴舞 佛得角"
+    },
+    {
+      "en": "rumbawave",
+      "zh": "隆巴浪"
+    },
+    {
+      "en": "salsa",
+      "zh": "萨尔萨"
+    },
+    {
+      "en": "salsa polka",
+      "zh": "萨尔萨波尔卡"
+    },
+    {
+      "en": "samba",
+      "zh": "桑巴"
+    },
+    {
+      "en": "samba afropiano",
+      "zh": "桑巴非洲钢琴"
+    },
+    {
+      "en": "samba bachata",
+      "zh": "桑巴 巴恰塔"
+    },
+    {
+      "en": "samba boom bap",
+      "zh": "桑巴嘭巴"
+    },
+    {
+      "en": "samba country",
+      "zh": "桑巴乡村"
+    },
+    {
+      "en": "samba dirty south",
+      "zh": "桑巴南部脏"
+    },
+    {
+      "en": "samba soul",
+      "zh": "桑巴灵魂"
+    },
+    {
+      "en": "saxophone 2-step",
+      "zh": "萨克斯风 2 步"
+    },
+    {
+      "en": "saxophone alt-country",
+      "zh": "萨克斯风 初级乡村音乐"
+    },
+    {
+      "en": "saxophone barbershop",
+      "zh": "萨克斯管理发店"
+    },
+    {
+      "en": "saxophone bossa nova",
+      "zh": "萨克斯风波萨诺瓦"
+    },
+    {
+      "en": "saxophone edm",
+      "zh": "萨克斯管 电子舞曲"
+    },
+    {
+      "en": "saxophone g-funk",
+      "zh": "萨克斯管 G-funk"
+    },
+    {
+      "en": "saxophone gnawa",
+      "zh": "萨克斯管 格瓦纳"
+    },
+    {
+      "en": "saxophone opera",
+      "zh": "萨克斯管歌剧"
+    },
+    {
+      "en": "saxophone shoegaze",
+      "zh": "萨克斯风梦幻"
+    },
+    {
+      "en": "sertanejo chillstep",
+      "zh": "西塔内乔冷步"
+    },
+    {
+      "en": "sertanejo emo",
+      "zh": "巴西乡村情歌"
+    },
+    {
+      "en": "sertanejo southern rock",
+      "zh": "塞尔塔内乔南方摇滚"
+    },
+    {
+      "en": "shoegaze afro-cuban jazz",
+      "zh": "鞋盯迷幻 非洲-古巴 爵士"
+    },
+    {
+      "en": "shoegaze afro-funk",
+      "zh": "鞋盯迷幻灵魂"
+    },
+    {
+      "en": "shoegaze boom bap",
+      "zh": "响鞋搏击"
+    },
+    {
+      "en": "shoegaze cumbia",
+      "zh": "鞋盯迷幻 库恰"
+    },
+    {
+      "en": "shoegaze psybient",
+      "zh": "鞋盯迷幻"
+    },
+    {
+      "en": "sitar afro-funk",
+      "zh": "西塔尔非洲放克"
+    },
+    {
+      "en": "sitar afro-jazz",
+      "zh": "西塔尔非洲爵士乐"
+    },
+    {
+      "en": "sitar alternative r&b",
+      "zh": "西塔尔 另类 R&B"
+    },
+    {
+      "en": "sitar blues",
+      "zh": "西塔尔蓝调"
+    },
+    {
+      "en": "sitar bossa nova",
+      "zh": "西塔尔波萨诺瓦"
+    },
+    {
+      "en": "sitar bubblegum bass",
+      "zh": "西塔尔泡泡糖贝斯"
+    },
+    {
+      "en": "sitar bubblegum dance",
+      "zh": "西塔尔泡泡糖舞"
+    },
+    {
+      "en": "sitar cape verdean",
+      "zh": "西塔尔 佛得角"
+    },
+    {
+      "en": "sitar cumbia",
+      "zh": "西塔尔库恰"
+    },
+    {
+      "en": "sitar delta blues",
+      "zh": "西塔尔三角蓝调"
+    },
+    {
+      "en": "sitar drum and bass",
+      "zh": "西塔尔鼓和贝斯"
+    },
+    {
+      "en": "sitar fife and drum blues",
+      "zh": "西塔琴、长笛和鼓的蓝调"
+    },
+    {
+      "en": "sitar glitch hop",
+      "zh": "西塔尔咯士浩普"
+    },
+    {
+      "en": "sitar goa trance",
+      "zh": "西塔尔 印度果阿 恍惚"
+    },
+    {
+      "en": "sitar rumba",
+      "zh": "西塔尔伦巴"
+    },
+    {
+      "en": "sitar sertanejo",
+      "zh": "西塔尔音乐"
+    },
+    {
+      "en": "sitar southern rock",
+      "zh": "西塔尔南方摇滚"
+    },
+    {
+      "en": "ska",
+      "zh": "斯卡"
+    },
+    {
+      "en": "ska coptic",
+      "zh": "斯卡 科普蒂克"
+    },
+    {
+      "en": "ska liquid drum and bass",
+      "zh": "斯卡液体鼓和贝斯"
+    },
+    {
+      "en": "slushwave acid house",
+      "zh": "冰泥波浪 酸屋"
+    },
+    {
+      "en": "slushwave chillstep",
+      "zh": "冰泥浪潮 冷步"
+    },
+    {
+      "en": "slushwave dancehall",
+      "zh": "雪泥浪舞厅"
+    },
+    {
+      "en": "slushwave new jack swing",
+      "zh": "冰泥浪潮 新爵士摇摆"
+    },
+    {
+      "en": "soul",
+      "zh": "灵魂"
+    },
+    {
+      "en": "soul dembow",
+      "zh": "灵魂登步"
+    },
+    {
+      "en": "soulful acid house",
+      "zh": "充满灵魂的酸房音乐"
+    },
+    {
+      "en": "soulful acid trance",
+      "zh": "充满灵魂的酸性trance"
+    },
+    {
+      "en": "soulful acoustic texas blues",
+      "zh": "充满灵魂的原声德克萨斯蓝调"
+    },
+    {
+      "en": "soulful boogie",
+      "zh": "充满灵魂的布吉"
+    },
+    {
+      "en": "soulful bubblegum dance",
+      "zh": "充满灵魂的泡泡糖舞曲"
+    },
+    {
+      "en": "soulful cabaret",
+      "zh": "充满灵魂的歌舞表演"
+    },
+    {
+      "en": "soulful chillsynth",
+      "zh": "灵魂深情合成音"
+    },
+    {
+      "en": "soulful city pop",
+      "zh": "充满灵魂的城市流行音乐"
+    },
+    {
+      "en": "soulful folk",
+      "zh": "充满灵魂的民谣"
+    },
+    {
+      "en": "soulful reggaeton",
+      "zh": "充满灵魂的雷鬼音乐"
+    },
+    {
+      "en": "soulful ska",
+      "zh": "充满灵魂的斯卡"
+    },
+    {
+      "en": "soulful soul",
+      "zh": "充满灵魂的灵魂"
+    },
+    {
+      "en": "southern rock",
+      "zh": "南方摇滚"
+    },
+    {
+      "en": "southern rock calypso",
+      "zh": "南方摇滚卡利普索"
+    },
+    {
+      "en": "southern rock ska",
+      "zh": "南方摇滚斯卡"
+    },
+    {
+      "en": "surf",
+      "zh": "冲浪"
+    },
+    {
+      "en": "surf acoustic blues",
+      "zh": "冲浪民谣布鲁斯"
+    },
+    {
+      "en": "surf classical",
+      "zh": "冲浪古典"
+    },
+    {
+      "en": "surf flamenco",
+      "zh": "冲浪弗拉门戈"
+    },
+    {
+      "en": "surf grunge",
+      "zh": "冲浪垃圾摇滚"
+    },
+    {
+      "en": "surf raga",
+      "zh": "冲浪拉格"
+    },
+    {
+      "en": "surf rock",
+      "zh": "冲浪摇滚"
+    },
+    {
+      "en": "surf rock boogie",
+      "zh": "冲浪摇滚布吉"
+    },
+    {
+      "en": "surf slushwave",
+      "zh": "冲浪糖浆波"
+    },
+    {
+      "en": "surfwave",
+      "zh": "冲浪音波"
+    },
+    {
+      "en": "swamp blues",
+      "zh": "沼泽布鲁斯"
+    },
+    {
+      "en": "swamp blues boogie",
+      "zh": "沼泽蓝调布吉"
+    },
+    {
+      "en": "swamp blues r&b",
+      "zh": "沼泽布鲁斯节奏布鲁斯"
+    },
+    {
+      "en": "swing bedroom pop",
+      "zh": "摇摆卧室流行"
+    },
+    {
+      "en": "swing grime",
+      "zh": "摇摆灰暗"
+    },
+    {
+      "en": "swing roots reggae",
+      "zh": "摇摆 根源 雷鬼"
+    },
+    {
+      "en": "swing samba",
+      "zh": "摇摆桑巴"
+    },
+    {
+      "en": "swing sertanejo",
+      "zh": "斯万格塞尔塔内若"
+    },
+    {
+      "en": "swing synthpop",
+      "zh": "摇摆合成流行"
+    },
+    {
+      "en": "symphonic afro-cuban jazz",
+      "zh": "交响式非洲-古巴爵士乐"
+    },
+    {
+      "en": "symphonic algorave",
+      "zh": "交响算法派对"
+    },
+    {
+      "en": "symphonic bluegrass",
+      "zh": "交响蓝草"
+    },
+    {
+      "en": "symphonic boom bap",
+      "zh": "交响式嘻哈"
+    },
+    {
+      "en": "symphonic city pop",
+      "zh": "交响城市流行"
+    },
+    {
+      "en": "symphonic cloud rap",
+      "zh": "交响云饶舌"
+    },
+    {
+      "en": "symphonic disco",
+      "zh": "交响迪斯科"
+    },
+    {
+      "en": "symphonic doo-wop",
+      "zh": "交响杜瓦普"
+    },
+    {
+      "en": "symphonic mariachi",
+      "zh": "交响马里奇"
+    },
+    {
+      "en": "symphonic mento",
+      "zh": "交响曼托"
+    },
+    {
+      "en": "symphonic merengue",
+      "zh": "交响梅伦格"
+    },
+    {
+      "en": "symphonic metal",
+      "zh": "交响金属"
+    },
+    {
+      "en": "symphonic opera",
+      "zh": "交响歌剧"
+    },
+    {
+      "en": "synthpop",
+      "zh": "合成流行"
+    },
+    {
+      "en": "synthpop coptic",
+      "zh": "合成流行 科普特"
+    },
+    {
+      "en": "synthpop hawaiian",
+      "zh": "合成流行 夏威夷"
+    },
+    {
+      "en": "synthpop trance",
+      "zh": "合成流行 频嗨"
+    },
+    {
+      "en": "synthwave",
+      "zh": "合成波"
+    },
+    {
+      "en": "synthwave chillsynth",
+      "zh": "合成波 冷波合成"
+    },
+    {
+      "en": "synthwave country",
+      "zh": "合成波乡村"
+    },
+    {
+      "en": "synthwave cumbia",
+      "zh": "合成波 库恰"
+    },
+    {
+      "en": "synthwave dancehall",
+      "zh": "合成浪潮舞厅"
+    },
+    {
+      "en": "synthwave trance",
+      "zh": "合成浪潮 频率"
+    },
+    {
+      "en": "tabla bedroom pop",
+      "zh": "塔布拉卧室流行"
+    },
+    {
+      "en": "tabla breakbeat",
+      "zh": "塔布拉打击节拍"
+    },
+    {
+      "en": "tabla dream pop",
+      "zh": "塔布拉梦幻流行"
+    },
+    {
+      "en": "tabla hawaiian",
+      "zh": "夏威夷鼓"
+    },
+    {
+      "en": "tabla jazz",
+      "zh": "爵士鼓"
+    },
+    {
+      "en": "tabla kawaii future bass",
+      "zh": "卡哇伊未来贝斯鼓"
+    },
+    {
+      "en": "tabla new jack swing",
+      "zh": "塔布拉新爵士摇摆"
+    },
+    {
+      "en": "tango",
+      "zh": "探戈"
+    },
+    {
+      "en": "tango boogie",
+      "zh": "探戈布吉"
+    },
+    {
+      "en": "tango reggae",
+      "zh": "探戈雷鬼"
+    },
+    {
+      "en": "tango slushwave",
+      "zh": "探戈冰波"
+    },
+    {
+      "en": "tango trance",
+      "zh": "探戈恍惚"
+    },
+    {
+      "en": "techno afrobeat",
+      "zh": "电子音乐 非洲节拍"
+    },
+    {
+      "en": "techno balkan brass band",
+      "zh": "技术巴尔干铜管乐队"
+    },
+    {
+      "en": "techno big band",
+      "zh": "科技大乐队"
+    },
+    {
+      "en": "techno bossa nova",
+      "zh": "电子波萨诺瓦"
+    },
+    {
+      "en": "techno norte\\xf1o",
+      "zh": "techno norteño"
+    },
+    {
+      "en": "tokyo acid breaks",
+      "zh": "东京酸性breaks"
+    },
+    {
+      "en": "tokyo acid trance",
+      "zh": "东京酸性trance"
+    },
+    {
+      "en": "tokyo afro-funk",
+      "zh": "东京非洲放克"
+    },
+    {
+      "en": "tokyo afro-jazz",
+      "zh": "东京非洲爵士"
+    },
+    {
+      "en": "tokyo city pop",
+      "zh": "东京城市流行"
+    },
+    {
+      "en": "tokyo drumstep",
+      "zh": "东京鼓步"
+    },
+    {
+      "en": "tokyo grunge",
+      "zh": "东京垃圾摇滚"
+    },
+    {
+      "en": "tokyo liquid drum and bass",
+      "zh": "东京液体鼓和贝斯"
+    },
+    {
+      "en": "tokyo norte\\xf1o",
+      "zh": "东京诺特尼奥"
+    },
+    {
+      "en": "tokyo samba",
+      "zh": "东京桑巴"
+    },
+    {
+      "en": "tokyo southern rock",
+      "zh": "东京南方摇滚"
+    },
+    {
+      "en": "trance",
+      "zh": "trance"
+    },
+    {
+      "en": "trap",
+      "zh": "陷阱"
+    },
+    {
+      "en": "trap g-funk",
+      "zh": "陷阱 g-funk"
+    },
+    {
+      "en": "trap k-pop",
+      "zh": "陷阱流行音乐"
+    },
+    {
+      "en": "tuareg motown",
+      "zh": "图瓦雷格城镇灵魂音乐"
+    },
+    {
+      "en": "tuareg synthwave",
+      "zh": "图瓦雷格合成波"
+    },
+    {
+      "en": "swing",
+      "zh": "摇摆"
+    },
+    {
+      "en": "slushwave roots reggae",
+      "zh": "slushwave 根源雷鬼"
+    },
+    {
+      "en": "saxophone tuareg",
+      "zh": "萨克斯管 图阿雷格"
+    },
+    {
+      "en": "saxophone drum and bass",
+      "zh": "萨克斯鼓和贝斯"
+    },
+    {
+      "en": "saxophone afro house",
+      "zh": "萨克斯风非洲之屋"
+    },
+    {
+      "en": "reggae k-pop",
+      "zh": "雷鬼 韩流"
+    },
+    {
+      "en": "psychedelic tango",
+      "zh": "迷幻探戈"
+    },
+    {
+      "en": "prog southern rock",
+      "zh": "南部摇滚乐"
+    },
+    {
+      "en": "prog dancepop",
+      "zh": "进步舞曲流行"
+    },
+    {
+      "en": "piano coptic",
+      "zh": "钢琴科普蒂克"
+    },
+    {
+      "en": "piano acid techno",
+      "zh": "钢琴酸性技术"
+    },
+    {
+      "en": "pacific reggae",
+      "zh": "太平洋雷鬼"
+    },
+    {
+      "en": "new wave delta blues",
+      "zh": "新浪潮三角蓝调"
+    },
+    {
+      "en": "new orleans afrobeat",
+      "zh": "新奥尔良非洲节拍"
+    },
+    {
+      "en": "mariachi indie",
+      "zh": "独立马里亚奇"
+    },
+    {
+      "en": "lo-fi swing",
+      "zh": "低保真摇摆"
+    },
+    {
+      "en": "hyphy balkan brass band",
+      "zh": "海菲巴尔干铜管乐队"
+    },
+    {
+      "en": "hyper-roots reggae",
+      "zh": "超级根源雷鬼"
+    },
+    {
+      "en": "hyper-house",
+      "zh": "超级混音"
+    },
+    {
+      "en": "hyper-afrikaner folk",
+      "zh": "超级非洲裔民谣"
+    },
+    {
+      "en": "house surf",
+      "zh": "屋顶冲浪"
+    },
+    {
+      "en": "house roots reggae",
+      "zh": "house roots reggae"
+    },
+    {
+      "en": "house",
+      "zh": "住宅"
+    },
+    {
+      "en": "hip hop roots reggae",
+      "zh": "嘻哈根源雷鬼"
+    }
+  ],
+  "featured_genres": [
+    {
+      "id": "pop",
+      "label": "流行",
+      "tags": [
+        "Pop",
+        "Popular"
+      ]
+    },
+    {
+      "id": "cfolk",
+      "label": "国风",
+      "tags": [
+        "Ethnic Fusion",
+        "World/Ethnic"
+      ]
+    },
+    {
+      "id": "cinematic",
+      "label": "电影感",
+      "tags": [
+        "Cinematic"
+      ]
+    },
+    {
+      "id": "electronic",
+      "label": "电子",
+      "tags": [
+        "Electronic",
+        "EDM",
+        "Synthwave"
+      ]
+    },
+    {
+      "id": "folk",
+      "label": "民谣",
+      "tags": [
+        "Folk"
+      ]
+    },
+    {
+      "id": "rnb",
+      "label": "R&B",
+      "tags": [
+        "RnB",
+        "Soul"
+      ]
+    },
+    {
+      "id": "hiphop",
+      "label": "嘻哈",
+      "tags": [
+        "HipHop",
+        "Rap",
+        "Trap"
+      ]
+    },
+    {
+      "id": "jazz",
+      "label": "爵士",
+      "tags": [
+        "Jazz",
+        "Jazz/Soul"
+      ]
+    },
+    {
+      "id": "rock",
+      "label": "摇滚",
+      "tags": [
+        "Rock",
+        "Indie"
+      ]
+    },
+    {
+      "id": "ambient",
+      "label": "氛围",
+      "tags": [
+        "Ambient",
+        "Downtempo"
+      ]
+    },
+    {
+      "id": "urban",
+      "label": "城市流行",
+      "tags": [
+        "Urban",
+        "Pop"
+      ]
+    },
+    {
+      "id": "reggae",
+      "label": "雷鬼",
+      "tags": [
+        "Reggae",
+        "Dancehall"
+      ]
+    }
+  ],
+  "vocal_prompts": {
+    "emotion": [
+      "Sad",
+      "Happy",
+      "Romantic",
+      "Melancholic",
+      "Angry",
+      "Hopeful",
+      "Nostalgic",
+      "Tender"
+    ],
+    "style": [
+      "Soulful",
+      "Husky",
+      "Intimate",
+      "Ethereal",
+      "Breathy",
+      "Powerful",
+      "Whisper",
+      "Belting"
+    ],
+    "effect": [
+      "Reverb-Heavy",
+      "Delay Echo",
+      "Telephone Bandpass",
+      "Auto-tune Soft",
+      "Dry Close Mic"
+    ]
+  },
+  "sfx_tags": [
+    "Rain Ambience",
+    "Thunder",
+    "Ocean Waves",
+    "Heartbeat",
+    "Footsteps",
+    "Crowd Noise",
+    "Church Bells",
+    "Forest Ambience",
+    "Cathedral Reverb"
+  ],
+  "rap_styles": [
+    "Old school",
+    "New school",
+    "Boombap",
+    "G-Funk",
+    "Trap",
+    "Drill",
+    "Melodic Rap",
+    "Lofi HipHop",
+    "Pop HipHop",
+    "Conscious Rap",
+    "West Coast",
+    "East Coast"
+  ],
+  "lyrics_rules": [
+    "禁止：物品罗列、反问、「是不是」、随意符号堆砌",
+    "增强：情绪主线贯穿；浅显金句；多结构押韵/谐音",
+    "公式：氛围营造 → 情感倾诉 → 意象深化 → 情感总结",
+    "歌词用 [Verse]/[Chorus]/[Bridge] 等结构标签；短句留白，跟着腔唱，忌念词腔",
+    "格式末尾可加编曲/人声效果提示"
+  ],
+  "agent_quick": {
+    "general": [
+      {
+        "label": "城市流行男声",
+        "text": "用导师模板「男生 · 城市流行」出一首带记忆点的旋律，先纯音乐"
+      },
+      {
+        "label": "华语女声抒情",
+        "text": "参考「女生 · 华语流行抒情」风格，先出纯音乐再填词"
+      },
+      {
+        "label": "国风融合",
+        "text": "Ethnic Fusion 国风，笛子主旋律，空灵，纯音乐"
+      }
+    ],
+    "melody": [
+      {
+        "label": "城市流行钩子",
+        "text": "Urban Pop，BPM 88，明亮男声向编曲但无人声，突出副歌钩子"
+      },
+      {
+        "label": "民谣钢琴弦乐",
+        "text": "Folk，BPM 70，钢琴+弦乐，厚实而克制的纯音乐"
+      },
+      {
+        "label": "Chill 说唱底床",
+        "text": "Hip-hop melancholic groove，深合成贝斯+鼓机，无人声底床"
+      }
+    ],
+    "lyrics": [
+      {
+        "label": "倾诉短句",
+        "text": "按绑定旋律写对一个人的倾诉；短句留白；[Verse]/[Chorus]；禁止念词"
+      },
+      {
+        "label": "副歌金句",
+        "text": "副歌浅显金句+谐音；主歌字少；跟着腔走"
+      },
+      {
+        "label": "国风意象",
+        "text": "山野夜色、月光、旧城门意象；克制不堆砌"
+      }
+    ]
+  }
+}
