@@ -23,7 +23,6 @@ def fetch_runninghub_account(api_key: str | None = None) -> dict:
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {key}",
-            "Host": base.replace("https://", "").replace("http://", "").split("/")[0],
         },
     )
     try:
@@ -40,10 +39,15 @@ def fetch_runninghub_account(api_key: str | None = None) -> dict:
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"RunningHub 返回非 JSON: {raw[:200]}") from exc
 
-    if int(payload.get("code") or -1) != 0:
+    code_raw = payload.get("code")
+    try:
+        code_ok = int(code_raw) == 0
+    except (TypeError, ValueError):
+        code_ok = str(code_raw).strip().lower() in {"0", "ok", "success"}
+    data = payload.get("data") or {}
+    if not code_ok and not (isinstance(data, dict) and ("remainMoney" in data or "remainCoins" in data)):
         raise RuntimeError(payload.get("msg") or "RunningHub 账户查询失败")
 
-    data = payload.get("data") or {}
     return {
         "remain_money": data.get("remainMoney"),
         "currency": data.get("currency") or "CNY",
