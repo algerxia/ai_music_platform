@@ -24,8 +24,8 @@ SYSTEM_GENERAL = (
     "第一步输出确认卡 workflow=\"lyrics_only\"、instrumental=false、lyrics 必填（可唱短句+结构标签），prompt 写歌词情绪与演唱气质；"
     "第二步在用户确认歌词后，再输出 workflow=\"compose_from_lyrics\" 的谱曲确认卡：沿用歌词，prompt 写配器/律动/钩子如何贴合词意与节奏。"
     "3) 仅当用户明确只要纯音乐配乐、不要歌词时，才可 instrumental=true、lyrics 空、workflow=\"melody_only\"。"
-    "4) 信息足够时输出 ```confirm ... ``` JSON 确认卡："
-    "title, engine(minimax|suno|mureka), mode(text|custom|parametric), prompt, lyrics, tags, "
+    "4) 信息足够时输出确认卡：```confirm 后跟单个合法 JSON 对象再 ``` 结束（字段必须双引号，禁止写成 key=value 列表）。"
+    "字段：title, engine(minimax|suno|mureka), mode(text|custom|parametric), prompt, lyrics, tags, "
     "instrumental(bool), genre(array), bpm, mood, estimated_credits(int), summary, workflow, "
     "template_id(可选，导师模板 id), quality_boost(可选 bool，苏诺高音质)。"
     "5) 面向用户字段用中文；summary 1–3 句中文。默认引擎 minimax。"
@@ -39,11 +39,11 @@ SYSTEM_MELODY = (
     "规则："
     "1) 必须先有歌词。若会话草稿已有 lyrics / source_lyrics，直接使用；若没有，请用户粘贴歌词或先去「作词 Agent」。"
     "2) 可追问：曲风、主奏乐器、BPM、空间感、人声气质；一次最多 1–2 个问题。"
-    "3) 信息足够时输出确认卡 ```confirm ... ```，且必须："
-    "workflow=\"compose_from_lyrics\"；instrumental=false；lyrics 沿用已有歌词（可微调标点/结构标签，不改核心意象）；"
+    "3) 信息足够时输出确认卡，必须是 ```confirm 后跟单个合法 JSON 对象再 ``` 结束（字段双引号，不要用 key=value 列表）。"
+    "JSON 必须含：workflow=\"compose_from_lyrics\"；instrumental=false；lyrics 沿用已有歌词；"
     "prompt 描述如何按词意与节奏谱曲：配器、律动、钩子、高潮落点、人声贴唱方式。"
     "4) 确认卡字段：title, engine(优先 minimax), mode(parametric|custom), prompt, lyrics, tags, "
-    "instrumental=false, genre(array), bpm, mood, estimated_credits(int), summary, workflow=\"compose_from_lyrics\", template_id(可选)。"
+    "instrumental=false, genre(array), bpm, mood, estimated_credits(int), summary, workflow, template_id(可选)。"
     "summary 用中文说明将按歌词意境谱曲。"
     "5) 仅当用户明确要求纯音乐时，才可 instrumental=true 并清空 lyrics（仍要根据词意写情绪配乐）。"
     "6) 确认前不计费；默认引擎 minimax；禁止版权承诺与声音克隆。"
@@ -54,9 +54,10 @@ SYSTEM_LYRICS = (
     "你负责先写出稀疏、可唱、有意境的口语歌词；不谱曲、不生成音频。忌朗诵念词腔。"
     "规则："
     "1) 可追问：想对谁唱、场景意象、一两句必须出现的词、大概情绪；不要堆砌口号。"
-    "2) 不需要旋律 Take。信息足够时输出确认卡 ```confirm ... ```，字段："
-    "title, engine=minimax, mode=parametric, prompt(歌词情绪/演唱气质，短), lyrics(必填，带 [Verse]/[Chorus] 等标签), "
-    "tags, instrumental=false, genre, bpm(建议演唱节奏感), mood, estimated_credits=0, summary, "
+    "2) 不需要旋律 Take。信息足够时输出确认卡：```confirm 后跟单个合法 JSON 对象再 ``` 结束（字段双引号，禁止 key=value 散文）。"
+    "JSON 字段："
+    "title, engine, mode, prompt(歌词情绪/演唱气质，短), lyrics(必填，带 [Verse]/[Chorus] 等标签), "
+    "tags, instrumental=false, genre(数组), bpm, mood, estimated_credits=0, summary, "
     "workflow=\"lyrics_only\"。"
     "3) 歌词：短句、留白、可换气；主歌字少；总字数尽量 ≤700；禁止密密麻麻朗诵长句；遵守提示词库作词准则。"
     "4) 说明：确认后只锁定歌词，不计费；用户再去「谱曲 Agent」按词谱曲。"
@@ -137,18 +138,52 @@ def _chinese_summary(data: dict) -> str:
     return "；".join(bits)[:500]
 
 
+def _recover_lyrics_block(text: str) -> str:
+    raw = text or ""
+    match = re.search(r"(\[(?:Verse|Chorus|Bridge|Intro|Outro)[^\]]*\][\s\S]{8,})", raw, re.I)
+    if not match:
+        return ""
+    block = match.group(1).strip()
+    # cut trailing metadata / fence junk
+    block = re.split(r"\n(?:tags|instrumental|workflow|estimated_credits|summary)\s*[:=]", block, maxsplit=1)[0]
+    block = re.sub(r"```[\s\S]*$", "", block).strip()
+    return block[:5000]
+
+
 def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
-    match = re.search(r"```confirm\s*([\s\S]*?)```", text or "", re.I)
+    raw = text or ""
+    match = re.search(r"```confirm\s*([\s\S]*?)```", raw, re.I)
     if not match:
-        match = re.search(r"```json\s*(\{[\s\S]*?" "estimated_credits" r"[\s\S]*?\})\s*```", text or "", re.I)
+        match = re.search(r"```json\s*(\{[\s\S]*?" "estimated_credits" r"[\s\S]*?\})\s*```", raw, re.I)
     if not match:
-        return None
-    try:
-        data = parse_json_object(match.group(1))
-    except Exception:
-        return None
+        # unclosed fence still worth trying
+        match = re.search(r"```confirm\s*([\s\S]+)$", raw, re.I)
+    data = None
+    if match:
+        try:
+            data = parse_json_object(match.group(1))
+        except Exception:
+            data = None
     if not isinstance(data, dict):
-        return None
+        # Model sometimes dumps fields without JSON; recover lyrics-first cards.
+        recovered = _recover_lyrics_block(raw)
+        if not recovered:
+            return None
+        data = {
+            "title": "歌词草案",
+            "engine": "minimax",
+            "mode": "parametric",
+            "prompt": "口语可唱，短句留白，先锁定歌词意象与节奏感。",
+            "lyrics": recovered,
+            "tags": "ballad, melodic",
+            "instrumental": False,
+            "genre": ["Pop"],
+            "bpm": 80,
+            "mood": "",
+            "estimated_credits": 0,
+            "summary": "已从回复中整理歌词确认卡。",
+            "workflow": "lyrics_only" if normalize_agent_kind(kind) in {"lyrics", "general"} else "compose_from_lyrics",
+        }
 
     kind = normalize_agent_kind(kind)
     engine = str(data.get("engine") or "minimax").lower()
