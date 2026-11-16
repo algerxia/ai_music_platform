@@ -19,6 +19,7 @@ from app.capabilities import CAPABILITY_SCHEMA_VERSION, public_capabilities
 from app.config import settings
 from app.credits import hold_credits, release_hold
 from app.db import get_db, init_db
+from app.admin_routes import router as admin_router
 from app.extra_routes import router as extra_router
 from app.models import Asset, Consent, CreditLedger, DeletionRequest, GenerationJob, Project, Report, User
 from app.plans import PLANS, get_plan
@@ -37,7 +38,6 @@ from app.schemas import (
     ProfileUpdate,
     ProjectCreate,
     ProjectUpdate,
-    ProviderSettingsUpdate,
     QwenAssistRequest,
     RegisterRequest,
     ReportCreate,
@@ -60,6 +60,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(extra_router)
+app.include_router(admin_router)
 
 
 @app.on_event("startup")
@@ -85,7 +86,10 @@ def public_assets(db: Session, assets, base: str = "") -> list[dict]:
 
 
 @app.get("/api/health")
-def health():
+def health(db: Session = Depends(get_db)):
+    from app.settings_store import apply_stored_settings
+
+    apply_stored_settings(db)
     return {
         "ok": True,
         "platform": "docker",
@@ -96,13 +100,13 @@ def health():
         "music_provider": settings.music_provider,
         "music_model": settings.music_model,
         "music_adapter_enabled": bool(settings.runninghub_api_key or settings.dashscope_api_key),
-        "music_cost_credits": settings.music_cost_credits,
+        "music_cost_credits": 0,
         "capability_schema_version": CAPABILITY_SCHEMA_VERSION,
         "features": {
             "auth": True,
             "projects": True,
             "async_jobs": True,
-            "credits": True,
+            "credits": False,
             "object_storage": True,
             "variation": True,
             "agent": True,
@@ -131,7 +135,8 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
         display_name=body.display_name.strip(),
         password_hash=hash_password(body.password),
         plan_code="creator",
-        credit_balance=settings.free_trial_credits,
+        credit_balance=0,
+        is_admin=False,
         daw=body.daw.strip()[:64],
         role_label=body.role_label.strip()[:64],
     )
@@ -141,18 +146,6 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     db.add(Consent(user_id=user.id, consent_type="privacy", document_version="1.0", accepted=True))
     if body.marketing_opt_in:
         db.add(Consent(user_id=user.id, consent_type="marketing", document_version="1.0", accepted=True))
-    db.add(
-        CreditLedger(
-            user_id=user.id,
-            entry_type="grant",
-            amount=settings.free_trial_credits,
-            balance_after=user.credit_balance,
-            label="首次免费额度",
-            project_name="Creator 方案",
-            status="已发放",
-            idempotency_key=f"grant-signup-{user.id}",
-        )
-    )
     db.commit()
     token = create_access_token(str(user.id), user.email)
     return {"data": {"token": token, "user": user_public(user)}}
@@ -256,26 +249,14 @@ def list_plans():
 
 @app.get("/api/credits/ledger")
 def credit_ledger(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    rows = db.scalars(
-        select(CreditLedger).where(CreditLedger.user_id == user.id).order_by(CreditLedger.created_at.desc()).limit(100)
-    ).all()
-    plan = get_plan(user.plan_code)
+    _ = (user, db)
     return {
         "data": {
-            "balance": user.credit_balance,
-            "monthly_quota": plan.get("credits") or settings.plan_monthly_credits,
-            "entries": [
-                {
-                    "id": str(row.id),
-                    "label": row.label,
-                    "project": row.project_name,
-                    "date": row.created_at.strftime("%Y-%m-%d"),
-                    "amount": row.amount,
-                    "status": row.status,
-                    "type": row.entry_type,
-                }
-                for row in rows
-            ],
+            "balance": 0,
+            "monthly_quota": 0,
+            "entries": [],
+            "disabled": True,
+            "note": "平台积分已停用，费用以 RunningHub 上游账户为准。",
         }
     }
 
@@ -531,17 +512,8 @@ def create_job(
     if job_type == "extend":
         engine = "mureka"
         mode = "extend"
-        cost = settings.extend_credit_cost
         if not body.parent_asset_id:
             raise HTTPException(status_code=400, detail="延长需要选择源 Take")
-    elif is_cover:
-        cost = settings.music_cost_credits + 5
-    elif engine == "suno":
-        cost = settings.suno_credit_cost
-    elif engine == "mureka":
-        cost = settings.mureka_credit_cost
-    else:
-        cost = settings.music_cost_credits
     job = GenerationJob(
         project_id=project.id,
         user_id=user.id,
@@ -568,12 +540,12 @@ def create_job(
         provider="runninghub",
         model="minimax-music-cover" if is_cover else (engine if engine != "minimax" else settings.music_model),
         capability_schema_version=body.capability_schema_version or CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
         parent_asset_id=body.parent_asset_id,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
     record(db, actor_id=user.id, action="job.create", resource_type="job", resource_id=str(job.id), metadata={"type": job_type})
     db.commit()
     enqueue_job(str(job.id))
@@ -614,7 +586,7 @@ def retry_job(
     if not job or job.user_id != user.id:
         raise HTTPException(status_code=404, detail="任务不存在")
     if job.status not in ("failed", "canceled"):
-        raise HTTPException(status_code=409, detail="只有失败或已取消的任务可以重试（会新建任务并重新预留积分）")
+        raise HTTPException(status_code=409, detail="只有失败或已取消的任务可以重试")
     params = job.params or {}
     body = JobCreate(
         prompt=job.prompt if len(job.prompt or "") >= 8 else f"{job.prompt} variation",
@@ -636,8 +608,8 @@ def activity(user: User = Depends(get_current_user), db: Session = Depends(get_d
         select(GenerationJob).where(GenerationJob.user_id == user.id).order_by(GenerationJob.created_at.desc()).limit(12)
     ).all()
     notices = []
-    if user.credit_balance < settings.music_cost_credits:
-        notices.append({"id": "low-credits", "level": "warn", "text": f"积分余额 {user.credit_balance}，不足一次生成。"})
+    if not settings.runninghub_api_key:
+        notices.append({"id": "rh-key-missing", "level": "warn", "text": "尚未配置 RunningHub API Key，无法生成音乐。"})
     for job in jobs:
         project = db.get(Project, job.project_id)
         name = project.name if project else "项目"
@@ -1008,52 +980,6 @@ def write_project_lyrics(
             "note": "填词只写入歌词，不会改已生成的 MP3。若要人声，请改为人声模式后重新生成。",
         }
     }
-
-
-@app.get("/api/settings/providers")
-def get_providers(user: User = Depends(get_current_user)):
-    _ = user
-    return {
-        "data": {
-            "qwen": {
-                "provider": "dashscope",
-                "model": settings.dashscope_model,
-                "configured": bool(settings.dashscope_api_key),
-            },
-            "music": {
-                "provider": settings.music_provider,
-                "model": settings.music_model,
-                "configured": bool(settings.runninghub_api_key),
-                "cost_credits": settings.music_cost_credits,
-            },
-        }
-    }
-
-
-@app.put("/api/settings/providers")
-def update_providers(body: ProviderSettingsUpdate, user: User = Depends(get_current_user)):
-    if user.email.lower() != settings.bootstrap_admin_email.lower():
-        raise HTTPException(status_code=403, detail="仅管理员可修改供应商凭据。普通用户请使用环境变量。")
-    # Runtime env update for current process; docker restart preferred for persistence.
-    if body.qwen_model:
-        os.environ["DASHSCOPE_MODEL"] = body.qwen_model
-        settings.dashscope_model = body.qwen_model
-    if body.music_provider:
-        os.environ["MUSIC_PROVIDER"] = body.music_provider
-        settings.music_provider = body.music_provider
-    if body.music_model:
-        os.environ["MUSIC_MODEL"] = body.music_model
-        settings.music_model = body.music_model
-    if body.dashscope_api_key:
-        os.environ["DASHSCOPE_API_KEY"] = body.dashscope_api_key
-        settings.dashscope_api_key = body.dashscope_api_key
-    if body.runninghub_api_key:
-        os.environ["RUNNINGHUB_API_KEY"] = body.runninghub_api_key
-        settings.runninghub_api_key = body.runninghub_api_key
-    if body.runninghub_base_url:
-        os.environ["RUNNINGHUB_BASE_URL"] = body.runninghub_base_url
-        settings.runninghub_base_url = body.runninghub_base_url
-    return {"data": {"ok": True}}
 
 
 # Compatibility shim for old frontend direct generate endpoint

@@ -27,7 +27,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(32), default="active")
     plan_code: Mapped[str] = mapped_column(String(32), default="creator")
-    credit_balance: Mapped[int] = mapped_column(Integer, default=0)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    credit_balance: Mapped[int] = mapped_column(Integer, default=0)  # legacy; platform no longer bills credits
     locale: Mapped[str] = mapped_column(String(16), default="zh-CN")
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Shanghai")
     daw: Mapped[str] = mapped_column(String(64), default="")
@@ -40,6 +41,14 @@ class User(Base):
 
     projects = relationship("Project", back_populates="owner")
     ledger = relationship("CreditLedger", back_populates="user")
+
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
 
 class Consent(Base):

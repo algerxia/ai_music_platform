@@ -158,7 +158,7 @@ def public_capabilities(music_configured: bool, qwen_configured: bool, audio_wor
                 "id": "agent",
                 "label": "对话式生成",
                 "supported": qwen_configured,
-                "note": "多轮澄清 → 确认卡 → 再扣积分生成；确认前不扣费",
+                "note": "先作词锁定 → 再按词谱曲；作词确认不计费，谱曲确认后按 RunningHub 计费",
             },
             "parametric": {
                 "id": "parametric",

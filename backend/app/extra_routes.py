@@ -211,6 +211,8 @@ class AgentCreateBody(BaseModel):
     kind: str = "general"
     title: str = ""
     melody_asset_id: UUID | None = None
+    source_lyrics: str = ""
+    lyrics: str = ""
 
 
 @router.post("/api/agent/sessions")
@@ -224,10 +226,19 @@ def agent_create(
     payload = body or AgentCreateBody()
     kind = normalize_agent_kind(payload.kind)
     seed: dict = {"agent_kind": kind}
+    seed_lyrics = (payload.source_lyrics or payload.lyrics or "").strip()
+    if seed_lyrics:
+        seed["source_lyrics"] = seed_lyrics[:5000]
+        seed["lyrics"] = seed_lyrics[:5000]
+        seed["workflow_stage"] = "lyrics_ready"
+        seed["title"] = (payload.title or "按词谱曲").strip()[:120]
     if payload.melody_asset_id:
         parent = resolve_owned_asset(db, user, payload.melody_asset_id)
         seed["melody_asset_id"] = str(parent.id)
-        seed["title"] = (parent.title or "").split("—")[0].strip() or payload.title or "按旋律填词"
+        if parent.lyrics and not seed_lyrics:
+            seed["source_lyrics"] = parent.lyrics[:5000]
+            seed["lyrics"] = parent.lyrics[:5000]
+        seed["title"] = (parent.title or "").split("—")[0].strip() or payload.title or seed.get("title") or "按词谱曲"
     session = create_session(
         db,
         user,
@@ -502,21 +513,21 @@ def agent_confirm(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Confirmation gate: only now create a paid generation job."""
+    """Confirmation gate: lyrics_only locks lyrics; compose creates a generation job."""
     from app.models import AgentSession
 
     session = db.get(AgentSession, session_id)
     if not session or session.user_id != user.id:
         raise HTTPException(404, "会话不存在")
-    draft = session.draft or {}
+    draft = dict(session.draft or {})
     kind = normalize_agent_kind(getattr(session, "kind", None) or draft.get("agent_kind"))
-    # Lyrics agent / fill-on-melody confirm → Music Cover path
-    if kind == "lyrics" or draft.get("workflow") == "lyrics_on_melody":
+    workflow = str(draft.get("workflow") or "").strip().lower()
+
+    # Legacy: old melody-then-lyrics cover path (only when explicitly bound)
+    if workflow == "lyrics_on_melody" and (draft.get("melody_asset_id") or draft.get("parent_asset_id")):
         if session.state != "awaiting_confirm":
             raise HTTPException(409, "当前没有待确认的作词方案")
         melody_raw = draft.get("melody_asset_id") or draft.get("parent_asset_id")
-        if not melody_raw:
-            raise HTTPException(409, "作词方案缺少旋律 Take，请先从旋律 Agent 交过来")
         if not str(draft.get("lyrics") or "").strip():
             raise HTTPException(409, "作词方案缺少歌词")
         try:
@@ -536,32 +547,83 @@ def agent_confirm(
             db=db,
         )
 
-    if session.state != "awaiting_confirm" or not draft.get("prompt"):
-        raise HTTPException(409, "当前没有待确认的生成方案")
-    # Melody agent always instrumental
-    if kind == "melody":
-        draft = dict(draft)
-        draft["instrumental"] = True
-        draft["lyrics"] = ""
-        draft["workflow"] = "melody_only"
+    # Step 1: lock lyrics only (no upstream billing)
+    if kind == "lyrics" or workflow == "lyrics_only":
+        if session.state != "awaiting_confirm":
+            raise HTTPException(409, "当前没有待确认的作词方案")
+        lyrics = str(draft.get("lyrics") or draft.get("source_lyrics") or "").strip()
+        if len(lyrics) < 8:
+            raise HTTPException(409, "作词方案缺少歌词")
+        draft["lyrics"] = lyrics
+        draft["source_lyrics"] = lyrics
+        draft["workflow"] = "lyrics_only"
+        draft["workflow_stage"] = "lyrics_ready"
+        draft["instrumental"] = False
         session.draft = draft
         flag_modified(session, "draft")
+        session.state = "ready"
+        messages = list(session.messages or [])
+        messages.append(
+            {
+                "role": "assistant",
+                "content": (
+                    "歌词已确认锁定。下一步可切换到「谱曲 Agent」，按这首词的意境与节奏谱曲；"
+                    "或在本会话继续说「按这首词谱曲」。\n\n"
+                    f"歌词预览：\n{lyrics[:480]}"
+                ),
+                "at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+        session.messages = messages
+        db.commit()
+        db.refresh(session)
+        return {
+            "data": {
+                "session": session_public(session),
+                "job": None,
+                "lyrics_ready": True,
+                "project_id": str(session.project_id) if session.project_id else None,
+            }
+        }
+
+    if session.state != "awaiting_confirm" or not (draft.get("prompt") or draft.get("lyrics")):
+        raise HTTPException(409, "当前没有待确认的生成方案")
+
+    # Step 2: compose from lyrics (default for 谱曲 Agent)
+    lyrics = str(draft.get("lyrics") or draft.get("source_lyrics") or "").strip()
+    if kind == "melody" or workflow == "compose_from_lyrics":
+        draft = dict(draft)
+        if workflow != "melody_only":
+            if len(lyrics) < 8:
+                raise HTTPException(409, "谱曲需要先有歌词，请先完成作词或粘贴歌词")
+            draft["instrumental"] = False
+            draft["lyrics"] = lyrics
+            draft["source_lyrics"] = lyrics
+            draft["workflow"] = "compose_from_lyrics"
+        session.draft = draft
+        flag_modified(session, "draft")
+
     project = ensure_agent_project(db, user, draft)
     session.project_id = project.id
     db.commit()
 
     engine = str(draft.get("engine") or "minimax").lower()
     mode = str(draft.get("mode") or "parametric").lower()
-    instrumental = bool(draft.get("instrumental", True))
-    lyrics = str(draft.get("lyrics") or "")
+    instrumental = bool(draft.get("instrumental", False))
+    lyrics = str(draft.get("lyrics") or draft.get("source_lyrics") or "")
+    if draft.get("workflow") == "melody_only":
+        instrumental = True
+        lyrics = ""
+    elif draft.get("workflow") == "compose_from_lyrics" or (kind == "melody" and lyrics.strip()):
+        instrumental = False
     if engine == "suno" and mode == "text":
         instrumental = bool(draft.get("instrumental", False))
     if engine in {"suno", "mureka"} and mode == "custom" and not lyrics.strip():
         lyrics = str(draft.get("prompt") or "")
-    if kind == "melody":
-        instrumental = True
-        lyrics = ""
-    prompt = str(draft.get("prompt") or draft.get("summary") or "对话创作")[:6000]
+    prompt = str(draft.get("prompt") or draft.get("summary") or "按歌词意境谱曲")[:6000]
+    if not instrumental and lyrics.strip():
+        if "按词" not in prompt and "歌词" not in prompt:
+            prompt = f"{prompt}\n按歌词意境、换气与节奏谱曲，旋律跟着词走，短句贴唱，禁止念词腔。".strip()
     idempotency_key = body.idempotency_key or f"agent-{session.id}-{uuid.uuid4()}"
     context = {
         "engine": engine,
@@ -572,23 +634,18 @@ def agent_confirm(
         "bpm": draft.get("bpm") or 90,
         "mood": draft.get("mood") or "",
         "from_agent": True,
+        "workflow": draft.get("workflow") or "compose_from_lyrics",
     }
     if not settings.runninghub_api_key:
         raise HTTPException(503, "音乐服务未配置")
-    cost = {
-        "minimax": settings.music_cost_credits,
-        "suno": settings.suno_credit_cost,
-        "mureka": settings.mureka_credit_cost,
-    }.get(engine, settings.music_cost_credits)
-    if user.credit_balance < cost:
-        raise HTTPException(402, f"积分不足（需要 {cost}，当前 {user.credit_balance}）")
+    # platform credits disabled
     job = GenerationJob(
         project_id=project.id,
         user_id=user.id,
         job_type="agent_generate",
         status="queued",
         progress_stage="queued",
-        prompt=prompt if len(prompt) >= 8 else f"{prompt} ambient tone",
+        prompt=prompt if len(prompt) >= 8 else f"{prompt} melodic vocal",
         params={
             "format": "mp3",
             "instrumental": instrumental,
@@ -605,13 +662,16 @@ def agent_confirm(
         provider="runninghub",
         model=engine if engine != "minimax" else settings.music_model,
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
     session.state = "generating"
     session.confirmed_job_id = job.id
+    draft["workflow_stage"] = "composing"
+    session.draft = draft
+    flag_modified(session, "draft")
     messages = list(session.messages or [])
     messages.append(
         {
@@ -619,7 +679,8 @@ def agent_confirm(
             "content": (
                 f"已确认，正在用 "
                 f"{ {'minimax': 'MiniMax', 'suno': '苏诺', 'mureka': 'Mureka'}.get(engine, engine) } "
-                f"生成（预留 {cost} 积分）。可在项目「{project.name}」查看 Takes。"
+                f"{'按歌词谱曲' if lyrics.strip() and not instrumental else '生成'}中。"
+                f"可在项目「{project.name}」查看 Takes。"
             ),
             "at": datetime.now(timezone.utc).isoformat(),
         }
@@ -700,8 +761,7 @@ def agent_fill_lyrics_on_melody(
         raise HTTPException(500, "自动填词失败，请补充歌词意向后再试")
 
     cost = CREDIT_COSTS["vocal_cover"]
-    if user.credit_balance < cost:
-        raise HTTPException(402, f"积分不足（需要 {cost}，当前 {user.credit_balance}）")
+    # platform credits disabled
 
     cover_prompt = (
         f"{style_prompt}\n保留参考纯音乐的旋律与编曲骨架；按歌词贴合唱，短句换气，"
@@ -733,12 +793,12 @@ def agent_fill_lyrics_on_melody(
         provider="runninghub",
         model="minimax-music-cover",
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
         parent_asset_id=parent.id,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
 
     draft["instrumental"] = False
     draft["lyrics"] = lyrics
@@ -752,7 +812,7 @@ def agent_fill_lyrics_on_melody(
         {
             "role": "assistant",
             "content": (
-                f"已按《{parent.title or project.name}》的旋律写好词，正在贴人声（预留 {cost} 积分）。\n"
+                f"已按《{parent.title or project.name}》的旋律写好词，正在贴人声。\n"
                 f"歌词预览：\n{lyrics[:480]}"
             ),
             "at": datetime.now(timezone.utc).isoformat(),
@@ -840,12 +900,12 @@ def tool_cover(body: CoverToolBody, user: User = Depends(get_current_user), db: 
         provider="runninghub",
         model="minimax-music-cover",
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
         parent_asset_id=parent.id,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
     db.commit()
     enqueue_job(str(job.id))
     return {"data": job_public(job)}
@@ -893,8 +953,7 @@ def create_tool_job(body: ToolJobBody, user: User = Depends(get_current_user), d
     if body.tool == "merge" and len(storage_keys) < 2:
         raise HTTPException(400, "合并需要至少两段音频（上传或选择作品）")
     cost = cost_for_tool(body.tool, body.backend)
-    if cost > 0 and user.credit_balance < cost:
-        raise HTTPException(402, "积分不足")
+    # platform credits disabled
     job = GenerationJob(
         project_id=project.id,
         user_id=user.id,
@@ -917,13 +976,13 @@ def create_tool_job(body: ToolJobBody, user: User = Depends(get_current_user), d
         provider="tool",
         model=body.tool,
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
         parent_asset_id=parent_asset_id,
     )
     db.add(job)
     db.flush()
     if cost > 0:
-        hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+        hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
     db.commit()
     enqueue_job(str(job.id))
     return {"data": job_public(job)}
@@ -1106,14 +1165,14 @@ def quick_generate(body: QuickGenerateBody, user: User = Depends(get_current_use
         provider="runninghub",
         model=engine if engine != "minimax" else settings.music_model,
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
-        credit_hold=cost,
+        credit_hold=0,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name=project.name, job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name=project.name, job_id=job.id, key=str(job.id))
     db.commit()
     enqueue_job(str(job.id))
-    return {"data": {"project_id": str(project.id), "job": job_public(job), "cost": cost}}
+    return {"data": {"project_id": str(project.id), "job": job_public(job), "cost": 0}}
 
 
 @router.get("/api/albums")
@@ -1300,12 +1359,12 @@ def create_mv(body: MvCreate, user: User = Depends(get_current_user), db: Sessio
         },
         provider="audio-worker",
         model="mv_render",
-        credit_hold=cost,
+        credit_hold=0,
         capability_schema_version=CAPABILITY_SCHEMA_VERSION,
     )
     db.add(job)
     db.flush()
-    hold_credits(db, user, cost, project_name="MV", job_id=job.id, key=str(job.id))
+    hold_credits(db, user, 0, project_name="MV", job_id=job.id, key=str(job.id))
     mv.job_id = job.id
     mv.status = "rendering"
     db.commit()

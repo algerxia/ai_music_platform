@@ -17,50 +17,50 @@ AGENT_KINDS = ("general", "melody", "lyrics")
 
 SYSTEM_GENERAL = (
     "你是 Studio AI 的对话式音乐创作助手。全程用简体中文与用户交流（专有名词可保留英文）。"
-    "审美目标：先做出好听、有记忆点的旋律与编曲，再贴贴合旋律的口语歌词；忌「念词」式人声。"
+    "审美目标：先写出可唱、有意境的歌词，再按歌词的意象、换气与节奏感去谱曲；忌「念词」式人声。"
     "规则："
-    "1) 一次最多追问 1–2 个高价值问题（曲风/情绪/场景/想对谁唱）。默认不要一上来就写整首歌词。"
-    "2) 默认两步法：第一步确认卡 instrumental=true、lyrics 空；第二步用户听过后交给作词 Agent 或点填词。"
-    "3) 仅当用户明确要求一次出带词人声时，才可 instrumental=false 并附稀疏歌词。"
+    "1) 一次最多追问 1–2 个高价值问题（想对谁唱/场景意象/曲风情绪）。默认先作词，不要先出纯音乐。"
+    "2) 默认两步法："
+    "第一步输出确认卡 workflow=\"lyrics_only\"、instrumental=false、lyrics 必填（可唱短句+结构标签），prompt 写歌词情绪与演唱气质；"
+    "第二步在用户确认歌词后，再输出 workflow=\"compose_from_lyrics\" 的谱曲确认卡：沿用歌词，prompt 写配器/律动/钩子如何贴合词意与节奏。"
+    "3) 仅当用户明确只要纯音乐配乐、不要歌词时，才可 instrumental=true、lyrics 空、workflow=\"melody_only\"。"
     "4) 信息足够时输出 ```confirm ... ``` JSON 确认卡："
     "title, engine(minimax|suno|mureka), mode(text|custom|parametric), prompt, lyrics, tags, "
-    "instrumental(bool), genre(array), bpm, mood, estimated_credits(int), summary, "
+    "instrumental(bool), genre(array), bpm, mood, estimated_credits(int), summary, workflow, "
     "template_id(可选，导师模板 id), quality_boost(可选 bool，苏诺高音质)。"
     "5) 面向用户字段用中文；summary 1–3 句中文。默认引擎 minimax。"
     "6) 用户点名导师模板/曲风时，prompt/tags 应对齐提示词库；苏诺可开 quality_boost。"
-    "7) 确认前说明：点确认才扣积分。禁止承诺版权/克隆在世艺人。"
+    "7) 确认前说明：作词确认不计费；谱曲确认后才会调用 RunningHub 计费。禁止承诺版权/克隆在世艺人。"
 )
 
 SYSTEM_MELODY = (
-    "你是 Studio AI「旋律创作 Agent」。全程简体中文。"
-    "你只负责创作好听、可记忆的纯音乐旋律与编曲，不做歌词、不生成带词人声。"
+    "你是 Studio AI「谱曲 Agent」。全程简体中文。"
+    "你根据已有歌词的意境、换气与节奏感来谱曲编配，并生成带词人声成品；你不重写整首歌词。"
     "规则："
-    "1) 一次最多追问 1–2 个问题：曲风、情绪、主奏乐器、时长/BPM、使用场景。"
-    "2) 信息足够时输出确认卡 ```confirm ... ```，且必须："
-    "instrumental=true；lyrics 必须是空字符串 \"\"；"
-    "prompt 只写乐器、旋律动机、律动、钩子、空间感、高潮落点，并写明「纯音乐 / instrumental / 无人声」；"
-    "不要写演唱法或歌词意向；可引用 template_id 并把模板编曲改写成无人声。"
-    "3) 确认卡字段：title, engine(优先 minimax), mode(parametric|text), prompt, lyrics=\"\", tags, "
-    "instrumental=true, genre(array), bpm, mood, estimated_credits(int, minimax 约 10), summary, template_id(可选)。"
-    "summary 用中文说明这是旋律草案，满意后再去「作词 Agent」填词。"
-    "4) 用户若要求写词：礼貌说明你专攻旋律，请切换到「作词 Agent」，并把当前 Take 交给对方。"
-    "5) 确认前不扣积分；默认引擎 minimax；禁止版权承诺与声音克隆。"
+    "1) 必须先有歌词。若会话草稿已有 lyrics / source_lyrics，直接使用；若没有，请用户粘贴歌词或先去「作词 Agent」。"
+    "2) 可追问：曲风、主奏乐器、BPM、空间感、人声气质；一次最多 1–2 个问题。"
+    "3) 信息足够时输出确认卡 ```confirm ... ```，且必须："
+    "workflow=\"compose_from_lyrics\"；instrumental=false；lyrics 沿用已有歌词（可微调标点/结构标签，不改核心意象）；"
+    "prompt 描述如何按词意与节奏谱曲：配器、律动、钩子、高潮落点、人声贴唱方式。"
+    "4) 确认卡字段：title, engine(优先 minimax), mode(parametric|custom), prompt, lyrics, tags, "
+    "instrumental=false, genre(array), bpm, mood, estimated_credits(int), summary, workflow=\"compose_from_lyrics\", template_id(可选)。"
+    "summary 用中文说明将按歌词意境谱曲。"
+    "5) 仅当用户明确要求纯音乐时，才可 instrumental=true 并清空 lyrics（仍要根据词意写情绪配乐）。"
+    "6) 确认前不计费；默认引擎 minimax；禁止版权承诺与声音克隆。"
 )
 
 SYSTEM_LYRICS = (
     "你是 Studio AI「作词 Agent」。全程简体中文。"
-    "你根据已有好听旋律写稀疏、可唱的口语歌词，并产出可贴人声的确认方案；忌朗诵念词腔。"
+    "你负责先写出稀疏、可唱、有意境的口语歌词；不谱曲、不生成音频。忌朗诵念词腔。"
     "规则："
-    "1) 必须先确认用户选中的旋律 Take（melody_asset_id）。若会话草稿或上下文已有 melody_asset_id，直接使用，勿再追问无关问题。"
-    "若没有，请用户从旋律 Agent 的 Take 点「交给作词」，或粘贴 asset id / 说明曲名。"
-    "2) 可追问：想对谁唱、场景意象、一两句必须出现的词；不要堆砌口号。"
-    "3) 信息足够时输出确认卡 ```confirm ... ```，字段："
-    "title, engine=minimax, mode=parametric, prompt(人声风格/情绪，短), lyrics(必填，带 [Verse]/[Chorus] 等标签), "
-    "tags, instrumental=false, genre, bpm, mood, estimated_credits(约 15), summary, "
-    "melody_asset_id(必填 UUID 字符串), workflow=\"lyrics_on_melody\"。"
-    "4) 歌词：短句、留白、跟着腔走；主歌字少；总字数尽量 ≤700；禁止密密麻麻朗诵长句；遵守提示词库作词准则。"
-    "5) 说明：确认后会按该旋律贴人声（Music Cover，失败则同风格短句人声保底）。确认前不扣积分。"
-    "6) 禁止版权承诺与声音克隆。"
+    "1) 可追问：想对谁唱、场景意象、一两句必须出现的词、大概情绪；不要堆砌口号。"
+    "2) 不需要旋律 Take。信息足够时输出确认卡 ```confirm ... ```，字段："
+    "title, engine=minimax, mode=parametric, prompt(歌词情绪/演唱气质，短), lyrics(必填，带 [Verse]/[Chorus] 等标签), "
+    "tags, instrumental=false, genre, bpm(建议演唱节奏感), mood, estimated_credits=0, summary, "
+    "workflow=\"lyrics_only\"。"
+    "3) 歌词：短句、留白、可换气；主歌字少；总字数尽量 ≤700；禁止密密麻麻朗诵长句；遵守提示词库作词准则。"
+    "4) 说明：确认后只锁定歌词，不计费；用户再去「谱曲 Agent」按词谱曲。"
+    "5) 禁止版权承诺与声音克隆。"
 )
 
 
@@ -84,15 +84,15 @@ SYSTEM_BY_KIND = {
 }
 
 WELCOME_BY_KIND = {
-    "general": "你好。我是对话式创作助手。先告诉我：曲风/情绪，还是只有一句灵感？默认先出纯音乐旋律，满意再填词。确认前不扣积分。",
-    "melody": "你好，我是「旋律创作 Agent」。只出纯音乐：说下曲风、情绪、主奏乐器或场景即可。确认后生成无人声 Take，满意再交给作词 Agent。",
-    "lyrics": "你好，我是「作词 Agent」。请先指定一首旋律 Take（可从旋律 Agent 点「交给作词」），再说想对谁唱、什么意象。确认后按旋律填词并贴人声。",
+    "general": "你好。我是对话式创作助手。默认先写歌词，再按歌词意境与节奏谱曲。先说：想对谁唱、什么意象，或一句灵感即可。作词确认不计费。",
+    "melody": "你好，我是「谱曲 Agent」。请先有歌词（可从作词 Agent 交过来），再说曲风、乐器与节奏偏好。确认后按词意谱曲并生成人声。",
+    "lyrics": "你好，我是「作词 Agent」。先告诉我想对谁唱、什么场景意象；确认后只锁定歌词，再交给谱曲 Agent 按词谱曲。",
 }
 
 TITLE_BY_KIND = {
     "general": "对话创作",
-    "melody": "旋律创作",
-    "lyrics": "作词填词",
+    "melody": "按词谱曲",
+    "lyrics": "先作词",
 }
 
 
@@ -155,32 +155,54 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
     if engine not in {"minimax", "suno", "mureka"}:
         engine = "minimax"
     mode = str(data.get("mode") or "parametric").lower()
-    raw_lyrics = str(data.get("lyrics") or "").strip()
+    raw_lyrics = str(data.get("lyrics") or data.get("source_lyrics") or "").strip()
     melody_asset_id = str(data.get("melody_asset_id") or data.get("parent_asset_id") or "").strip()
+    requested_workflow = str(data.get("workflow") or "").strip().lower()
 
-    if kind == "melody":
-        instrumental = True
-        raw_lyrics = ""
-        workflow = "melody_only"
-        credits = {"minimax": 10, "suno": 20, "mureka": 50}.get(engine, 10)
-    elif kind == "lyrics":
+    if kind == "lyrics":
         instrumental = False
-        workflow = "lyrics_on_melody"
-        credits = 15
+        workflow = "lyrics_only"
+        credits = 0
         engine = "minimax"
         if not raw_lyrics:
             return None
-    else:
-        if "instrumental" in data:
-            instrumental = bool(data.get("instrumental"))
-        else:
-            instrumental = not bool(raw_lyrics)
-        if not raw_lyrics:
+    elif kind == "melody":
+        # 谱曲：默认按词生成带词人声；仅用户明确只要纯音乐时走 melody_only
+        if requested_workflow == "melody_only" or (bool(data.get("instrumental")) and not raw_lyrics):
             instrumental = True
-        workflow = "lyrics_on_melody" if (melody_asset_id and raw_lyrics) else ("melody_first" if instrumental else "vocal_direct")
+            raw_lyrics = ""
+            workflow = "melody_only"
+        else:
+            instrumental = False
+            workflow = "compose_from_lyrics"
+            if not raw_lyrics:
+                return None
         credits = {"minimax": 10, "suno": 20, "mureka": 50}.get(engine, 10)
-        if workflow == "lyrics_on_melody":
-            credits = 15
+    else:
+        if requested_workflow == "lyrics_only" or (
+            raw_lyrics and requested_workflow not in {"compose_from_lyrics", "vocal_direct", "melody_only"}
+            and not bool(data.get("compose", False))
+        ):
+            # 综合助手默认先锁词
+            if not raw_lyrics:
+                return None
+            instrumental = False
+            workflow = "lyrics_only"
+            credits = 0
+        elif requested_workflow == "melody_only" or (bool(data.get("instrumental")) and not raw_lyrics):
+            instrumental = True
+            raw_lyrics = ""
+            workflow = "melody_only"
+            credits = {"minimax": 10, "suno": 20, "mureka": 50}.get(engine, 10)
+        else:
+            instrumental = False if raw_lyrics else bool(data.get("instrumental", False))
+            if raw_lyrics:
+                instrumental = False
+                workflow = "compose_from_lyrics"
+            else:
+                instrumental = True
+                workflow = "melody_only"
+            credits = {"minimax": 10, "suno": 20, "mureka": 50}.get(engine, 10)
 
     title = str(data.get("title") or TITLE_BY_KIND.get(kind, "对话创作"))[:120]
     prompt = str(data.get("prompt") or data.get("summary") or "")[:6000]
@@ -208,8 +230,10 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
         raw_lyrics = ""
         if "纯音乐" not in prompt and "instrumental" not in prompt.lower() and "无人声" not in prompt:
             prompt = f"{prompt}\n纯音乐，instrumental，无人声，突出可记忆旋律钩子。".strip()
-    elif kind == "lyrics" and not prompt.strip():
-        prompt = "保留参考旋律骨架；短句换气，跟着腔唱，禁止念词。"
+    elif workflow == "lyrics_only" and not prompt.strip():
+        prompt = "口语可唱，短句留白，先锁定歌词意象与节奏感。"
+    elif workflow == "compose_from_lyrics" and not prompt.strip():
+        prompt = "按歌词意境与换气节奏谱曲；旋律跟着词走，短句贴唱，禁止念词腔。"
 
     enriched = enrich_prompt_for_engine(
         engine=engine,
@@ -231,10 +255,12 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
         "instrumental": instrumental,
     }
     summary = _chinese_summary(summary_src)
-    if kind == "melody" and "旋律" not in summary:
-        summary = f"{summary}；纯音乐旋律草案，满意后交给作词 Agent。"[:500]
-    if kind == "lyrics" and "填词" not in summary:
-        summary = f"{summary}；按选定旋律填词并贴人声。"[:500]
+    if workflow == "lyrics_only" and "歌词" not in summary:
+        summary = f"{summary}；先锁定歌词，确认后再谱曲。"[:500]
+    if workflow == "compose_from_lyrics" and "谱曲" not in summary:
+        summary = f"{summary}；按歌词意境与节奏谱曲。"[:500]
+    if workflow == "melody_only" and "纯音乐" not in summary:
+        summary = f"{summary}；纯音乐配乐。"[:500]
 
     out = {
         "title": title,
@@ -257,6 +283,8 @@ def _extract_confirm(text: str, *, kind: str = "general") -> dict | None:
         out["template_id"] = template_id
     if melody_asset_id:
         out["melody_asset_id"] = melody_asset_id
+    if raw_lyrics:
+        out["source_lyrics"] = raw_lyrics[:5000]
     return out
 
 
@@ -431,13 +459,17 @@ def create_session(
     kind = normalize_agent_kind(kind)
     draft = dict(seed_draft or {})
     draft["agent_kind"] = kind
-    melody_id = str(draft.get("melody_asset_id") or "").strip()
+    seed_lyrics = str(draft.get("source_lyrics") or draft.get("lyrics") or "").strip()
     welcome = WELCOME_BY_KIND[kind]
-    if kind == "lyrics" and melody_id:
+    if kind == "melody" and seed_lyrics:
+        preview = seed_lyrics.replace("\n", " / ")[:80]
         welcome = (
-            f"已带入旋律 Take `{melody_id}`。"
-            "说说想对谁唱、什么意象即可；确认后按这首旋律填词并贴人声。确认前不扣积分。"
-        )
+            f"已带入歌词：「{preview}…」。"
+            if len(seed_lyrics) > 80
+            else f"已带入歌词：「{preview}」。"
+        ) + "说说想要的曲风、乐器与节奏，确认后按词意谱曲。"
+    elif kind == "lyrics" and seed_lyrics:
+        welcome = "已带入一段歌词草稿。可以说要怎么改意象或节奏感；确认后锁定歌词，再交给谱曲 Agent。"
     session = AgentSession(
         user_id=user.id,
         title=(title or TITLE_BY_KIND[kind])[:120],
@@ -489,15 +521,30 @@ def append_user_message(db: Session, session: AgentSession, content: str) -> lis
     db.refresh(session)
     kind = normalize_agent_kind(getattr(session, "kind", None))
     history = _build_history(messages, kind=kind)
-    # Inject melody binding for lyrics agent
+    # Inject bound lyrics for compose agent / continue-from-lyrics
     draft = session.draft or {}
-    melody_id = str(draft.get("melody_asset_id") or "").strip()
-    if kind == "lyrics" and melody_id:
+    seed_lyrics = str(draft.get("source_lyrics") or draft.get("lyrics") or "").strip()
+    if kind == "melody" and seed_lyrics:
         history.insert(
             1,
             {
                 "role": "system",
-                "content": f"当前绑定旋律 melody_asset_id={melody_id}。确认卡必须带上该字段。",
+                "content": (
+                    "当前绑定歌词如下，谱曲确认卡必须沿用（可微调结构标签，不改核心意象）：\n"
+                    f"{seed_lyrics[:3500]}"
+                ),
+            },
+        )
+    elif kind == "general" and draft.get("workflow_stage") == "lyrics_ready" and seed_lyrics:
+        history.insert(
+            1,
+            {
+                "role": "system",
+                "content": (
+                    "用户已确认歌词（workflow_stage=lyrics_ready）。下一步应输出 "
+                    "workflow=\"compose_from_lyrics\" 的谱曲确认卡，沿用歌词：\n"
+                    f"{seed_lyrics[:3500]}"
+                ),
             },
         )
     return history
@@ -506,15 +553,31 @@ def append_user_message(db: Session, session: AgentSession, content: str) -> lis
 def finalize_assistant_reply(db: Session, session: AgentSession, reply: str) -> AgentSession:
     kind = normalize_agent_kind(getattr(session, "kind", None))
     confirm = _extract_confirm(reply, kind=kind)
-    # Preserve bound melody id if model omitted it
-    if confirm and kind == "lyrics":
-        bound = str((session.draft or {}).get("melody_asset_id") or "").strip()
-        if bound and not confirm.get("melody_asset_id"):
-            confirm["melody_asset_id"] = bound
+    # Preserve bound lyrics for compose cards if model omitted them
+    if confirm and kind in {"melody", "general"}:
+        prev = session.draft or {}
+        prev_lyrics = str(prev.get("source_lyrics") or prev.get("lyrics") or "").strip()
+        if prev_lyrics and not str(confirm.get("lyrics") or "").strip():
+            confirm["lyrics"] = prev_lyrics
+            confirm["source_lyrics"] = prev_lyrics
+            if confirm.get("workflow") != "melody_only":
+                confirm["instrumental"] = False
+                confirm["workflow"] = "compose_from_lyrics"
+        # 综合助手：歌词已锁定后，下一张确认卡应进入谱曲
+        if (
+            kind == "general"
+            and prev.get("workflow_stage") == "lyrics_ready"
+            and confirm.get("workflow") == "lyrics_only"
+            and str(confirm.get("lyrics") or prev_lyrics).strip()
+        ):
+            confirm["workflow"] = "compose_from_lyrics"
+            confirm["instrumental"] = False
+            confirm["lyrics"] = str(confirm.get("lyrics") or prev_lyrics).strip()
+            confirm["source_lyrics"] = confirm["lyrics"]
     visible = _visible_reply(reply)
     assistant_msg = {
         "role": "assistant",
-        "content": visible or "我整理了一份可生成方案，请确认后开始。",
+        "content": visible or "我整理了一份方案，请确认。",
         "at": datetime.now(timezone.utc).isoformat(),
     }
     if confirm:
@@ -525,6 +588,11 @@ def finalize_assistant_reply(db: Session, session: AgentSession, reply: str) -> 
         merged = {**prev, **confirm, "agent_kind": kind}
         if prev.get("melody_asset_id") and not merged.get("melody_asset_id"):
             merged["melody_asset_id"] = prev["melody_asset_id"]
+        keep_lyrics = str(merged.get("lyrics") or prev.get("source_lyrics") or prev.get("lyrics") or "").strip()
+        if keep_lyrics:
+            merged["source_lyrics"] = keep_lyrics
+            if not merged.get("lyrics"):
+                merged["lyrics"] = keep_lyrics
         session.draft = merged
         if confirm.get("title"):
             session.title = str(confirm["title"])[:120]

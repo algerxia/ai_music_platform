@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import settings
-from app.models import Base, Consent, CreditLedger, User
+from app.models import Base, Consent, User
 from app.passwords import hash_password
 
 
@@ -34,6 +34,7 @@ _ALTERS = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMPTZ",
     "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS kind VARCHAR(32) DEFAULT 'general'",
     "CREATE INDEX IF NOT EXISTS ix_agent_sessions_kind ON agent_sessions (kind)",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
 ]
 
 
@@ -51,16 +52,23 @@ def init_db() -> None:
         for stmt in _ALTERS:
             conn.execute(text(stmt))
     with SessionLocal() as db:
+        from app.settings_store import apply_stored_settings
+
+        apply_stored_settings(db)
         email = settings.bootstrap_admin_email.strip().lower()
         user = db.scalar(select(User).where(User.email == email))
         if user:
+            if not getattr(user, "is_admin", False):
+                user.is_admin = True
+                db.commit()
             return
         user = User(
             email=email,
             display_name=settings.bootstrap_admin_name,
             password_hash=hash_password(settings.bootstrap_admin_password),
             plan_code="creator",
-            credit_balance=settings.free_trial_credits,
+            is_admin=True,
+            credit_balance=0,
         )
         db.add(user)
         db.flush()
@@ -78,18 +86,6 @@ def init_db() -> None:
                 consent_type="privacy",
                 document_version="1.0",
                 accepted=True,
-            )
-        )
-        db.add(
-            CreditLedger(
-                user_id=user.id,
-                entry_type="grant",
-                amount=settings.free_trial_credits,
-                balance_after=settings.free_trial_credits,
-                label="首次免费额度",
-                project_name="Creator 方案",
-                status="已发放",
-                idempotency_key=f"grant-signup-{user.id}",
             )
         )
         db.commit()

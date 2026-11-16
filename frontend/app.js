@@ -2,7 +2,7 @@ import { bindPlatformExt } from './js/platform-ext.js';
 
 const AUTH_KEY = 'studio-ai-token-v2';
 const API_BASE = (window.STUDIO_CONFIG?.API_BASE || '').replace(/\/$/, '');
-const CREDIT_COST = 10;
+const CREDIT_COST = 0;
 const PROMPT_MAX = 6000;
 let platformExtReady = false;
 let getCreateContext = () => ({ engine: 'minimax', mode: 'parametric' });
@@ -13,7 +13,9 @@ let currentUser = null;
 let projects = [];
 let ledger = [];
 let creditBalance = 0;
-let monthlyQuota = 200;
+let monthlyQuota = 0;
+let rhAccount = null;
+let adminUsers = [];
 let currentProjectId = null;
 let currentView = 'studio';
 let libraryFilter = 'all';
@@ -73,6 +75,8 @@ function logout(showMessage = true) {
   localStorage.removeItem(AUTH_KEY);
   projects = [];
   ledger = [];
+  rhAccount = null;
+  adminUsers = [];
   currentProjectId = null;
   stopAllPolls();
   navigate('login', { replace: true });
@@ -131,29 +135,43 @@ function render() {
     if ($('#profile-daw') && document.activeElement !== $('#profile-daw')) $('#profile-daw').value = currentUser.daw || '';
     if ($('#profile-role') && document.activeElement !== $('#profile-role')) $('#profile-role').value = currentUser.role_label || '';
     const planLabel = $('.profile-copy small');
-    if (planLabel) planLabel.textContent = `${currentUser.plan_name || 'Creator'} 方案`;
+    if (planLabel) planLabel.textContent = currentUser.is_admin ? '管理员' : '创作者';
   }
+  const navUsers = $('#nav-users');
+  if (navUsers) navUsers.hidden = !currentUser?.is_admin;
   renderProjectCards();
   renderLibrary();
   renderUsage();
+  renderUsers();
   renderRecentJobs();
   renderNotices();
   $('#project-count').textContent = listedProjects().length;
   $('#recent-count').textContent = allProjects().filter((item) => item.status !== 'archived').length;
-  $('#sidebar-credits').textContent = creditBalance;
-  const ratio = Math.max(0, Math.min(100, (creditBalance / Math.max(monthlyQuota, 1)) * 100));
-  $('#credit-bar').style.width = `${ratio}%`;
-  $('#usage-meter-fill').style.width = `${ratio}%`;
-  $('#usage-credits').textContent = creditBalance;
-  const quotaLabel = $('#usage-credits')?.parentElement?.querySelector('span');
-  if (quotaLabel) quotaLabel.textContent = ` / ${monthlyQuota}`;
+  const money = rhAccount?.remain_money;
+  $('#sidebar-credits').textContent = money == null ? (rhAccount?.error ? '—' : '…') : String(money);
+  const unit = $('#sidebar-credits-unit');
+  if (unit) unit.textContent = ` ${rhAccount?.currency || 'CNY'}`;
+  $('#credit-bar').style.width = money == null ? '0%' : '100%';
+  $('#usage-meter-fill').style.width = money == null ? '0%' : '100%';
+  $('#usage-credits').textContent = money == null ? '—' : String(money);
+  const usageUnit = $('#usage-credits-unit');
+  if (usageUnit) usageUnit.textContent = ` ${rhAccount?.currency || 'CNY'}`;
   $('#usage-projects').textContent = allProjects().filter((item) => item.status !== 'archived').length;
-  const spent = Math.max(0, monthlyQuota - creditBalance);
-  if ($('#usage-spent')) $('#usage-spent').textContent = `已使用 ${spent} 积分`;
-  if ($('#usage-plan-name') && currentUser) $('#usage-plan-name').innerHTML = `${escapeHTML(currentUser.plan_name || 'Creator')} <span class="plan-status">演示</span>`;
-  if ($('#usage-plan-desc') && currentUser?.plan_note) $('#usage-plan-desc').textContent = currentUser.plan_note;
+  if ($('#usage-spent')) {
+    const coins = rhAccount?.remain_coins;
+    $('#usage-spent').textContent = coins == null ? (rhAccount?.error || '硬币 —') : `硬币 ${coins}`;
+  }
+  if ($('#usage-plan-name')) {
+    $('#usage-plan-name').textContent = rhAccount?.configured
+      ? (rhAccount.key_masked || '已配置')
+      : '未配置';
+  }
+  if ($('#usage-plan-desc')) {
+    $('#usage-plan-desc').textContent = rhAccount?.error
+      || (currentUser?.is_admin ? '可在设置中更新 RunningHub API Key 并查询余额。' : '音乐生成按 RunningHub 上游账户计费。');
+  }
   const generate = $('#generate-button');
-  if (generate) generate.disabled = creditBalance < CREDIT_COST || !musicConfigured;
+  if (generate) generate.disabled = !musicConfigured;
   if (currentView === 'editor' && currentProjectId) renderEditor();
   updatePromptCount();
 }
@@ -220,7 +238,7 @@ function renderPendingJob(project) {
   const stage = job.progress_stage || job.status || 'queued';
   const stageLabel = stage === 'submitting' ? '提交中' : stage;
   const taskLabel = job.id && job.id !== 'pending-local' ? `任务 ${job.id}` : '正在提交到队列';
-  return `<div class="pending-job"><div class="pending-orbit"></div><h3>正在${jobTypeLabel(job.job_type) === '人声翻唱' ? '翻唱' : '生成'}…</h3><p>阶段：${escapeHTML(stageLabel)} · ${escapeHTML(jobTypeLabel(job.job_type))} · 已预留 ${job.credit_hold || CREDIT_COST} 积分</p><small>${escapeHTML(taskLabel)} · MiniMax 通常约 1 分钟</small>${cancel}</div>`;
+  return `<div class="pending-job"><div class="pending-orbit"></div><h3>正在${jobTypeLabel(job.job_type) === '人声翻唱' ? '翻唱' : '生成'}…</h3><p>阶段：${escapeHTML(stageLabel)} · ${escapeHTML(jobTypeLabel(job.job_type))} · RunningHub 计费</p><small>${escapeHTML(taskLabel)} · MiniMax 通常约 1 分钟</small>${cancel}</div>`;
 }
 
 function renderResultCard(project, asset) {
@@ -339,11 +357,61 @@ function renderLibrary() {
 }
 
 function renderUsage() {
-  $('#ledger-body').innerHTML = ledger.map((row) => `<tr><td>${escapeHTML(row.label)}</td><td>${escapeHTML(row.project || '-')}</td><td>${escapeHTML(row.date)}</td><td class="${row.amount < 0 ? 'debit' : 'credit'}">${row.amount > 0 ? '+' : ''}${row.amount}</td><td>${escapeHTML(row.status)}</td></tr>`).join('') || '<tr><td colspan="5">暂无积分记录</td></tr>';
+  const body = $('#ledger-body');
+  if (!body) return;
+  if (!rhAccount) {
+    body.innerHTML = '<tr><td colspan="2">正在查询 RunningHub 账户…</td></tr>';
+  } else if (rhAccount.error) {
+    body.innerHTML = `<tr><td>状态</td><td>${escapeHTML(rhAccount.error)}</td></tr>`;
+  } else {
+    const rows = [
+      ['余额', `${rhAccount.remain_money ?? '—'} ${rhAccount.currency || 'CNY'}`],
+      ['硬币', rhAccount.remain_coins ?? '—'],
+      ['积分点', rhAccount.remain_point ?? '—'],
+      ['当前任务数', rhAccount.current_task_counts ?? '—'],
+      ['API 类型', rhAccount.api_type || '—'],
+      ['Key', rhAccount.key_masked || '—'],
+      ['Base URL', rhAccount.base_url || '—'],
+    ];
+    body.innerHTML = rows.map(([k, v]) => `<tr><td>${escapeHTML(k)}</td><td>${escapeHTML(String(v))}</td></tr>`).join('');
+  }
   const grid = $('#pricing-preview');
   if (grid) {
-    grid.innerHTML = `<div><div class="section-kicker">PLANS</div><h2>方案对照（未开放真实购买）</h2><p>价格为 PRD 示例。当前环境发放演示积分，不经过支付 webhook。</p></div><div class="plan-grid">${plans.map((plan) => `<article class="plan-tile"><h3>${escapeHTML(plan.name)}</h3><div>${escapeHTML(plan.price_display)}</div><p>${escapeHTML(plan.note || '')}</p><ul>${(plan.features || []).map((f) => `<li>${escapeHTML(f)}</li>`).join('')}</ul></article>`).join('')}</div>`;
+    grid.innerHTML = `<div><div class="section-kicker">BILLING</div><h2>按 RunningHub 上游计费</h2><p>平台已取消积分账本。MiniMax Music 约 ¥0.8/次，以 RunningHub 控制台账单为准。</p></div>`;
   }
+  const pill = $('#usage-status-pill');
+  if (pill) {
+    pill.innerHTML = rhAccount?.configured
+      ? '<span class="status-dot"></span>RunningHub 已配置'
+      : '<span class="status-dot"></span>待配置 API Key';
+  }
+}
+
+function renderUsers() {
+  const body = $('#users-body');
+  if (!body) return;
+  if (!currentUser?.is_admin) {
+    body.innerHTML = '<tr><td colspan="5">需要管理员权限</td></tr>';
+    return;
+  }
+  body.innerHTML = adminUsers.map((user) => {
+    const role = user.is_admin ? '管理员' : '用户';
+    const status = user.status === 'disabled' ? '已停用' : '正常';
+    const toggleStatus = user.status === 'disabled' ? 'active' : 'disabled';
+    const toggleLabel = user.status === 'disabled' ? '启用' : '停用';
+    const adminToggle = user.is_admin ? '取消管理员' : '设为管理员';
+    return `<tr>
+      <td><strong>${escapeHTML(user.display_name)}</strong><br /><small>${escapeHTML(user.email)}</small></td>
+      <td>${role}</td>
+      <td>${status}</td>
+      <td>${escapeHTML((user.created_at || '').slice(0, 10))}</td>
+      <td class="library-row-actions">
+        <button class="mini-action" type="button" data-admin-user="${user.id}" data-admin-action="toggle-status" data-admin-value="${toggleStatus}">${toggleLabel}</button>
+        <button class="mini-action" type="button" data-admin-user="${user.id}" data-admin-action="toggle-admin" data-admin-value="${user.is_admin ? '0' : '1'}">${adminToggle}</button>
+        <button class="mini-action" type="button" data-admin-user="${user.id}" data-admin-action="reset-password">重置密码</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5">暂无用户</td></tr>';
 }
 
 function renderRecentJobs() {
@@ -381,7 +449,8 @@ const TITLE_MAP = {
   studio: '工作室 · Studio AI',
   projects: '所有项目 · Studio AI',
   library: '素材库 · Studio AI',
-  usage: '用量与方案 · Studio AI',
+  usage: '账户与计费 · Studio AI',
+  users: '用户管理 · Studio AI',
   settings: '设置 · Studio AI',
   editor: '参数式工作台 · Studio AI',
   agent: '对话式生成 · Studio AI',
@@ -407,6 +476,7 @@ function pathFor(view, projectId) {
     projects: '/projects',
     library: '/library',
     usage: '/usage',
+    users: '/users',
     settings: '/settings',
     agent: '/create/agent',
     parametric: '/create/parametric',
@@ -439,6 +509,7 @@ function parseLocation() {
   if (projectMatch) return { view: 'editor', projectId: projectMatch[1] };
   if (path === '/library') return { view: 'library' };
   if (path === '/usage') return { view: 'usage' };
+  if (path === '/users') return { view: 'users' };
   if (path === '/settings') return { view: 'settings' };
   if (path === '/terms') return { view: 'terms' };
   if (path === '/privacy') return { view: 'privacy' };
@@ -472,7 +543,8 @@ function applyRoute(route) {
     studio: ['工作室', '概览'],
     projects: ['项目', '所有项目'],
     library: ['素材库', '全部素材'],
-    usage: ['工作空间', '用量与方案'],
+    usage: ['工作空间', '账户与计费'],
+    users: ['工作空间', '用户管理'],
     settings: ['工作空间', '设置'],
     editor: ['参数式', route.label || '工作台'],
     agent: ['创作', '对话式生成'],
@@ -487,6 +559,8 @@ function applyRoute(route) {
   if ($('#crumb-current')) $('#crumb-current').textContent = current;
   document.title = TITLE_MAP[route.view] || 'Studio AI';
   if (route.view === 'settings' && token) loadProviderSettings();
+  if (route.view === 'usage' && token) loadRunningHubAccount().catch(() => null);
+  if (route.view === 'users' && token && currentUser?.is_admin) loadAdminUsers().catch(() => null);
   onPlatformView(route.view).catch(() => null);
 }
 
@@ -523,18 +597,17 @@ async function handleLocation() {
 async function refreshSession() {
   const me = await api('/api/me');
   currentUser = me.data;
-  const [projectPayload, creditPayload, capPayload, planPayload, jobPayload, activityPayload] = await Promise.all([
+  const [projectPayload, capPayload, planPayload, jobPayload, activityPayload] = await Promise.all([
     api('/api/projects?status=all'),
-    api('/api/credits/ledger'),
     api('/api/capabilities').catch(() => ({ data: null })),
     api('/api/plans').catch(() => ({ data: [] })),
     api('/api/jobs').catch(() => ({ data: [] })),
     api('/api/activity').catch(() => ({ data: { notices: [] } })),
   ]);
   projects = projectPayload.data || [];
-  ledger = creditPayload.data?.entries || [];
-  creditBalance = creditPayload.data?.balance ?? currentUser.credit_balance;
-  monthlyQuota = currentUser.monthly_quota || creditPayload.data?.monthly_quota || 200;
+  ledger = [];
+  creditBalance = 0;
+  monthlyQuota = 0;
   capabilities = capPayload.data;
   plans = planPayload.data || [];
   recentJobs = jobPayload.data || [];
@@ -543,6 +616,26 @@ async function refreshSession() {
     if (project.pendingJob) startJobPoll(project.id, project.pendingJob.id);
   });
   render();
+  loadRunningHubAccount().catch(() => null);
+  if (currentUser?.is_admin) loadAdminUsers().catch(() => null);
+}
+
+async function loadRunningHubAccount() {
+  try {
+    const payload = await api('/api/runninghub/account');
+    rhAccount = payload.data || null;
+  } catch (error) {
+    rhAccount = { configured: false, error: error.message, remain_money: null };
+  }
+  render();
+  return rhAccount;
+}
+
+async function loadAdminUsers() {
+  if (!currentUser?.is_admin) return;
+  const payload = await api('/api/admin/users');
+  adminUsers = payload.data || [];
+  renderUsers();
 }
 
 async function loadServiceHealth() {
@@ -555,18 +648,16 @@ async function loadServiceHealth() {
       ? `${currentUser.display_name} · ${musicConfigured ? musicLabel : '音乐服务待配置'}`
       : '未登录';
     $('.rights-note span:last-child').textContent = musicConfigured
-      ? `生成将调用 ${musicLabel}，并预留 ${health.music_cost_credits || CREDIT_COST} 平台积分；上游按 RunningHub 账号计费。`
-      : '生成服务尚未配置。请在 Docker/.env 中填写 RUNNINGHUB_API_KEY。';
-    $('.generation-cost strong').textContent = musicConfigured ? `${health.music_cost_credits || CREDIT_COST} 积分 / 次` : '需要配置服务';
-    $('.generation-cost small').textContent = musicConfigured ? '异步队列 · 失败自动退回' : '设置音乐模型与凭据';
+      ? `生成将调用 ${musicLabel}；费用按 RunningHub 上游账户计费。`
+      : '生成服务尚未配置。请管理员在设置中填写 RunningHub API Key。';
+    $('.generation-cost strong').textContent = musicConfigured ? 'RunningHub 计费' : '需要配置服务';
+    $('.generation-cost small').textContent = musicConfigured ? '异步队列 · 上游按次计费' : '设置音乐模型与凭据';
     $('#generate-button').innerHTML = `<span class="generate-stars">✳</span>${musicConfigured ? '生成音乐' : '配置生成服务'} <span class="button-arrow">→</span>`;
     $('#mode-pill').classList.toggle('service-ready', musicConfigured);
     $('.small-demo').innerHTML = `<span class="status-dot"></span>${musicConfigured ? `${musicLabel} 已就绪` : '音乐服务待配置'}`;
     $('#prompt-assist').querySelector('span').textContent = qwenConfigured ? 'Qwen 创作副驾' : '配置 Qwen 后可用';
     const fillHint = $('#fill-controls span');
     if (fillHint) fillHint.textContent = qwenConfigured ? '一键填写参数' : '一键填写参数（无 Qwen 时用规则推断）';
-    const usagePill = $('#view-usage .demo-pill');
-    if (usagePill) usagePill.innerHTML = '<span class="status-dot"></span>真实积分账本';
   } catch {
     $('#mode-label').textContent = '后端未连接';
   }
@@ -576,10 +667,17 @@ async function loadProviderSettings() {
   try {
     const payload = await api('/api/settings/providers');
     providerSettings = payload.data;
-    $('#provider-status').textContent = `Qwen ${providerSettings.qwen.configured ? '已配置' : '未配置'} · Music ${providerSettings.music.configured ? '已配置' : '未配置'}（${providerSettings.music.model}）`;
+    const canEdit = Boolean(providerSettings.can_edit);
+    $('#provider-status').textContent = `Qwen ${providerSettings.qwen.configured ? '已配置' : '未配置'}${providerSettings.qwen.key_masked ? `（${providerSettings.qwen.key_masked}）` : ''} · Music ${providerSettings.music.configured ? '已配置' : '未配置'}（${providerSettings.music.model}）${canEdit ? '' : ' · 只读'}`;
     $('#provider-music-model').value = providerSettings.music.model || 'minimax-music-2.5';
     $('#provider-music-provider').value = providerSettings.music.provider || 'runninghub';
     $('#provider-qwen-model').value = providerSettings.qwen.model || 'qwen-plus';
+    if ($('#provider-rh-base')) $('#provider-rh-base').value = providerSettings.music.base_url || 'https://www.runninghub.cn';
+    if ($('#provider-rh-masked')) $('#provider-rh-masked').value = providerSettings.music.key_masked || '';
+    $$('#provider-settings-form input, #provider-settings-form select, #save-provider-settings').forEach((el) => {
+      if (el.id === 'provider-rh-masked') return;
+      el.disabled = !canEdit;
+    });
   } catch (error) {
     $('#provider-status').textContent = error.message;
   }
@@ -587,6 +685,10 @@ async function loadProviderSettings() {
 
 async function saveProviderSettings(event) {
   event.preventDefault();
+  if (!currentUser?.is_admin) {
+    showToast('仅管理员可修改服务配置', 'error');
+    return;
+  }
   try {
     await api('/api/settings/providers', {
       method: 'PUT',
@@ -596,13 +698,15 @@ async function saveProviderSettings(event) {
         music_model: $('#provider-music-model').value,
         dashscope_api_key: $('#provider-api-key').value.trim() || null,
         runninghub_api_key: $('#provider-runninghub-key').value.trim() || null,
+        runninghub_base_url: $('#provider-rh-base')?.value.trim() || null,
       }),
     });
     $('#provider-api-key').value = '';
     $('#provider-runninghub-key').value = '';
-    showToast('服务配置已更新（当前进程生效）。');
+    showToast('服务配置已保存并持久化。');
     await loadServiceHealth();
     await loadProviderSettings();
+    await loadRunningHubAccount();
   } catch (error) {
     showToast(error.message, 'error');
   }
@@ -716,7 +820,7 @@ async function pollJobOnce(projectId, jobId) {
     if (job.status === 'succeeded') {
       showToast(job.job_type === 'vocal_cover' ? '人声翻唱完成，已保存为新 Take。' : (qwenConfigured ? '音乐生成完成。可以填词后再做「用人声再生成」。' : '音乐生成完成。'));
     } else {
-      showToast(job.error_message || '生成失败，积分已退回。', 'error');
+      showToast(job.error_message || '生成失败。', 'error');
     }
     return true;
   }
@@ -745,10 +849,6 @@ async function startGeneration(sourceAssetId = null, options = {}) {
   const project = projects.find((item) => item.id === currentProjectId);
   if (!project) {
     showToast('请先打开一个项目。', 'error');
-    return;
-  }
-  if (creditBalance < CREDIT_COST) {
-    showToast(`积分不足，本次需要 ${CREDIT_COST} 积分。`, 'error');
     return;
   }
   if (!musicConfigured) {
@@ -792,8 +892,6 @@ async function startGeneration(sourceAssetId = null, options = {}) {
   const extend = Boolean(options.extend);
   const engine = extend ? 'mureka' : (createCtx.engine || 'minimax');
   const mode = extend ? 'extend' : (createCtx.mode || 'parametric');
-  const costMap = { minimax: CREDIT_COST, suno: 20, mureka: 50 };
-  const cost = vocalCover ? CREDIT_COST + 5 : extend ? 30 : (costMap[engine] || CREDIT_COST);
   const button = $('#generate-button');
   button.disabled = true;
   // 立刻给反馈，避免先等保存/确认才像卡住
@@ -802,11 +900,10 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     status: 'queued',
     progress_stage: 'submitting',
     job_type: vocalCover ? 'vocal_cover' : extend ? 'extend' : (sourceAssetId ? 'variation' : 'initial_generate'),
-    credit_hold: cost,
+    credit_hold: 0,
   };
-  creditBalance = Math.max(0, creditBalance - cost);
   render();
-  showToast(vocalCover ? `人声翻唱提交中，预留 ${cost} 积分…` : extend ? `延长提交中，预留 ${cost} 积分…` : `正在提交 ${engine} 生成，预留 ${cost} 积分…`);
+  showToast(vocalCover ? '人声翻唱提交中…' : extend ? '延长任务提交中…' : `正在提交 ${engine} 生成…`);
   try {
     const [, payload] = await Promise.all([
       saveEditorFields().catch(() => null),
@@ -847,7 +944,6 @@ async function startGeneration(sourceAssetId = null, options = {}) {
     refreshSession().catch(() => null);
   } catch (error) {
     project.pendingJob = null;
-    creditBalance += cost;
     render();
     showToast(error.message, 'error');
   } finally {
@@ -1246,6 +1342,31 @@ document.addEventListener('click', (event) => {
     if (action === 'new-project') openModal();
     if (action === 'back') showView('projects');
     if (action === 'show-plans') $('#pricing-preview')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (action === 'refresh-rh-balance') {
+      loadRunningHubAccount()
+        .then((data) => showToast(data?.error || (data?.remain_money != null ? `余额 ${data.remain_money} ${data.currency || 'CNY'}` : '已刷新')))
+        .catch((error) => showToast(error.message, 'error'));
+    }
+    if (action === 'admin-create-user') {
+      if (!currentUser?.is_admin) return;
+      const email = window.prompt('新用户邮箱')?.trim();
+      if (!email) return;
+      const displayName = window.prompt('显示名称', email.split('@')[0])?.trim();
+      if (!displayName) return;
+      const password = window.prompt('初始密码（至少 6 位）')?.trim();
+      if (!password || password.length < 6) {
+        showToast('密码至少 6 位', 'error');
+        return;
+      }
+      const isAdmin = window.confirm('是否设为管理员？');
+      api('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify({ email, display_name: displayName, password, is_admin: isAdmin, status: 'active' }),
+      })
+        .then(() => loadAdminUsers())
+        .then(() => showToast('用户已创建'))
+        .catch((error) => showToast(error.message, 'error'));
+    }
     if (action === 'toast-profile') navigate('settings');
     if (action === 'logout') logout(true);
     if (action === 'toggle-notices') {
@@ -1277,6 +1398,38 @@ document.addEventListener('click', (event) => {
         .then(() => showToast('举报已提交。'))
         .catch((error) => showToast(error.message, 'error'));
     }
+    return;
+  }
+  const adminUserTarget = event.target.closest('[data-admin-user]');
+  if (adminUserTarget) {
+    const userId = adminUserTarget.dataset.adminUser;
+    const adminAction = adminUserTarget.dataset.adminAction;
+    const value = adminUserTarget.dataset.adminValue;
+    (async () => {
+      try {
+        if (adminAction === 'toggle-status') {
+          await api(`/api/admin/users/${userId}`, { method: 'PATCH', body: JSON.stringify({ status: value }) });
+          showToast(value === 'disabled' ? '已停用' : '已启用');
+        } else if (adminAction === 'toggle-admin') {
+          await api(`/api/admin/users/${userId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_admin: value === '1' }),
+          });
+          showToast(value === '1' ? '已设为管理员' : '已取消管理员');
+        } else if (adminAction === 'reset-password') {
+          const password = window.prompt('新密码（至少 6 位）')?.trim();
+          if (!password || password.length < 6) {
+            showToast('密码至少 6 位', 'error');
+            return;
+          }
+          await api(`/api/admin/users/${userId}`, { method: 'PATCH', body: JSON.stringify({ password }) });
+          showToast('密码已重置');
+        }
+        await loadAdminUsers();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    })();
     return;
   }
   const promptTarget = event.target.closest('[data-prompt]');
@@ -1340,7 +1493,7 @@ document.addEventListener('click', (event) => {
   if (retryTarget) {
     api(`/api/jobs/${retryTarget.dataset.retryJob}/retry`, { method: 'POST' })
       .then(async (payload) => {
-        showToast('已重新排队，将再次预留积分。');
+        showToast('已重新排队。');
         await refreshSession();
         if (payload.data?.project_id) startJobPoll(payload.data.project_id, payload.data.id);
       })
@@ -1554,7 +1707,7 @@ $('#auth-register-form')?.addEventListener('submit', async (event) => {
     await refreshSession();
     await loadServiceHealth();
     navigate('studio', { replace: true });
-    showToast(`账号已创建，赠送 ${monthlyQuota} 积分`);
+    showToast('账号已创建');
   } catch (error) {
     showToast(error.message, 'error');
   }

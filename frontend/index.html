@@ -18,7 +18,7 @@
       <nav>
         <a href="/#workflow">工作流</a>
         <a href="/help">帮助</a>
-        <a href="/usage">套餐</a>
+        <a href="/usage">账户与计费</a>
         <a href="/login">登录</a>
         <a class="button button-primary" href="/login">开始创作</a>
       </nav>
@@ -41,8 +41,8 @@
       <section class="landing-faq" id="faq">
         <h2>常见问题</h2>
         <article><h3>能导出 MIDI 或分轨吗？</h3><p>不能。当前 MiniMax Music 只返回整曲 MP3。拍号等参数会写入项目元数据，模型不保证遵守。</p></article>
-        <article><h3>积分怎么扣？</h3><p>提交时预留，成功结算，失败或排队中取消则退回。下载不扣生成积分。</p></article>
-        <article><h3>可以真实付款升级吗？</h3><p>不能。套餐价格是 PRD 示例，本环境只发放演示积分，没有支付 webhook。</p></article>
+        <article><h3>怎么计费？</h3><p>平台不再使用积分。音乐生成按 RunningHub 上游账户扣费；下载本地文件不额外计费。</p></article>
+        <article><h3>API Key 在哪配？</h3><p>管理员在「设置」中配置 RunningHub / 百炼 Key，可在「账户与计费」查询余额。</p></article>
       </section>
       <footer class="public-foot">
         <a href="/terms">服务条款</a>
@@ -51,17 +51,17 @@
         <a href="/help">帮助中心</a>
       </footer>
     </section>
-    <section class="view" id="view-help"><div class="legal-page"><h1>帮助中心</h1><p>1. 注册并同意条款 → 2. 新建项目 → 3. 填写提示词（人声须填歌词）→ 4. 生成后在版本列表试听、A/B、下载 MP3 或导出 ZIP。</p><p>排队中的任务可取消。失败任务可在工作室「最近任务」重试，会新建任务并再次预留积分。</p><p>忘记密码：登录页申请一次性令牌（本机没有邮箱，令牌会直接显示）。</p><p><a href="/">返回首页</a></p></div></section>
+    <section class="view" id="view-help"><div class="legal-page"><h1>帮助中心</h1><p>1. 注册并同意条款 → 2. 新建项目 → 3. 填写提示词（人声须填歌词）→ 4. 生成后在版本列表试听、A/B、下载 MP3 或导出 ZIP。</p><p>排队中的任务可取消。失败任务可在工作室「最近任务」重试。费用以 RunningHub 上游账户为准。</p><p>忘记密码：登录页申请一次性令牌（本机没有邮箱，令牌会直接显示）。</p><p><a href="/">返回首页</a></p></div></section>
     <section class="view" id="view-terms"><div class="legal-page"><h1>服务条款 1.0</h1><p>本机演示环境。生成结果的权利以 RunningHub / MiniMax 当期条款为准。平台不保证可注册版权或独家。</p><p><a href="/">返回首页</a></p></div></section>
     <section class="view" id="view-privacy"><div class="legal-page"><h1>隐私政策 1.0</h1><p>账号、提示词与音频存储在本机 Docker 卷。未获单独同意，不将内容用于模型训练。</p><p><a href="/">返回首页</a></p></div></section>
-    <section class="view" id="view-rights"><div class="legal-page"><h1>AI 与版权说明</h1><p>商业使用不等于版权所有权。禁止未经授权的声音克隆与特定在世艺人模仿。套餐页价格为示例，未开放真实支付。</p><p><a href="/">返回首页</a></p></div></section>
+    <section class="view" id="view-rights"><div class="legal-page"><h1>AI 与版权说明</h1><p>商业使用不等于版权所有权。禁止未经授权的声音克隆与特定在世艺人模仿。费用按 RunningHub 上游账户计费。</p><p><a href="/">返回首页</a></p></div></section>
   </div>
   <audio id="global-audio" preload="auto"></audio>
   <div class="auth-gate" id="auth-gate" hidden>
     <div class="auth-card">
       <div class="auth-brand">studio<span>.ai</span></div>
       <h1>登录创作工作台</h1>
-      <p>全功能本地平台：账号、项目、积分、异步出歌、对象存储。</p>
+      <p>全功能本地平台：账号、项目、异步出歌、RunningHub 上游计费。</p>
       <div class="auth-tabs">
         <button type="button" class="active" data-auth-tab="login">登录</button>
         <button type="button" data-auth-tab="register">注册</button>
@@ -72,7 +72,7 @@
         <label class="field-label modal-second-label" for="auth-password">密码</label>
         <input class="modal-input" id="auth-password" type="password" value="studio123" required />
         <button class="button button-primary auth-submit" type="submit">进入工作室 →</button>
-        <p class="auth-hint">默认管理员：admin@studio.ai / studio123（赠送 200 积分）</p>
+        <p class="auth-hint">默认管理员：admin@studio.ai / studio123</p>
         <button type="button" class="text-button" data-auth-tab="forgot">忘记密码</button>
       </form>
       <form id="auth-register-form" hidden>
@@ -156,17 +156,20 @@
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.8-3.2 4-4.8 7-4.8S17.2 15.8 19 19"/></svg><span>我的</span>
         </a>
         <a class="nav-item" href="/usage" data-view="usage">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M17.5 7H9.7a3.2 3.2 0 0 0 0 6.4h4.6a3.2 3.2 0 0 1 0 6.4H6.5"/></svg><span>用量与方案</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M17.5 7H9.7a3.2 3.2 0 0 0 0 6.4h4.6a3.2 3.2 0 0 1 0 6.4H6.5"/></svg><span>账户与计费</span>
+        </a>
+        <a class="nav-item" href="/users" data-view="users" id="nav-users" hidden>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c1.5-3 3.5-4.5 5.5-4.5S12.5 16 14 19"/><path d="M14.5 19c.8-1.8 2-2.8 3.5-2.8 1.2 0 2.2.6 3 1.8"/></svg><span>用户管理</span>
         </a>
       </nav>
 
       <div class="sidebar-spacer"></div>
       <div class="sidebar-bottom">
         <div class="credits-card">
-          <div class="credits-head"><span class="credits-icon">✳</span><span>本月剩余积分</span><button class="more-button" type="button" aria-label="积分说明">···</button></div>
-          <div class="credits-value"><strong id="sidebar-credits">120</strong><span> / 200</span></div>
+          <div class="credits-head"><span class="credits-icon">✳</span><span>RunningHub 余额</span><button class="more-button" type="button" data-action="refresh-rh-balance" aria-label="刷新余额">↻</button></div>
+          <div class="credits-value"><strong id="sidebar-credits">—</strong><span id="sidebar-credits-unit"> CNY</span></div>
           <div class="credits-track"><span id="credit-bar"></span></div>
-          <a class="credits-link" href="/usage" data-view="usage">查看使用情况 <span>↗</span></a>
+          <a class="credits-link" href="/usage" data-view="usage">账户详情 <span>↗</span></a>
         </div>
         <a class="profile-button" href="/settings" data-view="settings">
           <span class="profile-avatar">林</span><span class="profile-copy"><strong>林制作人</strong><small>Creator 方案</small></span><svg class="icon icon-small" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
@@ -206,8 +209,8 @@
           <div class="job-list" id="recent-jobs"></div>
           <div class="section-heading-row prompt-heading"><div><div class="section-kicker">A LITTLE SPARK</div><h2 class="section-heading">从一个灵感开始</h2></div></div>
             <div class="prompt-grid">
-            <button class="prompt-card" type="button" data-prompt="男生城市流行，BPM 88，明亮合成器与电钢琴，先出纯音乐钩子，无人声。"><span class="prompt-art art-amber"><i>♬</i><b></b></span><span class="prompt-copy"><strong>城市流行钩子</strong><small>Urban Pop · 导师模板</small></span><span class="prompt-arrow">↗</span></button>
-            <button class="prompt-card" type="button" data-prompt="华语流行抒情女声向编曲，钢琴弦乐，BPM 70，先出纯音乐再填词。"><span class="prompt-art art-lilac"><i>◌</i><b></b></span><span class="prompt-copy"><strong>华语女声抒情</strong><small>Pop Ballad · 留白</small></span><span class="prompt-arrow">↗</span></button>
+            <button class="prompt-card" type="button" data-prompt="男生城市流行，BPM 88。先写对夜色街头的歌词，再按词意用明亮合成器与电钢琴谱曲。"><span class="prompt-art art-amber"><i>♬</i><b></b></span><span class="prompt-copy"><strong>城市流行钩子</strong><small>Urban Pop · 先词后曲</small></span><span class="prompt-arrow">↗</span></button>
+            <button class="prompt-card" type="button" data-prompt="华语流行抒情女声。先写短句留白的倾诉歌词，再按词意用钢琴弦乐、BPM 70 谱曲。"><span class="prompt-art art-lilac"><i>◌</i><b></b></span><span class="prompt-copy"><strong>华语女声抒情</strong><small>Pop Ballad · 先词后曲</small></span><span class="prompt-arrow">↗</span></button>
             <button class="prompt-card" type="button" data-prompt="国风 Ethnic Fusion，笛子主旋律，氛围 Pad，冥想空灵，纯音乐无人声。"><span class="prompt-art art-mint"><i>⌁</i><b></b></span><span class="prompt-copy"><strong>国风丝竹</strong><small>Ethnic Fusion · 笛子</small></span><span class="prompt-arrow">↗</span></button>
           </div>
           <footer class="page-footer"><span>为每一种创作可能而生。</span><span>STUDIO AI <i>·</i> BUILT FOR MAKERS</span></footer>
@@ -218,11 +221,11 @@
 
       <section class="view" id="view-agent" aria-labelledby="agent-title">
         <div class="inner-page agent-page">
-          <div class="page-title-row"><div><div class="section-kicker">CONVERSATIONAL</div><h1 id="agent-title">对话式生成</h1><p class="page-description" id="agent-desc">多轮澄清 → 方案确认卡 → 再扣积分生成。确认前不扣费。</p></div><button class="button button-primary" type="button" id="agent-new-session">新会话</button></div>
+          <div class="page-title-row"><div><div class="section-kicker">CONVERSATIONAL</div><h1 id="agent-title">对话式生成</h1><p class="page-description" id="agent-desc">先作词锁定 → 再按歌词意境与节奏谱曲。作词确认不计费。</p></div><button class="button button-primary" type="button" id="agent-new-session">新会话</button></div>
           <div class="chip-row agent-kind-tabs" id="agent-kind-tabs" role="tablist" aria-label="Agent 类型">
             <button class="choice-chip active" type="button" data-agent-kind="general">综合助手</button>
-            <button class="choice-chip" type="button" data-agent-kind="melody">旋律 Agent</button>
             <button class="choice-chip" type="button" data-agent-kind="lyrics">作词 Agent</button>
+            <button class="choice-chip" type="button" data-agent-kind="melody">谱曲 Agent</button>
           </div>
           <div class="agent-layout">
             <div class="agent-chat" id="agent-chat"></div>
@@ -231,9 +234,9 @@
               <div id="agent-confirm-panel" class="agent-confirm empty-block">确认方案会出现在这里。</div>
               <div class="section-kicker" style="margin-top:1.2rem">快捷入口</div>
               <div class="chip-row" id="agent-quick">
-                <button class="choice-chip" type="button" data-agent-quick="我有一段灵感，想做成流行女声歌">我有灵感</button>
-                <button class="choice-chip" type="button" data-agent-quick="帮我写一首古风对唱的歌词并定风格">帮我写词</button>
-                <button class="choice-chip" type="button" data-agent-quick="只要纯音乐配乐，电影感，90 秒">纯音乐配乐</button>
+                <button class="choice-chip" type="button" data-agent-quick="先写一首对一个人倾诉的歌词">先写词</button>
+                <button class="choice-chip" type="button" data-agent-quick="帮我写一首古风对唱的歌词">古风写词</button>
+                <button class="choice-chip" type="button" data-agent-quick="我已有歌词，请按词意谱曲">按词谱曲</button>
               </div>
             </aside>
           </div>
@@ -249,7 +252,7 @@
       <section class="view" id="view-parametric" aria-labelledby="parametric-title">
         <div class="inner-page parametric-studio">
           <div class="page-title-row"><div><div class="section-kicker">PARAMETRIC</div><h1 id="parametric-title">参数式生成</h1><p class="page-description" id="parametric-hint">结构化参数直接出歌；与对话式生成并列。版本不覆盖。</p></div>
-            <span class="demo-pill" id="param-cost-pill"><span class="status-dot"></span><span id="param-cost-label">10 积分 / 次</span></span>
+            <span class="demo-pill" id="param-cost-pill"><span class="status-dot"></span><span id="param-cost-label">RunningHub 计费</span></span>
           </div>
           <div class="create-split">
             <div class="create-form-panel">
@@ -295,7 +298,7 @@
               </label>
               <p class="field-hint" id="param-library-hint">提示词库加载中…</p>
               <div class="generate-footer">
-                <div class="generation-cost"><span class="cost-icon">✳</span><span><strong id="param-cost-strong">10 积分</strong><small>失败退回 · 新 Take 不覆盖</small></span></div>
+                <div class="generation-cost"><span class="cost-icon">✳</span><span><strong id="param-cost-strong">上游计费</strong><small>按 RunningHub 账户 · 新 Take 不覆盖</small></span></div>
                 <button class="button button-generate" id="param-generate" type="button">立即生成 <span class="button-arrow">→</span></button>
               </div>
               <p class="field-hint" id="param-job-status"></p>
@@ -324,7 +327,7 @@
               <label class="form-field" id="tool-crop-wrap" hidden><span>起点(秒)</span><input id="tool-crop-start" type="number" min="0" value="0" /><span>终点(秒)</span><input id="tool-crop-end" type="number" min="1" value="15" /></label>
               <label class="form-field full-field"><span id="tool-prompt-label">说明 / 歌词 / 主题</span><textarea id="tool-prompt" maxlength="6000" rows="4" placeholder="可选"></textarea></label>
             </div>
-            <div class="generate-footer"><div class="generation-cost"><span class="cost-icon">✳</span><span id="tool-cost-label">积分按工具计费</span></div><button class="button button-generate" id="tool-run" type="button">开始处理 →</button></div>
+            <div class="generate-footer"><div class="generation-cost"><span class="cost-icon">✳</span><span id="tool-cost-label">本地工具免费 · 上游按账户计费</span></div><button class="button button-generate" id="tool-run" type="button">开始处理 →</button></div>
             <div id="tool-result" class="empty-block" style="margin-top:1rem">结果会出现在这里。</div>
             <div id="tool-history" class="creation-list" style="margin-top:1rem"></div>
           </div>
@@ -414,7 +417,7 @@
               <label class="form-field full-field"><span>情绪</span><input id="mood-input" type="text" placeholder="例如：克制、心疼、含泪" /></label>
               <label class="form-field full-field"><span>结构</span><input id="structure-input" type="text" placeholder="Verse / Chorus / Bridge / Outro" /></label>
               <label class="form-field full-field"><span>排除描述</span><input id="negative-input" type="text" placeholder="不要念白、不要战鼓炸裂" /></label>
-              <label class="form-field full-field"><span>歌词（人声必填；纯音乐生成后也可填词）</span><textarea id="lyrics-input" maxlength="3500" placeholder="[Verse]…[Chorus]…"></textarea>
+              <label class="form-field full-field"><span>歌词（人声必填；建议先写好词再生成）</span><textarea id="lyrics-input" maxlength="3500" placeholder="[Verse]…[Chorus]…"></textarea>
                 <div class="chip-row structure-chip-row" id="editor-structure-chips" aria-label="结构标签"></div>
               </label>
               <div class="lyrics-actions">
@@ -424,7 +427,7 @@
               <p class="field-hint">填词走 Qwen，只写入歌词。要用成品加人声，请点「用人声再生成」（Music Cover：上传音频 + 歌词，上限 1000 字）。</p>
             </div></div>
             <div class="rights-note"><span class="rights-icon">ⓘ</span><span>生成不保证版权或独家。请勿提交声音克隆或特定在世艺人模仿。条款版本 1.0。</span></div>
-            <div class="generate-footer"><div class="generation-cost"><span class="cost-icon">✳</span><span><strong>10 积分 / 次</strong><small>异步队列 · 失败退回 · 旧版本不覆盖</small></span></div><button class="button button-generate" id="generate-button" type="button">生成草稿 <span class="button-arrow">→</span></button></div>
+            <div class="generate-footer"><div class="generation-cost"><span class="cost-icon">✳</span><span><strong>RunningHub 计费</strong><small>异步队列 · 旧版本不覆盖</small></span></div><button class="button button-generate" id="generate-button" type="button">生成草稿 <span class="button-arrow">→</span></button></div>
           </div>
           <div class="player-panel">
             <div class="panel-heading"><span class="panel-step">02</span><div><h2>监听台</h2><p>选中版本播放；可加入 A/B 比较。</p></div></div>
@@ -440,7 +443,9 @@
 
       <section class="view" id="view-library" aria-labelledby="library-title"><div class="inner-page"><div class="page-title-row"><div><div class="section-kicker">SOUND ARCHIVE</div><h1 id="library-title">素材库</h1><p class="page-description">已生成的声音与创作素材。点击歌曲即可试听。</p></div></div><div class="library-toolbar"><div class="segmented-control"><button class="active" type="button" data-library-filter="all">全部</button><button type="button" data-library-filter="audio">音频</button><button type="button" data-library-filter="midi">MIDI</button></div><span class="library-count" id="library-count">0 个素材</span></div><p class="library-now" id="library-now-playing">点列表中的歌曲即可试听</p><div class="library-list" id="library-list"></div></div></section>
 
-      <section class="view" id="view-usage" aria-labelledby="usage-title"><div class="inner-page usage-page"><div class="page-title-row"><div><div class="section-kicker">PLAN & USAGE</div><h1 id="usage-title">用量与方案</h1><p class="page-description">清晰掌握每一份创作额度。</p></div><span class="demo-pill"><span class="status-dot"></span>真实积分账本</span></div><div class="usage-summary-grid"><div class="usage-card primary-usage"><div class="usage-card-label">本周期可用积分</div><div class="usage-number"><strong id="usage-credits">120</strong><span> / 200</span></div><div class="usage-meter"><span id="usage-meter-fill"></span></div><div class="usage-foot"><span id="usage-spent">已使用 —</span><span id="usage-period">演示额度，无真实账期</span></div></div><div class="usage-card"><div class="usage-card-label">当前方案</div><div class="plan-name" id="usage-plan-name">Creator <span class="plan-status">演示</span></div><div class="plan-desc" id="usage-plan-desc">面向独立创作者的基础方案。</div><button class="outline-button" type="button" data-action="show-plans">查看方案 <span>→</span></button></div><div class="usage-card"><div class="usage-card-label">活跃项目</div><div class="usage-number"><strong id="usage-projects">0</strong><span> 个</span></div><div class="plan-desc">保留灵感，也保留每一次迭代。</div><button class="outline-button" type="button" data-view="projects">浏览项目 <span>→</span></button></div></div><div class="ledger-section"><div class="section-heading-row"><div><div class="section-kicker">CREDIT HISTORY</div><h2 class="section-heading">积分记录</h2></div><span class="ledger-caption">最近活动</span></div><div class="ledger-table-wrap"><table class="ledger-table"><thead><tr><th>活动</th><th>项目</th><th>日期</th><th>变动</th><th>状态</th></tr></thead><tbody id="ledger-body"></tbody></table></div></div><div class="pricing-preview" id="pricing-preview"><div><div class="section-kicker">GROW WITH YOUR IDEAS</div><h2>为更大的创作空间，<br />留一个位置。</h2><p>更多生成额度，更自在的创作节奏。套餐和价格尚未开放真实购买。</p></div><div class="pricing-card"><div class="pricing-name">Studio <span>COMING SOON</span></div><div class="pricing-price">$49 <small>/ 月 · 示例价格</small></div><ul><li>每月 1,000 积分（示例）</li><li>更高并发与优先队列（待接入）</li><li>团队协作（规划中）</li></ul><button class="button button-disabled" type="button" disabled>暂未开放购买</button></div></div></div></section>
+      <section class="view" id="view-usage" aria-labelledby="usage-title"><div class="inner-page usage-page"><div class="page-title-row"><div><div class="section-kicker">RUNNINGHUB</div><h1 id="usage-title">账户与计费</h1><p class="page-description">平台不再使用积分；费用以 RunningHub 上游账户为准。</p></div><span class="demo-pill" id="usage-status-pill"><span class="status-dot"></span>上游账户</span></div><div class="usage-summary-grid"><div class="usage-card primary-usage"><div class="usage-card-label">账户余额</div><div class="usage-number"><strong id="usage-credits">—</strong><span id="usage-credits-unit"> CNY</span></div><div class="usage-meter"><span id="usage-meter-fill"></span></div><div class="usage-foot"><span id="usage-spent">硬币 —</span><span id="usage-period">按次调用上游计费</span></div></div><div class="usage-card"><div class="usage-card-label">API Key</div><div class="plan-name" id="usage-plan-name">未配置</div><div class="plan-desc" id="usage-plan-desc">管理员可在设置中配置 RunningHub API Key。</div><button class="outline-button" type="button" data-view="settings">打开设置 <span>→</span></button></div><div class="usage-card"><div class="usage-card-label">活跃项目</div><div class="usage-number"><strong id="usage-projects">0</strong><span> 个</span></div><div class="plan-desc">保留灵感，也保留每一次迭代。</div><button class="outline-button" type="button" data-view="projects">浏览项目 <span>→</span></button></div></div><div class="ledger-section"><div class="section-heading-row"><div><div class="section-kicker">ACCOUNT</div><h2 class="section-heading">账户状态</h2></div><button class="outline-button" type="button" data-action="refresh-rh-balance">刷新余额</button></div><div class="ledger-table-wrap"><table class="ledger-table"><thead><tr><th>字段</th><th>值</th></tr></thead><tbody id="ledger-body"></tbody></table></div></div><div class="pricing-preview" id="pricing-preview"></div></div></section>
+
+      <section class="view" id="view-users" aria-labelledby="users-title"><div class="inner-page"><div class="page-title-row"><div><div class="section-kicker">ADMIN</div><h1 id="users-title">用户管理</h1><p class="page-description">创建账号、启停与管理员权限。</p></div><button class="button button-primary" type="button" data-action="admin-create-user">新建用户</button></div><div class="ledger-table-wrap"><table class="ledger-table" id="users-table"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody id="users-body"></tbody></table></div></div></section>
 
       <section class="view" id="view-settings" aria-labelledby="settings-title"><div class="inner-page"><div class="page-title-row"><div><div class="section-kicker">YOUR PREFERENCES</div><h1 id="settings-title">设置</h1><p class="page-description">资料、安全、模型凭据与隐私请求。</p></div></div>
         <form class="settings-card" id="profile-form">
@@ -462,7 +467,7 @@
             <label class="form-field"><span>新密码</span><input id="pw-new" type="password" minlength="6" required /></label>
             <button class="outline-button" type="submit">更新密码</button>
           </div>
-        </form><form class="settings-card settings-detail provider-form" id="provider-settings-form"><div class="settings-icon">✳</div><div class="settings-content provider-settings-content"><h2>模型服务商与凭据</h2><p>Qwen 文本副驾继续用阿里云百炼；音乐生成默认走 RunningHub.cn 的 MiniMax Music（约 ¥0.8/次）。也可切回百炼 Fun-Music。请分别填写百炼 Key 与 RunningHub Key。RunningHub Key 在 <a href="https://www.runninghub.cn/call-api/bill-task?tab=keys&type=shared" target="_blank" rel="noopener noreferrer">API 控制台</a> 创建（企业共享）。</p><div class="provider-grid"><label class="form-field"><span>Qwen 服务商</span><select id="provider-qwen-provider"><option value="dashscope">阿里云百炼</option></select></label><label class="form-field"><span>Qwen 模型</span><input id="provider-qwen-model" value="qwen-plus" maxlength="100" placeholder="例如 qwen-plus" /></label><label class="form-field"><span>Qwen API 地址</span><input id="provider-qwen-url" value="https://dashscope.aliyuncs.com/compatible-mode/v1" /></label><label class="form-field"><span>音乐服务商</span><select id="provider-music-provider"><option value="runninghub">RunningHub.cn</option><option value="dashscope">阿里云百炼</option></select></label><label class="form-field"><span>音乐模型</span><select id="provider-music-model"><option value="minimax-music-2.6">MiniMax Music 2.6</option><option value="minimax-music-2.5">MiniMax Music 2.5</option><option value="fun-music-v1">Fun-Music v1（百炼）</option><option value="fun-music-preview">Fun-Music Preview（百炼）</option></select></label><label class="form-field"><span>百炼业务空间 ID（可选）</span><input id="provider-workspace" maxlength="100" autocomplete="off" placeholder="仅 Fun-Music 需要时可填" /></label><label class="form-field full-field"><span>百炼 API Key（Qwen / Fun-Music） <small>留空表示保留已保存的 Key</small></span><input id="provider-api-key" type="password" maxlength="512" autocomplete="new-password" placeholder="输入百炼 sk-…，保存后不会再次显示" /></label><label class="form-field full-field"><span>RunningHub API Key <small>留空表示保留已保存的 Key</small></span><input id="provider-runninghub-key" type="password" maxlength="512" autocomplete="new-password" placeholder="输入 RunningHub 企业共享 Key" /></label></div><div class="provider-status" id="provider-status" aria-live="polite">正在读取后端模型配置…</div><button class="outline-button" id="save-provider-settings" type="submit">保存服务配置</button></div></form><div class="settings-card settings-detail"><div class="settings-icon">ⓘ</div><div class="settings-content"><h2>模型用量与费用</h2><p>音乐生成默认按 RunningHub 账号计费（MiniMax Music 约 ¥0.8/次）；Qwen 副驾按百炼账号计费。本平台不提供共享账号。生成前会提醒你确认调用。</p></div></div><div class="settings-legal"><strong>本地密钥安全</strong><p>密钥仅写入项目根目录的 .env 文件，不下发到浏览器，也不会回显。不要把 .env 提交到 Git 或发送到聊天中。Qwen 用百炼 Key；音乐可用 RunningHub Key 或百炼 Fun-Music。作品授权请以模型服务商当期条款为准。</p></div>
+        </form><form class="settings-card settings-detail provider-form" id="provider-settings-form"><div class="settings-icon">✳</div><div class="settings-content provider-settings-content"><h2>模型服务商与凭据</h2><p>仅管理员可修改。Qwen 用阿里云百炼；音乐默认走 RunningHub.cn（MiniMax Music，约 ¥0.8/次）。Key 会持久化到数据库。RunningHub Key 在 <a href="https://www.runninghub.cn/call-api/bill-task?tab=keys&type=shared" target="_blank" rel="noopener noreferrer">API 控制台</a> 创建。</p><div class="provider-grid"><label class="form-field"><span>Qwen 服务商</span><select id="provider-qwen-provider"><option value="dashscope">阿里云百炼</option></select></label><label class="form-field"><span>Qwen 模型</span><input id="provider-qwen-model" value="qwen-plus" maxlength="100" placeholder="例如 qwen-plus" /></label><label class="form-field"><span>RunningHub Base URL</span><input id="provider-rh-base" value="https://www.runninghub.cn" maxlength="200" /></label><label class="form-field"><span>音乐服务商</span><select id="provider-music-provider"><option value="runninghub">RunningHub.cn</option><option value="dashscope">阿里云百炼</option></select></label><label class="form-field"><span>音乐模型</span><select id="provider-music-model"><option value="minimax-music-2.6">MiniMax Music 2.6</option><option value="minimax-music-2.5">MiniMax Music 2.5</option><option value="fun-music-v1">Fun-Music v1（百炼）</option><option value="fun-music-preview">Fun-Music Preview（百炼）</option></select></label><label class="form-field"><span>当前 RH Key</span><input id="provider-rh-masked" readonly placeholder="未配置" /></label><label class="form-field full-field"><span>百炼 API Key（Qwen / Fun-Music） <small>留空表示保留已保存的 Key</small></span><input id="provider-api-key" type="password" maxlength="512" autocomplete="new-password" placeholder="输入百炼 sk-…，保存后不会再次显示" /></label><label class="form-field full-field"><span>RunningHub API Key <small>留空表示保留已保存的 Key</small></span><input id="provider-runninghub-key" type="password" maxlength="512" autocomplete="new-password" placeholder="输入 RunningHub 企业共享 Key" /></label></div><div class="provider-status" id="provider-status" aria-live="polite">正在读取后端模型配置…</div><div class="modal-actions" style="gap:10px;margin-top:12px"><button class="outline-button" id="save-provider-settings" type="submit">保存服务配置</button><button class="outline-button" type="button" data-action="refresh-rh-balance">查询余额</button></div></div></form><div class="settings-card settings-detail"><div class="settings-icon">ⓘ</div><div class="settings-content"><h2>模型用量与费用</h2><p>平台已取消积分。音乐生成按 RunningHub 账号计费（MiniMax Music 约 ¥0.8/次）；Qwen 副驾按百炼账号计费。</p></div></div><div class="settings-legal"><strong>密钥安全</strong><p>密钥由管理员配置并持久化到服务端，不会明文回显到浏览器。不要把 Key 提交到 Git 或发到聊天中。</p></div>
         <div class="settings-card settings-detail">
           <div class="settings-icon">⇩</div>
           <div class="settings-content">
@@ -480,7 +485,7 @@
   <div class="toast-region" id="toast-region" aria-live="polite"></div>
   <div class="modal-backdrop" id="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" type="button" aria-label="关闭">×</button><div class="modal-kicker">NEW CREATION</div><h2 id="modal-title">给灵感一个名字。</h2><p>先从一个项目开始。之后可以随时调整方向。</p><form id="new-project-form"><label class="field-label" for="new-project-name">项目名称</label><input class="modal-input" id="new-project-name" maxlength="80" placeholder="例如：午夜之后" required /><label class="field-label modal-second-label" for="new-project-purpose">创作类型</label><select class="modal-input" id="new-project-purpose"><option value="灵感草稿">灵感草稿</option><option value="电影 / 游戏配乐">电影 / 游戏配乐</option><option value="歌曲制作">歌曲制作</option><option value="Loop / 节奏">Loop / 节奏</option><option value="声音设计">声音设计</option></select><div class="modal-actions"><button class="button button-secondary modal-cancel" type="button">再想一想</button><button class="button button-primary" type="submit">创建项目 <span>→</span></button></div></form></div></div>
   <script src="/config.js?v=public-tunnel"></script>
-  <script type="module" src="/app.js?v=prompt-library-2"></script>
+  <script type="module" src="/app.js?v=lyrics-first-1"></script>
 </body>
 </html>
 

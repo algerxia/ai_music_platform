@@ -20,8 +20,8 @@ PLANS = [
         "purchasable": False,
         "commercial": True,
         "concurrency": 2,
-        "features": ["每月示例 200 积分", "项目历史与版本", "变体迭代", "元数据导出"],
-        "note": "支付未接入，本环境发放演示额度，不可真实扣款。",
+        "features": ["项目历史与版本", "变体迭代", "元数据导出", "RunningHub 上游计费"],
+        "note": "平台积分已停用，费用以 RunningHub 账户为准。",
     },
     {
         "code": "studio",

@@ -26,6 +26,12 @@ def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
 
 
+def user_is_admin(user: User) -> bool:
+    if getattr(user, "is_admin", False):
+        return True
+    return (user.email or "").strip().lower() == settings.bootstrap_admin_email.strip().lower()
+
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     db: Session = Depends(get_db),
@@ -38,9 +44,22 @@ def get_current_user(
     except JWTError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="登录已过期，请重新登录") from exc
     user = db.scalar(select(User).where(User.id == user_id))
-    if not user or user.status != "active":
+    if not user or user.status != "active" or user.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="账号不可用")
     return user
 
 
-__all__ = ["create_access_token", "get_current_user", "hash_password", "verify_password"]
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    if not user_is_admin(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="需要管理员权限")
+    return user
+
+
+__all__ = [
+    "create_access_token",
+    "get_current_user",
+    "require_admin",
+    "user_is_admin",
+    "hash_password",
+    "verify_password",
+]

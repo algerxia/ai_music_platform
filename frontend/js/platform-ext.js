@@ -44,32 +44,32 @@ export function bindPlatformExt(host) {
   const AGENT_KIND_META = {
     general: {
       title: '对话式生成',
-      desc: '综合助手：默认先出旋律，再填词。确认前不扣费。内置提示词库。',
-      placeholder: '描述曲风、情绪或一句灵感…',
+      desc: '综合助手：默认先作词，再按歌词意境与节奏谱曲。作词确认不计费。',
+      placeholder: '想对谁唱？什么意象？或一句灵感…',
       quick: [
-        ['先出一首温柔民谣纯音乐', '温柔民谣旋律'],
-        ['电影感配乐，90 秒无人声', '电影配乐'],
-        ['我想直接出带词人声', '带词人声'],
-      ],
-    },
-    melody: {
-      title: '旋律 Agent',
-      desc: '专攻纯音乐旋律与编曲。出 Take 后可交给作词 Agent。',
-      placeholder: '曲风 / 主奏乐器 / 情绪 / BPM…',
-      quick: [
-        ['木吉他民谣，温柔钩子，78BPM 纯音乐', '民谣钩子'],
-        ['电子氛围铺底，有记忆点的主旋律', '电子氛围'],
-        ['古风丝竹，空灵感，无人声', '古风丝竹'],
+        ['先写一首温柔民谣歌词', '先写词'],
+        ['我已有歌词，请按词意谱曲', '按词谱曲'],
+        ['只要纯音乐配乐，电影感，90 秒', '纯音乐'],
       ],
     },
     lyrics: {
       title: '作词 Agent',
-      desc: '根据选定旋律写可唱短句歌词并贴人声。可从旋律 Agent 点「交给作词」。',
-      placeholder: '想对谁唱？什么意象？或说明旋律 Take…',
+      desc: '先写出可唱、有意境的歌词并锁定；确认后交给谱曲 Agent。',
+      placeholder: '想对谁唱？场景意象？必须出现的词？',
       quick: [
-        ['按这首旋律写对一个人倾诉的词', '倾诉填词'],
-        ['短句留白，副歌好记，不要念词腔', '短句留白'],
+        ['写一首对一个人倾诉的词，短句留白', '倾诉写词'],
         ['山野夜色意象，温柔克制', '山野意象'],
+        ['副歌好记，不要念词腔', '短句副歌'],
+      ],
+    },
+    melody: {
+      title: '谱曲 Agent',
+      desc: '根据已有歌词的意境与节奏谱曲编配，生成带词人声。可从作词 Agent 点「交给谱曲」。',
+      placeholder: '曲风 / 主奏乐器 / BPM…或粘贴歌词',
+      quick: [
+        ['按这首词做成温柔民谣，木吉他，78BPM', '民谣谱曲'],
+        ['电子铺底，副歌更有记忆点', '电子谱曲'],
+        ['古风丝竹，戏腔感人声', '古风谱曲'],
       ],
     },
   };
@@ -352,9 +352,8 @@ export function bindPlatformExt(host) {
     });
     localStorage.setItem('studio-engine', selectedEngine);
     localStorage.setItem('studio-mode', selectedMode);
-    const cost = selectedMode === 'sfx' ? COST.sfx : COST[selectedEngine] || 10;
-    if ($('#param-cost-label')) $('#param-cost-label').textContent = `${cost} 积分 / 次`;
-    if ($('#param-cost-strong')) $('#param-cost-strong').textContent = `${cost} 积分`;
+    if ($('#param-cost-label')) $('#param-cost-label').textContent = 'RunningHub 计费';
+    if ($('#param-cost-strong')) $('#param-cost-strong').textContent = '上游计费';
     syncParamForm();
   }
 
@@ -445,7 +444,7 @@ export function bindPlatformExt(host) {
           idempotency_key: newIdempotencyKey(),
         }),
       });
-      showToast(`已入队，预留 ${payload.data.cost} 积分`);
+      showToast('已入队，按 RunningHub 上游计费');
       if ($('#param-job-status')) $('#param-job-status').textContent = `任务 ${payload.data.job.id} · ${payload.data.job.status}`;
       host.refreshSession?.();
       pollJob(payload.data.job.id);
@@ -488,7 +487,7 @@ export function bindPlatformExt(host) {
       (tool) => `<button class="tool-card" type="button" data-open-tool="${tool.id}">
         <strong>${escapeHTML(tool.title)}</strong>
         <small>${escapeHTML(tool.desc)}</small>
-        <span>${tool.cost ? `${tool.cost} 积分` : '免费'}</span>
+        <span>${tool.cost ? '上游计费' : '免费'}</span>
       </button>`
     ).join('');
   }
@@ -533,7 +532,7 @@ export function bindPlatformExt(host) {
     $('#tool-workbench').hidden = false;
     $('#tool-workbench-title').textContent = tool.title;
     $('#tool-workbench-desc').textContent = tool.desc;
-    $('#tool-cost-label').textContent = tool.cost ? `${tool.cost} 积分 / 次` : '免费';
+    $('#tool-cost-label').textContent = tool.cost ? 'RunningHub / 本地处理' : '免费';
     $('#tool-result').textContent = '结果会出现在这里。';
     if ($('#tool-sep-wrap')) $('#tool-sep-wrap').hidden = !tool.sep;
     if ($('#tool-crop-wrap')) $('#tool-crop-wrap').hidden = !tool.crop;
@@ -717,17 +716,12 @@ export function bindPlatformExt(host) {
         const srcAttr = a.localUrl || a.blobUrl || '';
         const assetAttr = a.id ? `data-media-asset="${a.id}"` : '';
         const urlAttr = a.url || a.audioUrl ? `data-media-url="${escapeHTML(a.url || a.audioUrl)}"` : '';
-        const canFill =
+        const canCompose =
           a.id &&
-          (a.instrumental === true ||
-            a.origin === 'instrumental' ||
-            a.melodyReady === true ||
-            agentKind === 'melody' ||
-            String(a.title || '').includes('纯音乐'));
-        const fillBtn = canFill
+          (a.hasLyrics || a.lyricsWritten || (typeof a.lyrics === 'string' && a.lyrics.trim().length > 8));
+        const fillBtn = canCompose
           ? `<div class="agent-media-file-actions">
-              <button type="button" class="mini-action agent-fill-lyrics" data-fill-lyrics-asset="${a.id}">本会话填词</button>
-              <button type="button" class="mini-action" data-handoff-lyrics="${a.id}">交给作词 Agent</button>
+              <button type="button" class="mini-action" data-handoff-compose="${a.id}">交给谱曲 Agent</button>
             </div>`
           : '';
         if (kind === 'audio') {
@@ -868,10 +862,12 @@ export function bindPlatformExt(host) {
     const panel = $('#agent-confirm-panel');
     if (!panel) return;
     const draft = session.draft || {};
-    if (session.state === 'awaiting_confirm' && draft.prompt) {
+    if (session.state === 'awaiting_confirm' && (draft.prompt || draft.lyrics)) {
       const engineLabel = { minimax: 'MiniMax', suno: '苏诺', mureka: 'Mureka' }[draft.engine] || draft.engine || '';
       const modeLabel = { text: '文生', custom: '自定义', parametric: '精细参数' }[draft.mode] || draft.mode || '';
-      const vocalLabel = draft.instrumental ? '纯音乐' : '含人声';
+      const lyricsOnly = draft.workflow === 'lyrics_only' || agentKind === 'lyrics';
+      const composeFromLyrics = draft.workflow === 'compose_from_lyrics' || (agentKind === 'melody' && !draft.instrumental);
+      const vocalLabel = lyricsOnly ? '先作词' : draft.instrumental ? '纯音乐' : '按词谱曲';
       const rawSummary = String(draft.summary || '');
       const letters = (rawSummary.match(/[A-Za-z]/g) || []).length;
       const cjk = (rawSummary.match(/[\u4e00-\u9fff]/g) || []).length;
@@ -879,31 +875,39 @@ export function bindPlatformExt(host) {
       const summaryText = summaryLooksEnglish || !rawSummary.trim()
         ? `《${draft.title || '方案'}》；${engineLabel}·${modeLabel || '创作'}；${vocalLabel}`
         : rawSummary;
+      const lyricsPreview = String(draft.lyrics || draft.source_lyrics || '').trim();
+      const lyricsBlock = lyricsPreview
+        ? `<pre class="field-hint" style="white-space:pre-wrap;max-height:12rem;overflow:auto">${escapeHTML(lyricsPreview.slice(0, 800))}</pre>`
+        : '';
+      const confirmLabel = lyricsOnly
+        ? '确认歌词'
+        : composeFromLyrics
+          ? '确认并按词谱曲'
+          : agentKind === 'melody'
+            ? '确认并谱曲'
+            : '确认并生成';
+      const billHint = lyricsOnly ? '作词确认不计费' : 'RunningHub 计费';
       panel.classList.remove('empty-block');
       panel.innerHTML = `<strong>${escapeHTML(draft.title || '方案')}</strong>
             <p>${escapeHTML(summaryText)}</p>
-            <p class="field-hint">${escapeHTML(engineLabel)}${modeLabel ? ` · ${modeLabel}` : ''} · ${vocalLabel} · 预计 ${draft.estimated_credits || '?'} 积分</p>
-            <button class="button button-primary" type="button" id="agent-confirm-btn">${
-              agentKind === 'lyrics' || draft.workflow === 'lyrics_on_melody' ? '确认并填词贴人声' : agentKind === 'melody' ? '确认并生成旋律' : '确认并生成'
-            }</button>`;
+            ${lyricsBlock}
+            <p class="field-hint">${escapeHTML(engineLabel)}${modeLabel ? ` · ${modeLabel}` : ''} · ${vocalLabel} · ${billHint}</p>
+            <button class="button button-primary" type="button" id="agent-confirm-btn">${confirmLabel}</button>`;
       $('#agent-confirm-btn')?.addEventListener('click', confirmAgent);
-    } else if (session.state === 'ready' && (fallbackAssets.length || draft.result_asset_id)) {
-      const melodyReady =
-        draft.workflow_stage === 'melody_ready' ||
-        draft.instrumental === true ||
-        fallbackAssets.some((a) => a.instrumental || a.origin === 'instrumental');
+    } else if (session.state === 'ready' && draft.workflow_stage === 'lyrics_ready' && (draft.lyrics || draft.source_lyrics)) {
+      const lyricsPreview = String(draft.lyrics || draft.source_lyrics || '').trim();
       panel.classList.remove('empty-block');
-      panel.innerHTML = `<strong>${melodyReady ? '旋律已就绪' : '已完成'}</strong>
-            <p class="field-hint">${
-              melodyReady
-                ? '先试听选一首好听的 Take，再点「按这首旋律填词」。'
-                : '可在对话中直接播放 / 预览，或打开项目查看详情。'
-            }</p>
-            ${renderMediaCards(
-              fallbackAssets.map((a) =>
-                melodyReady ? { ...a, instrumental: a.instrumental ?? true, origin: a.origin || 'instrumental' } : a
-              )
-            )}
+      panel.innerHTML = `<strong>歌词已锁定</strong>
+            <p class="field-hint">下一步交给谱曲 Agent，按这首词的意境与节奏谱曲。</p>
+            <pre class="field-hint" style="white-space:pre-wrap;max-height:12rem;overflow:auto">${escapeHTML(lyricsPreview.slice(0, 800))}</pre>
+            <button type="button" class="button button-primary" id="agent-handoff-compose">交给谱曲 Agent</button>`;
+      $('#agent-handoff-compose')?.addEventListener('click', () => handoffToComposeAgent(lyricsPreview));
+    } else if (session.state === 'ready' && (fallbackAssets.length || draft.result_asset_id)) {
+      const composed = draft.workflow_stage === 'composed' || draft.workflow === 'compose_from_lyrics';
+      panel.classList.remove('empty-block');
+      panel.innerHTML = `<strong>${composed ? '谱曲完成' : '已完成'}</strong>
+            <p class="field-hint">可在对话中直接播放 / 预览，或打开项目查看详情。</p>
+            ${renderMediaCards(fallbackAssets)}
             ${
               session.project_id
                 ? `<button type="button" class="outline-button" id="agent-open-project" data-open-project-id="${session.project_id}">打开项目</button>`
@@ -1045,14 +1049,55 @@ export function bindPlatformExt(host) {
     else await renderAgentChat();
   }
 
+  async function handoffToComposeAgent(lyricsOrAssetId) {
+    if (!lyricsOrAssetId || agentStreaming) return;
+    let sourceLyrics = '';
+    let melodyAssetId = '';
+    if (/^[0-9a-f-]{36}$/i.test(String(lyricsOrAssetId))) {
+      melodyAssetId = String(lyricsOrAssetId);
+      try {
+        const asset = await api(`/api/assets/${melodyAssetId}`);
+        sourceLyrics = String(asset.data?.lyrics || '').trim();
+      } catch {
+        sourceLyrics = '';
+      }
+    } else {
+      sourceLyrics = String(lyricsOrAssetId).trim();
+    }
+    if (!sourceLyrics && !melodyAssetId) {
+      showToast('没有可交接的歌词', 'error');
+      return;
+    }
+    agentKind = 'melody';
+    localStorage.setItem('studio-agent-kind', agentKind);
+    syncAgentKindUI();
+    clearAgentAttachments();
+    const body = {};
+    if (sourceLyrics) body.source_lyrics = sourceLyrics;
+    if (melodyAssetId) body.melody_asset_id = melodyAssetId;
+    await newAgentSession(body);
+    showToast('已交给谱曲 Agent');
+  }
+
   async function handoffToLyricsAgent(assetId) {
+    // 兼容旧按钮：若资产已有歌词则改交谱曲，否则仍可开作词会话
     if (!assetId || agentStreaming) return;
+    try {
+      const asset = await api(`/api/assets/${assetId}`);
+      const lyrics = String(asset.data?.lyrics || '').trim();
+      if (lyrics) {
+        await handoffToComposeAgent(lyrics);
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
     agentKind = 'lyrics';
     localStorage.setItem('studio-agent-kind', agentKind);
     syncAgentKindUI();
     clearAgentAttachments();
-    await newAgentSession({ melody_asset_id: assetId });
-    showToast('已交给作词 Agent');
+    await newAgentSession();
+    showToast('已打开作词 Agent');
   }
 
   function setAgentComposerBusy(busy) {
@@ -1237,7 +1282,11 @@ export function bindPlatformExt(host) {
         method: 'POST',
         body: JSON.stringify({ idempotency_key: newIdempotencyKey() }),
       });
-      showToast('已确认，任务已入队');
+      if (payload.data?.lyrics_ready) {
+        showToast('歌词已锁定，可交给谱曲 Agent');
+      } else {
+        showToast('已确认，任务已入队');
+      }
       await renderAgentChat();
       host.refreshSession?.();
       const jobId = payload.data?.job?.id;
@@ -1619,6 +1668,12 @@ export function bindPlatformExt(host) {
     }
     const quick = event.target.closest('[data-agent-quick]');
     if (quick) sendAgent(quick.dataset.agentQuick);
+    const handoffComposeBtn = event.target.closest('[data-handoff-compose]');
+    if (handoffComposeBtn?.dataset.handoffCompose) {
+      event.preventDefault();
+      handoffToComposeAgent(handoffComposeBtn.dataset.handoffCompose).catch((e) => showToast(e.message, 'error'));
+      return;
+    }
     const handoffBtn = event.target.closest('[data-handoff-lyrics]');
     if (handoffBtn?.dataset.handoffLyrics) {
       event.preventDefault();
@@ -1628,7 +1683,8 @@ export function bindPlatformExt(host) {
     const fillLyricsBtn = event.target.closest('[data-fill-lyrics-asset]');
     if (fillLyricsBtn?.dataset.fillLyricsAsset) {
       event.preventDefault();
-      fillLyricsOnMelody(fillLyricsBtn.dataset.fillLyricsAsset);
+      showToast('当前流程是先作词再谱曲，请用「作词 Agent」');
+      switchAgentKind('lyrics').catch((e) => showToast(e.message, 'error'));
       return;
     }
     const kindBtn = event.target.closest('#agent-kind-tabs [data-agent-kind]');

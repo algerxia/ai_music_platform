@@ -543,6 +543,9 @@ def _run_tool_job(db, job, project, user, params) -> Asset:
 
 def process_job(job_id: str) -> None:
     with SessionLocal() as db:
+        from app.settings_store import apply_stored_settings
+
+        apply_stored_settings(db)
         job = db.get(GenerationJob, uuid.UUID(job_id))
         if not job or job.status not in ("queued", "running"):
             return
@@ -723,7 +726,12 @@ def _notify_agent_job(
     )
     is_cover = bool((job.params or {}).get("vocal_cover") or job.job_type == "vocal_cover")
     cover_fallback = bool((job.params or {}).get("cover_fallback"))
-    # Tag media cards so UI can offer “按旋律填词”
+    job_context = (job.params or {}).get("context") if isinstance((job.params or {}).get("context"), dict) else {}
+    session_draft = session.draft if isinstance(session.draft, dict) else {}
+    workflow = str(job_context.get("workflow") or session_draft.get("workflow") or "").strip().lower()
+    compose_from_lyrics = workflow == "compose_from_lyrics" or (
+        not is_instrumental and bool(str((job.params or {}).get("lyrics") or "").strip())
+    )
     for row in assets_payload:
         row["instrumental"] = is_instrumental
         row["origin"] = (
@@ -733,13 +741,15 @@ def _notify_agent_job(
         )
     if is_instrumental:
         lines = [
-            f"《{title}》纯音乐旋律已出，可直接在下方试听。",
-            "先挑一首好听的 Take，再点「按这首旋律填词」——会按旋律写词并贴上人声，避免念词感。",
+            f"《{title}》纯音乐已出，可直接在下方试听。",
+            "若还需要人声，可先去作词 Agent 写词，再交给谱曲 Agent 按词生成。",
         ]
     elif is_cover or cover_fallback:
-        lines = [f"《{title}》已按选定旋律填词并贴上人声，可直接试听。"]
+        lines = [f"《{title}》已按选定旋律贴上人声，可直接试听。"]
         if cover_fallback:
             lines.append("（参考翻唱通道繁忙，已用同风格短句人声生成保底。）")
+    elif compose_from_lyrics:
+        lines = [f"《{title}》已按歌词意境谱曲完成，可直接试听。"]
     else:
         lines = [f"《{title}》已生成完成，可直接在下方试听。"]
     if len(assets_payload) > 1:
@@ -753,6 +763,9 @@ def _notify_agent_job(
         draft["instrumental"] = True
     elif is_cover:
         draft["workflow_stage"] = "lyrics_filled"
+        draft["instrumental"] = False
+    elif compose_from_lyrics:
+        draft["workflow_stage"] = "composed"
         draft["instrumental"] = False
     session.draft = draft
     messages.append(

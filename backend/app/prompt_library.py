@@ -78,16 +78,16 @@ def agent_knowledge_pack(kind: str = "general", *, max_chars: int = 2800) -> str
 
     if kind == "melody":
         lines.append(
-            "旋律 Agent：prompt 用英文或中英混写描述配器/律动/钩子/空间；必须标明 instrumental / 纯音乐 / 无人声；"
-            "可借鉴导师模板的乐器与编曲段，但去掉人声演唱指令。"
+            "谱曲 Agent：必须沿用已有歌词；prompt 描述如何按词意/换气/节奏谱曲（配器、律动、钩子、人声贴唱）；"
+            "workflow=compose_from_lyrics；instrumental=false；可借鉴导师模板编曲并保留歌词。"
         )
     elif kind == "lyrics":
         lines.append(
-            "作词 Agent：lyrics 必含 [Verse]/[Chorus] 等；短句留白；prompt 只写人声情绪与贴唱方式；"
-            "可加 [Vocal Emotion: …] / [Vocal Style: …]。"
+            "作词 Agent：先出歌词，不计费；lyrics 必含 [Verse]/[Chorus] 等；短句留白；"
+            "workflow=lyrics_only；prompt 写歌词情绪与演唱气质；可加 [Vocal Emotion: …] / [Vocal Style: …]。"
         )
     else:
-        lines.append("综合助手：默认先纯音乐；用户要人声时再带稀疏歌词与结构标签。")
+        lines.append("综合助手：默认先作词（lyrics_only），确认后再按词谱曲（compose_from_lyrics）。")
 
     pack = "\n".join(lines)
     return _clip(pack, max_chars)

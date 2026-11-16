@@ -123,6 +123,8 @@ from app.plans import get_plan
 
 
 def user_public(user) -> dict:
+    from app.security import user_is_admin
+
     plan = get_plan(user.plan_code)
     return {
         "id": str(user.id),
@@ -130,12 +132,14 @@ def user_public(user) -> dict:
         "display_name": user.display_name,
         "plan_code": user.plan_code,
         "plan_name": plan["name"],
-        "credit_balance": user.credit_balance,
+        "credit_balance": 0,
+        "is_admin": user_is_admin(user),
+        "status": getattr(user, "status", "active") or "active",
         "daw": getattr(user, "daw", "") or "",
         "role_label": getattr(user, "role_label", "") or "",
         "timezone": getattr(user, "timezone", "Asia/Shanghai"),
-        "monthly_quota": plan.get("credits") or 200,
-        "plan_note": plan.get("note") or "",
+        "monthly_quota": 0,
+        "plan_note": "按 RunningHub 上游计费，平台不再使用积分。",
         "created_at": user.created_at.isoformat() if isinstance(user.created_at, datetime) else user.created_at,
     }
 
