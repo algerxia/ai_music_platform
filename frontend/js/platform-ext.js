@@ -24,12 +24,10 @@ const COST = { minimax: 10, suno: 20, mureka: 50, sfx: 4 };
 export function bindPlatformExt(host) {
   const { api, $, $$, showToast, navigate, newIdempotencyKey, escapeHTML, allProjects, projectCard } = host;
   let agentKind = localStorage.getItem('studio-agent-kind') || 'general';
-  const agentSessionByKind = {
-    general: localStorage.getItem('studio-agent-session-general') || localStorage.getItem('studio-agent-session') || '',
-    melody: localStorage.getItem('studio-agent-session-melody') || '',
-    lyrics: localStorage.getItem('studio-agent-session-lyrics') || '',
-  };
-  let agentSessionId = agentSessionByKind[agentKind] || '';
+  const agentSessionByKind = { general: '', melody: '', lyrics: '' };
+  let agentSessionId = '';
+  let agentHistory = [];
+  let agentMemory = {};
   let selectedEngine = localStorage.getItem('studio-engine') || 'suno';
   let selectedMode = localStorage.getItem('studio-mode') || 'text';
   let activeTool = null;
@@ -40,6 +38,40 @@ export function bindPlatformExt(host) {
   let paramPoll = null;
   let promptLibrary = null;
   const templateCache = new Map();
+
+  function currentUserId() {
+    return host.currentUser?.id || '';
+  }
+
+  function sessionStorageKey(kind, userId = currentUserId()) {
+    return userId ? `studio-agent-session-${userId}-${kind}` : `studio-agent-session-${kind}`;
+  }
+
+  function loadScopedSessions() {
+    const uid = currentUserId();
+    for (const kind of Object.keys(agentSessionByKind)) {
+      agentSessionByKind[kind] =
+        (uid && localStorage.getItem(sessionStorageKey(kind, uid))) ||
+        localStorage.getItem(`studio-agent-session-${kind}`) ||
+        '';
+    }
+    agentSessionId = agentSessionByKind[agentKind] || '';
+  }
+
+  function clearScopedSessions() {
+    const uid = currentUserId();
+    for (const kind of Object.keys(agentSessionByKind)) {
+      localStorage.removeItem(sessionStorageKey(kind, uid));
+      localStorage.removeItem(`studio-agent-session-${kind}`);
+      agentSessionByKind[kind] = '';
+    }
+    localStorage.removeItem('studio-agent-session');
+    agentSessionId = '';
+    agentHistory = [];
+    agentMemory = {};
+  }
+
+  loadScopedSessions();
 
   const AGENT_KIND_META = {
     general: {
@@ -309,9 +341,150 @@ export function bindPlatformExt(host) {
   function persistAgentSession(id, kind = agentKind) {
     agentSessionId = id || '';
     agentSessionByKind[kind] = agentSessionId;
-    localStorage.setItem(`studio-agent-session-${kind}`, agentSessionId);
+    const uid = currentUserId();
+    localStorage.setItem(sessionStorageKey(kind, uid), agentSessionId);
     localStorage.setItem('studio-agent-session', agentSessionId);
     localStorage.setItem('studio-agent-kind', kind);
+  }
+
+  function kindLabel(kind) {
+    return ({ general: '综合', lyrics: '作词', melody: '谱曲' }[kind] || kind);
+  }
+
+  function stateLabel(state) {
+    return (
+      {
+        clarifying: '澄清中',
+        streaming: '回复中',
+        awaiting_confirm: '待确认',
+        generating: '生成中',
+        ready: '已完成',
+        failed: '失败',
+      }[state] || state || '—'
+    );
+  }
+
+  function formatHistoryTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  function renderAgentMemory() {
+    const el = $('#agent-memory-summary');
+    if (!el) return;
+    const genres = (agentMemory.preferred_genres || []).slice(0, 3).join('、');
+    const moods = (agentMemory.preferred_moods || []).slice(0, 3).join('、');
+    const vocal = agentMemory.vocal_preference || '';
+    const notes = agentMemory.notes || '';
+    const bits = [];
+    if (genres) bits.push(`曲风 ${genres}`);
+    if (moods) bits.push(`情绪 ${moods}`);
+    if (vocal) bits.push(vocal === 'instrumental' ? '偏好纯音乐' : '偏好人声');
+    if (notes) bits.push(notes.slice(0, 60));
+    el.textContent = bits.length ? bits.join(' · ') : '暂无跨会话记忆，确认方案后会自动积累。';
+  }
+
+  function renderAgentHistory() {
+    const box = $('#agent-history-list');
+    if (!box) return;
+    if (!currentUserId()) {
+      box.innerHTML = '<div class="empty-block">登录后可查看历史会话。</div>';
+      return;
+    }
+    const rows = agentHistory.filter((s) => !s.archived_at);
+    if (!rows.length) {
+      box.innerHTML = '<div class="empty-block">还没有历史会话，点「新会话」开始。</div>';
+      return;
+    }
+    box.innerHTML = rows
+      .map((s) => {
+        const active = s.id === agentSessionId ? 'active' : '';
+        return `<button type="button" class="agent-history-item ${active}" data-open-session="${s.id}">
+          <strong>${escapeHTML(s.title || '未命名会话')}</strong>
+          <small>${escapeHTML(kindLabel(s.kind))} · ${escapeHTML(stateLabel(s.state))} · ${s.message_count || 0} 条</small>
+          <span class="agent-history-preview">${escapeHTML(s.preview || '')}</span>
+          <span class="agent-history-meta">${escapeHTML(formatHistoryTime(s.updated_at))}
+            <i data-delete-session="${s.id}" title="删除">✕</i>
+          </span>
+        </button>`;
+      })
+      .join('');
+  }
+
+  async function loadAgentHistory() {
+    if (!currentUserId()) {
+      agentHistory = [];
+      renderAgentHistory();
+      return;
+    }
+    try {
+      const payload = await api(`/api/agent/sessions?kind=${encodeURIComponent(agentKind)}&limit=40`);
+      agentHistory = payload.data || [];
+      renderAgentHistory();
+    } catch (error) {
+      const box = $('#agent-history-list');
+      if (box) box.innerHTML = `<div class="empty-block">${escapeHTML(error.message)}</div>`;
+    }
+  }
+
+  async function loadAgentMemory() {
+    if (!currentUserId()) {
+      agentMemory = {};
+      renderAgentMemory();
+      return;
+    }
+    try {
+      const payload = await api('/api/me/agent-memory');
+      agentMemory = payload.data || {};
+    } catch {
+      agentMemory = host.currentUser?.agent_memory || {};
+    }
+    renderAgentMemory();
+  }
+
+  async function openAgentSession(sessionId) {
+    if (!sessionId || agentStreaming) return;
+    persistAgentSession(sessionId, agentKind);
+    clearAgentAttachments();
+    await renderAgentChat();
+    renderAgentHistory();
+  }
+
+  async function deleteAgentSession(sessionId) {
+    if (!sessionId) return;
+    if (!window.confirm('删除这个会话？对话记录将不可恢复。')) return;
+    await api(`/api/agent/sessions/${sessionId}`, { method: 'DELETE' });
+    if (agentSessionId === sessionId) {
+      persistAgentSession('', agentKind);
+      const box = $('#agent-chat');
+      if (box) box.innerHTML = '<div class="empty-block">会话已删除。点「新会话」继续。</div>';
+      const panel = $('#agent-confirm-panel');
+      if (panel) {
+        panel.className = 'agent-confirm empty-block';
+        panel.textContent = '确认方案会出现在这里。';
+      }
+    }
+    await loadAgentHistory();
+    showToast('会话已删除');
+  }
+
+  async function editAgentMemory() {
+    const notes = window.prompt('写下你的创作偏好（会注入后续会话）', agentMemory.notes || '') ?? null;
+    if (notes === null) return;
+    const payload = await api('/api/me/agent-memory', {
+      method: 'PUT',
+      body: JSON.stringify({
+        notes: notes.trim(),
+        preferred_genres: agentMemory.preferred_genres || [],
+        preferred_moods: agentMemory.preferred_moods || [],
+        vocal_preference: agentMemory.vocal_preference || '',
+      }),
+    });
+    agentMemory = payload.data || {};
+    renderAgentMemory();
+    showToast('记忆已更新');
   }
 
   function syncAgentKindUI() {
@@ -1023,7 +1196,12 @@ export function bindPlatformExt(host) {
 
   async function newAgentSession(extra = {}) {
     if (agentStreaming) return;
-    const body = { kind: agentKind, ...extra };
+    const ephemeral = Boolean($('#agent-ephemeral-mode')?.checked);
+    const body = {
+      kind: agentKind,
+      mode: ephemeral ? 'ephemeral' : 'persistent',
+      ...extra,
+    };
     const payload = await api('/api/agent/sessions', {
       method: 'POST',
       body: JSON.stringify(body),
@@ -1031,6 +1209,7 @@ export function bindPlatformExt(host) {
     persistAgentSession(payload.data.id, agentKind);
     syncAgentKindUI();
     await renderAgentChat();
+    await loadAgentHistory();
     return payload.data;
   }
 
@@ -1045,6 +1224,7 @@ export function bindPlatformExt(host) {
     agentSessionId = agentSessionByKind[agentKind] || '';
     syncAgentKindUI();
     clearAgentAttachments();
+    await loadAgentHistory();
     if (!agentSessionId) await newAgentSession();
     else await renderAgentChat();
   }
@@ -1288,6 +1468,7 @@ export function bindPlatformExt(host) {
         showToast('已确认，任务已入队');
       }
       await renderAgentChat();
+      await Promise.all([loadAgentHistory(), loadAgentMemory()]);
       host.refreshSession?.();
       const jobId = payload.data?.job?.id;
       if (jobId) pollAgentJob(jobId);
@@ -1599,6 +1780,17 @@ export function bindPlatformExt(host) {
     }
   }
 
+  host.onAgentUserChanged = async () => {
+    loadScopedSessions();
+    syncAgentKindUI();
+    await Promise.all([loadAgentHistory(), loadAgentMemory()]);
+    if (agentSessionId) await renderAgentChat().catch(() => null);
+    else renderAgentHistory();
+  };
+  host.clearAgentSessions = clearScopedSessions;
+  window.__studioOnAgentUserChanged = host.onAgentUserChanged;
+  window.__studioClearAgentSessions = clearScopedSessions;
+
   host.onPlatformView = async (view) => {
     if (view === 'parametric') {
       syncEngineTabs();
@@ -1611,6 +1803,8 @@ export function bindPlatformExt(host) {
     }
     if (view === 'agent') {
       syncAgentKindUI();
+      loadScopedSessions();
+      await Promise.all([loadAgentHistory(), loadAgentMemory()]);
       if (!agentSessionId) await newAgentSession().catch(() => {});
       else await renderAgentChat();
     }
@@ -1746,6 +1940,25 @@ export function bindPlatformExt(host) {
   $('#agent-new-session')?.addEventListener('click', () => {
     clearAgentAttachments();
     newAgentSession().catch((e) => showToast(e.message, 'error'));
+  });
+  $('#agent-history-refresh')?.addEventListener('click', () => {
+    loadAgentHistory().catch((e) => showToast(e.message, 'error'));
+  });
+  $('#agent-memory-edit')?.addEventListener('click', () => {
+    editAgentMemory().catch((e) => showToast(e.message, 'error'));
+  });
+  $('#agent-history-list')?.addEventListener('click', (event) => {
+    const del = event.target.closest('[data-delete-session]');
+    if (del?.dataset.deleteSession) {
+      event.preventDefault();
+      event.stopPropagation();
+      deleteAgentSession(del.dataset.deleteSession).catch((e) => showToast(e.message, 'error'));
+      return;
+    }
+    const open = event.target.closest('[data-open-session]');
+    if (open?.dataset.openSession) {
+      openAgentSession(open.dataset.openSession).catch((e) => showToast(e.message, 'error'));
+    }
   });
   $('#agent-file')?.addEventListener('change', (event) => {
     const files = [...(event.target.files || [])];

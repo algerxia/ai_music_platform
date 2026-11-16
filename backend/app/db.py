@@ -35,6 +35,10 @@ _ALTERS = [
     "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS kind VARCHAR(32) DEFAULT 'general'",
     "CREATE INDEX IF NOT EXISTS ix_agent_sessions_kind ON agent_sessions (kind)",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_memory JSONB DEFAULT '{}'::jsonb",
+    "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS mode VARCHAR(32) DEFAULT 'persistent'",
+    "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS memory_summary TEXT DEFAULT ''",
+    "ALTER TABLE agent_sessions ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ",
 ]
 
 

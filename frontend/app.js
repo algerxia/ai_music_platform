@@ -70,6 +70,7 @@ async function api(path, options = {}) {
 }
 
 function logout(showMessage = true) {
+  window.__studioClearAgentSessions?.();
   token = '';
   currentUser = null;
   localStorage.removeItem(AUTH_KEY);
@@ -618,6 +619,7 @@ async function refreshSession() {
   render();
   loadRunningHubAccount().catch(() => null);
   if (currentUser?.is_admin) loadAdminUsers().catch(() => null);
+  window.__studioOnAgentUserChanged?.().catch(() => null);
 }
 
 async function loadRunningHubAccount() {
@@ -1827,6 +1829,9 @@ bindPlatformExt({
   openProject,
   get token() {
     return token;
+  },
+  get currentUser() {
+    return currentUser;
   },
   API_BASE,
 });

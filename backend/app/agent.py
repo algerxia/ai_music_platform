@@ -462,22 +462,58 @@ def deliver_assets_reply(db: Session, session: AgentSession, user: User, user_te
     return session
 
 
+def session_preview_text(session: AgentSession) -> str:
+    messages = list(session.messages or [])
+    for item in reversed(messages):
+        if not isinstance(item, dict):
+            continue
+        text = str(item.get("content") or "").strip()
+        if text:
+            return text.replace("\n", " ")[:80]
+    draft = session.draft or {}
+    return str(draft.get("summary") or draft.get("title") or session.memory_summary or "")[:80]
+
+
 def session_public(session: AgentSession, *, result_assets: list[dict] | None = None) -> dict:
     draft = dict(session.draft or {})
     if result_assets:
         draft["result_assets"] = result_assets
         draft["result_asset_id"] = result_assets[0]["id"] if result_assets else draft.get("result_asset_id")
     kind = normalize_agent_kind(getattr(session, "kind", None) or draft.get("agent_kind"))
+    messages = session.messages or []
     return {
         "id": str(session.id),
         "title": session.title,
         "kind": kind,
+        "mode": getattr(session, "mode", None) or "persistent",
         "state": session.state,
-        "messages": session.messages or [],
+        "messages": messages,
+        "message_count": len(messages),
+        "preview": session_preview_text(session),
         "draft": draft,
+        "memory_summary": getattr(session, "memory_summary", "") or "",
         "project_id": str(session.project_id) if session.project_id else None,
         "confirmed_job_id": str(session.confirmed_job_id) if session.confirmed_job_id else None,
         "result_assets": result_assets or draft.get("result_assets") or [],
+        "archived_at": session.archived_at.isoformat() if getattr(session, "archived_at", None) else None,
+        "created_at": session.created_at.isoformat() if session.created_at else None,
+        "updated_at": session.updated_at.isoformat() if session.updated_at else None,
+    }
+
+
+def session_list_item(session: AgentSession) -> dict:
+    kind = normalize_agent_kind(getattr(session, "kind", None))
+    messages = session.messages or []
+    return {
+        "id": str(session.id),
+        "title": session.title,
+        "kind": kind,
+        "mode": getattr(session, "mode", None) or "persistent",
+        "state": session.state,
+        "message_count": len(messages),
+        "preview": session_preview_text(session),
+        "memory_summary": (getattr(session, "memory_summary", "") or "")[:200],
+        "archived_at": session.archived_at.isoformat() if getattr(session, "archived_at", None) else None,
         "created_at": session.created_at.isoformat() if session.created_at else None,
         "updated_at": session.updated_at.isoformat() if session.updated_at else None,
     }
@@ -490,8 +526,10 @@ def create_session(
     kind: str = "general",
     title: str | None = None,
     seed_draft: dict | None = None,
+    mode: str = "persistent",
 ) -> AgentSession:
     kind = normalize_agent_kind(kind)
+    mode_value = "ephemeral" if str(mode or "").strip().lower() == "ephemeral" else "persistent"
     draft = dict(seed_draft or {})
     draft["agent_kind"] = kind
     seed_lyrics = str(draft.get("source_lyrics") or draft.get("lyrics") or "").strip()
@@ -505,10 +543,14 @@ def create_session(
         ) + "说说想要的曲风、乐器与节奏，确认后按词意谱曲。"
     elif kind == "lyrics" and seed_lyrics:
         welcome = "已带入一段歌词草稿。可以说要怎么改意象或节奏感；确认后锁定歌词，再交给谱曲 Agent。"
+    user_memory = getattr(user, "agent_memory", None) or {}
+    if isinstance(user_memory, dict) and user_memory.get("notes"):
+        welcome = f"{welcome}\n（已载入你的创作偏好记忆。）"
     session = AgentSession(
         user_id=user.id,
         title=(title or TITLE_BY_KIND[kind])[:120],
         kind=kind,
+        mode=mode_value,
         state="clarifying",
         messages=[
             {
@@ -518,6 +560,7 @@ def create_session(
             }
         ],
         draft=draft,
+        memory_summary="",
     )
     db.add(session)
     db.commit()
@@ -525,14 +568,102 @@ def create_session(
     return session
 
 
-def _build_history(messages: list[dict], *, kind: str = "general") -> list[dict]:
+def _format_user_memory(memory: dict | None) -> str:
+    if not isinstance(memory, dict) or not memory:
+        return ""
+    bits = []
+    for key in ("preferred_genres", "preferred_moods", "vocal_preference", "notes"):
+        value = memory.get(key)
+        if isinstance(value, list) and value:
+            bits.append(f"{key}: " + "、".join(str(v) for v in value[:6]))
+        elif isinstance(value, str) and value.strip():
+            bits.append(f"{key}: {value.strip()[:240]}")
+    return "；".join(bits)[:800]
+
+
+def compact_session_memory(session: AgentSession) -> str:
+    """Extractive memory from older turns so long chats stay coherent."""
+    messages = [m for m in (session.messages or []) if isinstance(m, dict)]
+    if len(messages) < 14:
+        return getattr(session, "memory_summary", "") or ""
+    older = messages[:-10]
+    lines: list[str] = []
+    existing = (getattr(session, "memory_summary", "") or "").strip()
+    if existing:
+        lines.append(existing)
+    for item in older[-12:]:
+        role = item.get("role")
+        text = str(item.get("content") or "").strip().replace("\n", " ")
+        if role not in {"user", "assistant"} or not text:
+            continue
+        prefix = "用户" if role == "user" else "助手"
+        lines.append(f"{prefix}: {text[:160]}")
+    draft = session.draft or {}
+    if draft.get("title"):
+        lines.append(f"当前方案标题: {draft.get('title')}")
+    if draft.get("workflow_stage"):
+        lines.append(f"流程阶段: {draft.get('workflow_stage')}")
+    if draft.get("lyrics"):
+        lines.append(f"歌词要点: {str(draft.get('lyrics'))[:180].replace(chr(10), ' / ')}")
+    summary = " | ".join(lines)[:1800]
+    session.memory_summary = summary
+    return summary
+
+
+def merge_user_memory_from_draft(user: User, draft: dict | None) -> None:
+    """Lightly learn durable preferences from confirmed drafts."""
+    if not isinstance(draft, dict):
+        return
+    memory = dict(getattr(user, "agent_memory", None) or {})
+    genres = draft.get("genre") if isinstance(draft.get("genre"), list) else []
+    if genres:
+        preferred = list(memory.get("preferred_genres") or [])
+        for g in genres:
+            g = str(g).strip()
+            if g and g not in preferred:
+                preferred.append(g)
+        memory["preferred_genres"] = preferred[:12]
+    mood = str(draft.get("mood") or "").strip()
+    if mood:
+        moods = list(memory.get("preferred_moods") or [])
+        if mood not in moods:
+            moods.append(mood)
+        memory["preferred_moods"] = moods[:12]
+    if draft.get("instrumental") is True:
+        memory["vocal_preference"] = "instrumental"
+    elif draft.get("instrumental") is False or draft.get("lyrics"):
+        memory["vocal_preference"] = "vocal"
+    note = str(draft.get("summary") or "").strip()
+    if note and not _mostly_english(note):
+        memory["notes"] = note[:400]
+    memory["updated_at"] = datetime.now(timezone.utc).isoformat()
+    user.agent_memory = memory
+    from sqlalchemy.orm.attributes import flag_modified
+
+    flag_modified(user, "agent_memory")
+
+
+def _build_history(
+    messages: list[dict],
+    *,
+    kind: str = "general",
+    memory_summary: str = "",
+    user_memory: dict | None = None,
+) -> list[dict]:
     kind = normalize_agent_kind(kind)
     history = [{"role": "system", "content": _system_for_kind(kind)}]
+    mem_bits = []
+    user_mem_text = _format_user_memory(user_memory)
+    if user_mem_text:
+        mem_bits.append(f"用户长期创作偏好：{user_mem_text}")
+    if (memory_summary or "").strip():
+        mem_bits.append(f"本会话记忆摘要：{(memory_summary or '').strip()[:1200]}")
+    if mem_bits:
+        history.append({"role": "system", "content": "\n".join(mem_bits)})
     for item in messages[-12:]:
         role = item.get("role")
         if role in {"user", "assistant"}:
             history.append({"role": role, "content": str(item.get("content") or "")[:4000]})
-    # Remind lyrics agent of bound melody id
     return history
 
 
@@ -543,25 +674,36 @@ def _visible_reply(reply: str) -> str:
     return visible
 
 
-def append_user_message(db: Session, session: AgentSession, content: str) -> list[dict]:
+def append_user_message(db: Session, session: AgentSession, content: str, user: User | None = None) -> list[dict]:
     text = (content or "").strip()
     if not text:
         raise ValueError("消息不能为空")
     messages = list(session.messages or [])
     messages.append({"role": "user", "content": text[:4000], "at": datetime.now(timezone.utc).isoformat()})
     session.messages = messages
+    if len(messages) >= 14:
+        compact_session_memory(session)
     session.state = "streaming"
     session.updated_at = utcnow()
     db.commit()
     db.refresh(session)
     kind = normalize_agent_kind(getattr(session, "kind", None))
-    history = _build_history(messages, kind=kind)
+    owner = user
+    if owner is None:
+        owner = db.get(User, session.user_id)
+    history = _build_history(
+        messages,
+        kind=kind,
+        memory_summary=getattr(session, "memory_summary", "") or "",
+        user_memory=getattr(owner, "agent_memory", None) if owner else None,
+    )
     # Inject bound lyrics for compose agent / continue-from-lyrics
     draft = session.draft or {}
     seed_lyrics = str(draft.get("source_lyrics") or draft.get("lyrics") or "").strip()
+    insert_at = 1
     if kind == "melody" and seed_lyrics:
         history.insert(
-            1,
+            insert_at,
             {
                 "role": "system",
                 "content": (
@@ -572,7 +714,7 @@ def append_user_message(db: Session, session: AgentSession, content: str) -> lis
         )
     elif kind == "general" and draft.get("workflow_stage") == "lyrics_ready" and seed_lyrics:
         history.insert(
-            1,
+            insert_at,
             {
                 "role": "system",
                 "content": (
@@ -631,11 +773,16 @@ def finalize_assistant_reply(db: Session, session: AgentSession, reply: str) -> 
         session.draft = merged
         if confirm.get("title"):
             session.title = str(confirm["title"])[:120]
+        owner = db.get(User, session.user_id)
+        if owner and (getattr(session, "mode", None) or "persistent") != "ephemeral":
+            merge_user_memory_from_draft(owner, merged)
     else:
         session.state = "clarifying"
     messages = list(session.messages or [])
     messages.append(assistant_msg)
     session.messages = messages
+    if len(messages) >= 14:
+        compact_session_memory(session)
     session.updated_at = utcnow()
     db.commit()
     db.refresh(session)
@@ -654,8 +801,8 @@ def stream_display_delta(buffer: str, delta: str) -> tuple[str, str | None]:
     return new_buf, new_buf[already:cut]
 
 
-def post_message(db: Session, session: AgentSession, content: str) -> AgentSession:
-    history = append_user_message(db, session, content)
+def post_message(db: Session, session: AgentSession, content: str, user: User | None = None) -> AgentSession:
+    history = append_user_message(db, session, content, user=user)
     reply = qwen_chat(history, temperature=0.6)
     return finalize_assistant_reply(db, session, reply)
 

@@ -38,6 +38,7 @@ class User(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reset_token_hash: Mapped[str] = mapped_column(String(128), default="")
     reset_token_expires: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    agent_memory: Mapped[dict] = mapped_column(JSONB, default=dict)  # cross-session preferences / notes
 
     projects = relationship("Project", back_populates="owner")
     ledger = relationship("CreditLedger", back_populates="user")
@@ -224,10 +225,13 @@ class AgentSession(Base):
     project_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(120), default="对话创作")
     kind: Mapped[str] = mapped_column(String(32), default="general", index=True)  # general|melody|lyrics
+    mode: Mapped[str] = mapped_column(String(32), default="persistent")  # persistent|ephemeral
     state: Mapped[str] = mapped_column(String(32), default="clarifying", index=True)
     messages: Mapped[list] = mapped_column(JSONB, default=list)
     draft: Mapped[dict] = mapped_column(JSONB, default=dict)
+    memory_summary: Mapped[str] = mapped_column(Text, default="")
     confirmed_job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 

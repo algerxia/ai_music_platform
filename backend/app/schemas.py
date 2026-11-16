@@ -140,6 +140,7 @@ def user_public(user) -> dict:
         "timezone": getattr(user, "timezone", "Asia/Shanghai"),
         "monthly_quota": 0,
         "plan_note": "按 RunningHub 上游计费，平台不再使用积分。",
+        "agent_memory": getattr(user, "agent_memory", None) or {},
         "created_at": user.created_at.isoformat() if isinstance(user.created_at, datetime) else user.created_at,
     }
 

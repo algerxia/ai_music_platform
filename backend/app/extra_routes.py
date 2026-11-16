@@ -25,6 +25,7 @@ from app.agent import (
     iter_assistant_stream,
     normalize_agent_kind,
     post_message,
+    session_list_item,
     session_public,
     stream_display_delta,
 )
@@ -210,9 +211,23 @@ async def upload_audio(
 class AgentCreateBody(BaseModel):
     kind: str = "general"
     title: str = ""
+    mode: str = "persistent"
     melody_asset_id: UUID | None = None
     source_lyrics: str = ""
     lyrics: str = ""
+
+
+class AgentSessionPatch(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=120)
+    archived: bool | None = None
+    mode: str | None = None
+
+
+class AgentMemoryUpdate(BaseModel):
+    preferred_genres: list[str] | None = None
+    preferred_moods: list[str] | None = None
+    vocal_preference: str | None = None
+    notes: str | None = Field(default=None, max_length=800)
 
 
 @router.post("/api/agent/sessions")
@@ -245,6 +260,7 @@ def agent_create(
         kind=kind,
         title=payload.title or None,
         seed_draft=seed,
+        mode=payload.mode,
     )
     return {"data": session_public(session)}
 
@@ -252,7 +268,8 @@ def agent_create(
 @router.get("/api/agent/sessions")
 def agent_list(
     kind: str | None = Query(default=None),
-    limit: int = Query(default=20, ge=1, le=50),
+    include_archived: bool = Query(default=False),
+    limit: int = Query(default=40, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -261,19 +278,79 @@ def agent_list(
     q = select(AgentSession).where(AgentSession.user_id == user.id)
     if kind:
         q = q.where(AgentSession.kind == normalize_agent_kind(kind))
+    if not include_archived:
+        q = q.where(AgentSession.archived_at.is_(None))
     rows = db.scalars(q.order_by(AgentSession.updated_at.desc()).limit(limit)).all()
-    return {
-        "data": [
-            {
-                "id": str(s.id),
-                "title": s.title,
-                "kind": normalize_agent_kind(getattr(s, "kind", None)),
-                "state": s.state,
-                "updated_at": s.updated_at.isoformat() if s.updated_at else None,
-            }
-            for s in rows
-        ]
-    }
+    return {"data": [session_list_item(s) for s in rows]}
+
+
+@router.patch("/api/agent/sessions/{session_id}")
+def agent_patch(
+    session_id: UUID,
+    body: AgentSessionPatch,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models import AgentSession
+
+    session = db.get(AgentSession, session_id)
+    if not session or session.user_id != user.id:
+        raise HTTPException(404, "会话不存在")
+    if body.title is not None:
+        session.title = body.title.strip()[:120]
+    if body.mode is not None:
+        session.mode = "ephemeral" if body.mode.strip().lower() == "ephemeral" else "persistent"
+    if body.archived is True:
+        session.archived_at = datetime.now(timezone.utc)
+    elif body.archived is False:
+        session.archived_at = None
+    session.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(session)
+    return {"data": session_public(session)}
+
+
+@router.delete("/api/agent/sessions/{session_id}")
+def agent_delete(
+    session_id: UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models import AgentSession
+
+    session = db.get(AgentSession, session_id)
+    if not session or session.user_id != user.id:
+        raise HTTPException(404, "会话不存在")
+    db.delete(session)
+    db.commit()
+    return {"data": {"ok": True, "id": str(session_id)}}
+
+
+@router.get("/api/me/agent-memory")
+def get_agent_memory(user: User = Depends(get_current_user)):
+    return {"data": getattr(user, "agent_memory", None) or {}}
+
+
+@router.put("/api/me/agent-memory")
+def put_agent_memory(
+    body: AgentMemoryUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    memory = dict(getattr(user, "agent_memory", None) or {})
+    if body.preferred_genres is not None:
+        memory["preferred_genres"] = [str(g).strip() for g in body.preferred_genres if str(g).strip()][:12]
+    if body.preferred_moods is not None:
+        memory["preferred_moods"] = [str(m).strip() for m in body.preferred_moods if str(m).strip()][:12]
+    if body.vocal_preference is not None:
+        memory["vocal_preference"] = body.vocal_preference.strip()[:64]
+    if body.notes is not None:
+        memory["notes"] = body.notes.strip()[:800]
+    memory["updated_at"] = datetime.now(timezone.utc).isoformat()
+    user.agent_memory = memory
+    flag_modified(user, "agent_memory")
+    db.commit()
+    return {"data": memory}
 
 
 @router.get("/api/agent/sessions/{session_id}")
@@ -359,7 +436,7 @@ def agent_message(
     if not session or session.user_id != user.id:
         raise HTTPException(404, "会话不存在")
     try:
-        session = post_message(db, session, body.content)
+        session = post_message(db, session, body.content, user=user)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, str(exc)[:240]) from exc
     return {"data": session_public(session)}
@@ -384,7 +461,7 @@ def agent_message_stream(
     # Fast path: 「发我 / 听听」直接附播放器，不绕模型推诿
     if is_delivery_request(body.content):
         try:
-            append_user_message(db, session, body.content)
+            append_user_message(db, session, body.content, user=user)
             delivered = deliver_assets_reply(db, session, user, user_text=body.content)
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(400, str(exc)[:240]) from exc
@@ -411,7 +488,7 @@ def agent_message_stream(
             )
 
     try:
-        history = append_user_message(db, session, body.content)
+        history = append_user_message(db, session, body.content, user=user)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, str(exc)[:240]) from exc
 

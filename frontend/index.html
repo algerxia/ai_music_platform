@@ -221,13 +221,30 @@
 
       <section class="view" id="view-agent" aria-labelledby="agent-title">
         <div class="inner-page agent-page">
-          <div class="page-title-row"><div><div class="section-kicker">CONVERSATIONAL</div><h1 id="agent-title">对话式生成</h1><p class="page-description" id="agent-desc">先作词锁定 → 再按歌词意境与节奏谱曲。作词确认不计费。</p></div><button class="button button-primary" type="button" id="agent-new-session">新会话</button></div>
+          <div class="page-title-row"><div><div class="section-kicker">CONVERSATIONAL</div><h1 id="agent-title">对话式生成</h1><p class="page-description" id="agent-desc">先作词锁定 → 再按歌词意境与节奏谱曲。会话按账号隔离，支持历史与记忆。</p></div>
+            <div class="agent-title-actions">
+              <label class="agent-mode-toggle" title="临时会话不进入长期偏好学习"><input type="checkbox" id="agent-ephemeral-mode" /> 临时会话</label>
+              <button class="button button-primary" type="button" id="agent-new-session">新会话</button>
+            </div>
+          </div>
           <div class="chip-row agent-kind-tabs" id="agent-kind-tabs" role="tablist" aria-label="Agent 类型">
             <button class="choice-chip active" type="button" data-agent-kind="general">综合助手</button>
             <button class="choice-chip" type="button" data-agent-kind="lyrics">作词 Agent</button>
             <button class="choice-chip" type="button" data-agent-kind="melody">谱曲 Agent</button>
           </div>
-          <div class="agent-layout">
+          <div class="agent-layout agent-layout-3">
+            <aside class="agent-history-panel" aria-label="历史会话">
+              <div class="section-heading-row">
+                <div><div class="section-kicker">HISTORY</div><h2 class="section-heading" style="font-size:1rem;margin:0">我的会话</h2></div>
+                <button class="mini-action" type="button" id="agent-history-refresh" title="刷新">↻</button>
+              </div>
+              <div class="agent-history-list" id="agent-history-list"><div class="empty-block">登录后可查看历史会话。</div></div>
+              <div class="agent-memory-box">
+                <div class="section-kicker">MEMORY</div>
+                <p class="field-hint" id="agent-memory-summary">跨会话偏好记忆会自动积累。</p>
+                <button class="mini-action" type="button" id="agent-memory-edit">编辑记忆</button>
+              </div>
+            </aside>
             <div class="agent-chat" id="agent-chat"></div>
             <aside class="agent-side">
               <div class="section-kicker">方案确认</div>
@@ -485,7 +502,7 @@
   <div class="toast-region" id="toast-region" aria-live="polite"></div>
   <div class="modal-backdrop" id="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" type="button" aria-label="关闭">×</button><div class="modal-kicker">NEW CREATION</div><h2 id="modal-title">给灵感一个名字。</h2><p>先从一个项目开始。之后可以随时调整方向。</p><form id="new-project-form"><label class="field-label" for="new-project-name">项目名称</label><input class="modal-input" id="new-project-name" maxlength="80" placeholder="例如：午夜之后" required /><label class="field-label modal-second-label" for="new-project-purpose">创作类型</label><select class="modal-input" id="new-project-purpose"><option value="灵感草稿">灵感草稿</option><option value="电影 / 游戏配乐">电影 / 游戏配乐</option><option value="歌曲制作">歌曲制作</option><option value="Loop / 节奏">Loop / 节奏</option><option value="声音设计">声音设计</option></select><div class="modal-actions"><button class="button button-secondary modal-cancel" type="button">再想一想</button><button class="button button-primary" type="submit">创建项目 <span>→</span></button></div></form></div></div>
   <script src="/config.js?v=public-tunnel"></script>
-  <script type="module" src="/app.js?v=lyrics-first-1"></script>
+  <script type="module" src="/app.js?v=session-memory-1"></script>
 </body>
 </html>
 
